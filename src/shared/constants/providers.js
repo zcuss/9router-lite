@@ -204,8 +204,43 @@ export function isCustomEmbeddingProvider(providerId) {
   return typeof providerId === "string" && providerId.startsWith(CUSTOM_EMBEDDING_PREFIX);
 }
 
-// All providers (combined)
-export const AI_PROVIDERS = { ...FREE_PROVIDERS, ...FREE_TIER_PROVIDERS, ...OAUTH_PROVIDERS, ...APIKEY_PROVIDERS, ...WEB_COOKIE_PROVIDERS };
+// We use an environment variable to filter providers for lightweight version
+function filterProviders(providersObj, defaultAllowedKeys) {
+  const customListStr = process.env.ROUTER_ALLOWED_PROVIDERS;
+  
+  if (customListStr === "ALL" || customListStr === "all") {
+    return providersObj;
+  }
+  
+  const allowedKeys = new Set(
+    customListStr 
+      ? customListStr.split(",").map(k => k.trim()).filter(Boolean)
+      : defaultAllowedKeys
+  );
+
+  if (allowedKeys.size === 0) return providersObj;
+
+  const filtered = {};
+  for (const key in providersObj) {
+    if (allowedKeys.has(key)) {
+      filtered[key] = providersObj[key];
+    } else {
+      // Put a dummy disabled provider to avoid UI breaking on undefined accesses during render / build
+      filtered[key] = { ...providersObj[key], disabled: true };
+    }
+  }
+  return filtered;
+}
+
+const DEFAULT_ALLOWED = ["antigravity", "codex", "gemini-cli", "kiro"];
+
+// All providers (combined and filtered)
+const UNFILTERED_AI_PROVIDERS = { ...FREE_PROVIDERS, ...FREE_TIER_PROVIDERS, ...OAUTH_PROVIDERS, ...APIKEY_PROVIDERS, ...WEB_COOKIE_PROVIDERS };
+
+const freeTierKeys = Object.keys(FREE_TIER_PROVIDERS);
+const defaultAllowedWithFreeTier = [...DEFAULT_ALLOWED, ...freeTierKeys];
+
+export const AI_PROVIDERS = filterProviders(UNFILTERED_AI_PROVIDERS, defaultAllowedWithFreeTier);
 
 // Auth methods
 export const AUTH_METHODS = {

@@ -34,8 +34,8 @@ const ANTIGRAVITY_CONFIG = {
   quotaApiUrl: "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
   loadProjectApiUrl: "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist",
   tokenUrl: "https://oauth2.googleapis.com/token",
-  clientId: "GOOGLE_ANTIGRAVITY_CLIENT_ID",
-  clientSecret: "GOOGLE_ANTIGRAVITY_CLIENT_SECRET",
+  clientId: process.env.GOOGLE_ANTIGRAVITY_CLIENT_ID || "GOOGLE_ANTIGRAVITY_CLIENT_ID",
+  clientSecret: process.env.GOOGLE_ANTIGRAVITY_CLIENT_SECRET || "GOOGLE_ANTIGRAVITY_CLIENT_SECRET",
   userAgent: getPlatformUserAgent(),
 };
 

@@ -47,7 +47,83 @@ const CLAUDE_CLI_SPOOF_HEADERS = {
 // Shared baseUrls
 const KIMI_CODING_BASE_URL = "https://api.kimi.com/coding/v1/messages";
 
-export const PROVIDERS = {
+const DEFAULT_PROVIDER_KEYS = [
+  "antigravity",
+  "codex",
+  "gemini-cli",
+  "kiro",
+  "openrouter",
+  "nvidia",
+  "ollama",
+  "vertex",
+  "gemini",
+  "cloudflare-ai",
+  "byteplus",
+  "agentrouter",
+  "aimlapi",
+  "novita",
+  "modal",
+  "reka",
+  "nlpcloud",
+  "bazaarlink",
+  "completions",
+  "enally",
+  "freetheai",
+  "llm7",
+  "lepton",
+  "kluster",
+  "ai21",
+  "inference-net",
+  "predibase",
+  "bytez",
+  "morph",
+  "longcat",
+  "puter",
+  "uncloseai",
+  "scaleway",
+  "deepinfra",
+  "sambanova",
+  "nscale",
+  "baseten",
+  "publicai",
+  "nous-research",
+  "glhf",
+  "blackbox"
+];
+
+function getAllowedProviderSet() {
+  const value = process.env.ROUTER_ALLOWED_PROVIDERS;
+  if (value === "ALL" || value === "all") return null;
+
+  const keys = value
+    ? value.split(",").map((key) => key.trim()).filter(Boolean)
+    : DEFAULT_PROVIDER_KEYS;
+
+  return new Set(keys);
+}
+
+function filterProviders(providers) {
+  const allowed = getAllowedProviderSet();
+  if (!allowed) return providers;
+
+  const result = {};
+  for (const [key, value] of Object.entries(providers)) {
+    // If it's not allowed, return a dummy fallback so deep imports don't crash the Webpack build
+    if (allowed.has(key)) {
+      result[key] = value;
+    } else {
+      result[key] = { baseUrl: "", format: value.format || "openai", authType: value.authType, disabled: true };
+    }
+  }
+  return result;
+}
+
+const GOOGLE_GEMINI_CLIENT_ID = process.env.GOOGLE_GEMINI_CLIENT_ID || "GOOGLE_GEMINI_CLIENT_ID";
+const GOOGLE_GEMINI_CLIENT_SECRET = process.env.GOOGLE_GEMINI_CLIENT_SECRET || "GOOGLE_GEMINI_CLIENT_SECRET";
+const GOOGLE_ANTIGRAVITY_CLIENT_ID = process.env.GOOGLE_ANTIGRAVITY_CLIENT_ID || "GOOGLE_ANTIGRAVITY_CLIENT_ID";
+const GOOGLE_ANTIGRAVITY_CLIENT_SECRET = process.env.GOOGLE_ANTIGRAVITY_CLIENT_SECRET || "GOOGLE_ANTIGRAVITY_CLIENT_SECRET";
+
+const ALL_PROVIDERS = {
   claude: {
     baseUrl: "https://api.anthropic.com/v1/messages",
     format: "claude",
@@ -58,14 +134,14 @@ export const PROVIDERS = {
   gemini: {
     baseUrl: "https://generativelanguage.googleapis.com/v1beta/models",
     format: "gemini",
-    clientId: "GOOGLE_GEMINI_CLIENT_ID",
-    clientSecret: "GOOGLE_GEMINI_CLIENT_SECRET"
+    clientId: GOOGLE_GEMINI_CLIENT_ID,
+    clientSecret: GOOGLE_GEMINI_CLIENT_SECRET
   },
   "gemini-cli": {
     baseUrl: "https://cloudcode-pa.googleapis.com/v1internal",
     format: "gemini-cli",
-    clientId: "GOOGLE_GEMINI_CLIENT_ID",
-    clientSecret: "GOOGLE_GEMINI_CLIENT_SECRET"
+    clientId: GOOGLE_GEMINI_CLIENT_ID,
+    clientSecret: GOOGLE_GEMINI_CLIENT_SECRET
   },
   codex: {
     baseUrl: "https://chatgpt.com/backend-api/codex/responses",
@@ -109,8 +185,8 @@ export const PROVIDERS = {
     ],
     format: "antigravity",
     headers: { "User-Agent": `antigravity/1.107.0 ${platform()}/${arch()}` },
-    clientId: "GOOGLE_ANTIGRAVITY_CLIENT_ID",
-    clientSecret: "GOOGLE_ANTIGRAVITY_CLIENT_SECRET"
+    clientId: GOOGLE_ANTIGRAVITY_CLIENT_ID,
+    clientSecret: GOOGLE_ANTIGRAVITY_CLIENT_SECRET
   },
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1/chat/completions",
@@ -436,6 +512,8 @@ export const PROVIDERS = {
   glhf: { baseUrl: "https://glhf.chat/api/openai/v1/chat/completions", format: "openai" },
   blackbox: { baseUrl: "https://api.blackbox.ai/chat/completions", format: "openai" },
 };
+
+export const PROVIDERS = filterProviders(ALL_PROVIDERS);
 
 export const OLLAMA_LOCAL_DEFAULT_HOST = "http://localhost:11434";
 

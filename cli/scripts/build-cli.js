@@ -113,7 +113,6 @@ try {
       USERPROFILE: buildHomeDir,
       APPDATA: path.join(buildHomeDir, "AppData", "Roaming"),
       LOCALAPPDATA: path.join(buildHomeDir, "AppData", "Local"),
-      NEXT_DIST_DIR: buildDistDirName,
       NEXT_TRACING_ROOT_MODE: "workspace",
     }
   });
@@ -137,12 +136,19 @@ console.log("3️⃣  Copying Next.js standalone build to app/cli/app...");
 const standaloneRoot = path.join(appDir, ".next", "standalone");
 const standaloneRootResolved = path.join(buildDistDir, "standalone");
 const standaloneRootToUse = fs.existsSync(standaloneRootResolved) ? standaloneRootResolved : standaloneRoot;
-const standaloneApp = fs.existsSync(path.join(standaloneRootToUse, "server.js"))
-  ? standaloneRootToUse
-  : path.join(standaloneRootToUse, "app");
+
+// Standalone build may nest inside a folder matching the root package.json's name ("9router-lite")
+const nameInStandalone = appPkg.name || "9router-lite";
+const nestedAppDir = path.join(standaloneRootToUse, nameInStandalone);
+const standaloneApp = fs.existsSync(path.join(nestedAppDir, "server.js"))
+  ? nestedAppDir
+  : (fs.existsSync(path.join(standaloneRootToUse, "server.js"))
+      ? standaloneRootToUse
+      : path.join(standaloneRootToUse, "app"));
+
 if (!fs.existsSync(standaloneApp)) {
   console.error("❌ Next.js standalone build not found under .next/standalone");
-  console.error("Expected either .next/standalone/server.js or .next/standalone/app/");
+  console.error(`Expected server.js under ${nestedAppDir}, ${standaloneRootToUse}, or ${path.join(standaloneRootToUse, "app")}`);
   process.exit(1);
 }
 copyRecursive(standaloneApp, cliAppDir);

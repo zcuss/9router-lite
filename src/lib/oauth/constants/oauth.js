@@ -40,10 +40,15 @@ export const CODEX_CONFIG = {
   },
 };
 
+const GOOGLE_GEMINI_CLIENT_ID = process.env.GOOGLE_GEMINI_CLIENT_ID || "GOOGLE_GEMINI_CLIENT_ID";
+const GOOGLE_GEMINI_CLIENT_SECRET = process.env.GOOGLE_GEMINI_CLIENT_SECRET || "GOOGLE_GEMINI_CLIENT_SECRET";
+const GOOGLE_ANTIGRAVITY_CLIENT_ID = process.env.GOOGLE_ANTIGRAVITY_CLIENT_ID || "GOOGLE_ANTIGRAVITY_CLIENT_ID";
+const GOOGLE_ANTIGRAVITY_CLIENT_SECRET = process.env.GOOGLE_ANTIGRAVITY_CLIENT_SECRET || "GOOGLE_ANTIGRAVITY_CLIENT_SECRET";
+
 // Gemini (Google) OAuth Configuration (Standard OAuth2)
 export const GEMINI_CONFIG = {
-  clientId: "GOOGLE_GEMINI_CLIENT_ID",
-  clientSecret: "GOOGLE_GEMINI_CLIENT_SECRET",
+  clientId: GOOGLE_GEMINI_CLIENT_ID,
+  clientSecret: GOOGLE_GEMINI_CLIENT_SECRET,
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   userInfoUrl: "https://www.googleapis.com/oauth2/v1/userinfo",
@@ -94,8 +99,8 @@ export const IFLOW_CONFIG = {
 
 // Antigravity OAuth Configuration (Standard OAuth2 with Google)
 export const ANTIGRAVITY_CONFIG = {
-  clientId: "GOOGLE_ANTIGRAVITY_CLIENT_ID",
-  clientSecret: "GOOGLE_ANTIGRAVITY_CLIENT_SECRET",
+  clientId: GOOGLE_ANTIGRAVITY_CLIENT_ID,
+  clientSecret: GOOGLE_ANTIGRAVITY_CLIENT_SECRET,
   authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
   tokenUrl: "https://oauth2.googleapis.com/token",
   userInfoUrl: "https://www.googleapis.com/oauth2/v1/userinfo",
