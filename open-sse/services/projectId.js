@@ -1,10 +1,9 @@
 /**
- * Project ID Service - Fetch and cache real Project IDs from Google Cloud Code API
- *
- *
- * Instead of generating random project IDs (e.g. "useful-spark-a1b2c"),
- * this service fetches the real Project ID bound to the authenticated user's account.
- * This significantly reduces the risk of being flagged by Google's anti-abuse systems.
+ * Purpose: Fetch and cache real Google Cloud Code Assist project IDs for OAuth-backed providers.
+ * Caller: Provider auth/refresh flows that need a stable Antigravity or Gemini project binding.
+ * Dependencies: `../config/appConstants.js` Cloud Code endpoints, headers, and metadata constants.
+ * Main Functions: `getProjectIdForConnection`, `invalidateProjectId`, `removeConnection`, `cleanupNow`.
+ * Side Effects: Performs outbound HTTP calls, logs onboarding/fetch failures, and manages in-memory cache timers.
  */
 
 import { CLOUD_CODE_API, LOAD_CODE_ASSIST_HEADERS, LOAD_CODE_ASSIST_METADATA } from "../config/appConstants.js";
@@ -235,7 +234,8 @@ async function onboardUser(accessToken, tierID, externalSignal) {
                     console.log(`[ProjectId] Successfully onboarded, project ID: ${projectId}`);
                     return projectId;
                 }
-                throw new Error("onboardUser done but no project_id in response");
+                console.warn("[ProjectId] onboardUser returned done=true without a project ID; refusing to fall back to a synthetic project");
+                return null;
             }
 
             // Server not done yet – wait and retry
@@ -271,14 +271,27 @@ async function onboardUser(accessToken, tierID, externalSignal) {
 function extractProjectId(data) {
     if (!data) return null;
 
-    if (typeof data.cloudaicompanionProject === "string") {
-        const id = data.cloudaicompanionProject.trim();
-        if (id) return id;
-    }
+    const candidates = [
+        data.cloudaicompanionProject,
+        data.projectId,
+        data.project?.id,
+        data.project,
+        data.response?.cloudaicompanionProject,
+        data.response?.projectId,
+        data.response?.project?.id,
+        data.response?.project,
+    ];
 
-    if (data.cloudaicompanionProject && typeof data.cloudaicompanionProject === "object") {
-        const id = data.cloudaicompanionProject.id;
-        if (typeof id === "string" && id.trim()) return id.trim();
+    for (const candidate of candidates) {
+        if (typeof candidate === "string") {
+            const id = candidate.trim();
+            if (id) return id;
+        }
+
+        if (candidate && typeof candidate === "object") {
+            const id = candidate.id;
+            if (typeof id === "string" && id.trim()) return id.trim();
+        }
     }
 
     return null;
@@ -288,19 +301,5 @@ function extractProjectId(data) {
  * Extract project ID from onboardUser response.
  */
 function extractProjectIdFromOnboard(data) {
-    if (!data?.response) return null;
-
-    const project = data.response.cloudaicompanionProject;
-
-    if (typeof project === "string") {
-        const id = project.trim();
-        if (id) return id;
-    }
-
-    if (project && typeof project === "object") {
-        const id = project.id;
-        if (typeof id === "string" && id.trim()) return id.trim();
-    }
-
-    return null;
+    return extractProjectId(data);
 }

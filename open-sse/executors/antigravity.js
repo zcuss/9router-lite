@@ -1,3 +1,10 @@
+/**
+ * Purpose: Execute Antigravity chat requests against Google Cloud Code Assist endpoints.
+ * Caller: `open-sse/handlers/chatCore.js` through the provider executor registry.
+ * Dependencies: Provider config, OAuth token refresh endpoint, session ID derivation, proxy-aware fetch, and schema cleanup helpers.
+ * Main Functions: `buildUrl`, `buildHeaders`, `transformRequest`, `refreshCredentials`, `execute`.
+ * Side Effects: Performs outbound streaming/non-streaming HTTP calls and surfaces provider auth/quota errors.
+ */
 import crypto from "crypto";
 import { BaseExecutor } from "./base.js";
 import { PROVIDERS } from "../config/providers.js";
@@ -42,7 +49,13 @@ export class AntigravityExecutor extends BaseExecutor {
   }
 
   transformRequest(model, body, stream, credentials) {
-    const projectId = credentials?.projectId || this.generateProjectId();
+    const projectId = typeof credentials?.projectId === "string" ? credentials.projectId.trim() : "";
+    if (!projectId) {
+      const error = new Error("Antigravity requires a real Google project ID. Reconnect the provider so loadCodeAssist can return cloudaicompanionProject.");
+      error.status = HTTP_STATUS.FORBIDDEN;
+      error.code = "ANTIGRAVITY_PROJECT_ID_REQUIRED";
+      throw error;
+    }
 
     // Fix contents for Claude models via Antigravity
     const contents = body.request?.contents?.map(c => {

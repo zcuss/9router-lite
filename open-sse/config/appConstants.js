@@ -1,3 +1,10 @@
+/**
+ * Purpose: Shared runtime constants for provider adapters, OAuth-mirroring headers, and internal request markers.
+ * Caller: Executors, OAuth helpers, usage services, and request translators under `open-sse/*`.
+ * Dependencies: Node `os` platform helpers and provider-specific runtime conventions.
+ * Main Functions: `geminiCLIUserAgent`, `getPlatformEnum`, `getPlatformUserAgent`, `buildKimiHeaders`.
+ * Side Effects: None; exports immutable config consumed by HTTP request builders.
+ */
 import { platform, arch } from "os";
 
 // === Gemini CLI ===
@@ -140,6 +147,7 @@ export const LOAD_CODE_ASSIST_HEADERS = {
   "User-Agent": "google-api-nodejs-client/9.15.1",
   "X-Goog-Api-Client": "google-cloud-sdk vscode_cloudshelleditor/0.1",
   "Client-Metadata": JSON.stringify({ ideType: IDE_TYPE.ANTIGRAVITY, platform: getPlatformEnum(), pluginType: PLUGIN_TYPE.GEMINI }),
+  "x-request-source": "local",
 };
 
 export const LOAD_CODE_ASSIST_METADATA = {

@@ -1,6 +1,9 @@
 /**
- * OAuth Provider Configurations and Handlers
- * Centralized DRY approach for all OAuth providers
+ * Purpose: Centralize OAuth provider configuration, token exchange, and post-exchange normalization for dashboard/API auth flows.
+ * Caller: OAuth route handlers and connection persistence flows under `src/lib/oauth/*`.
+ * Dependencies: Provider constants, PKCE helpers, xAI discovery, and shared Google metadata builders.
+ * Main Functions: Provider registry entries exposing `buildAuthUrl`, `exchangeToken`, `postExchange`, and `mapTokens`.
+ * Side Effects: Performs outbound OAuth/token/profile requests and may trigger provider onboarding side effects.
  */
 
 // Ensure outbound fetch respects HTTP(S)_PROXY/ALL_PROXY in Node runtime
@@ -475,7 +478,7 @@ const PROVIDERS = {
         console.log("Failed to load code assist:", e);
       }
 
-      // Fire-and-forget onboarding — does not block DB save
+      // Fire-and-forget onboarding — does not block DB save, but never invents a project ID
       if (projectId) {
         const doOnboard = async () => {
           for (let i = 0; i < 10; i++) {
@@ -496,6 +499,10 @@ const PROVIDERS = {
           }
         };
         doOnboard().catch(() => {});
+      }
+
+      if (!projectId) {
+        console.warn("[OAuth][antigravity] loadCodeAssist returned no cloudaicompanionProject; connection saved without projectId");
       }
 
       return { userInfo, projectId };
