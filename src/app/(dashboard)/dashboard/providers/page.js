@@ -256,6 +256,8 @@ export default function ProvidersPage() {
     .filter((node) => node.type === "openai-compatible")
     .map((node) => ({
       id: node.id,
+      routeId: node.prefix || node.id,
+      prefix: node.prefix,
       name: node.name || "OpenAI Compatible",
       color: "#10A37F",
       textIcon: "OC",
@@ -267,6 +269,8 @@ export default function ProvidersPage() {
     .filter((node) => node.type === "anthropic-compatible")
     .map((node) => ({
       id: node.id,
+      routeId: node.prefix || node.id,
+      prefix: node.prefix,
       name: node.name || "Anthropic Compatible",
       color: "#D97757",
       textIcon: "AC",
@@ -710,6 +714,7 @@ function ApiKeyProviderCard({
   onToggle,
 }) {
   const { connected, error, errorCode, errorTime, allDisabled } = stats;
+  const routeProviderId = provider.routeId || providerId;
   const isCompatible = providerId.startsWith(OPENAI_COMPATIBLE_PREFIX);
   const isAnthropicCompatible = providerId.startsWith(
     ANTHROPIC_COMPATIBLE_PREFIX,
@@ -738,7 +743,7 @@ function ApiKeyProviderCard({
   };
 
   return (
-    <Link href={`/dashboard/providers/${providerId}`} className="group min-w-0">
+    <Link href={`/dashboard/providers/${routeProviderId}`} className="group min-w-0">
       <Card
         padding="xs"
         className={`h-full hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors cursor-pointer ${allDisabled ? "opacity-50" : ""}`}

@@ -1,17 +1,10 @@
 #!/usr/bin/env node
 
-// Postinstall: warm-up SQLite deps into ~/.9router/runtime so the first
-// `9router` start doesn't need network. Failure here is non-fatal —
-// cli.js will retry at runtime if anything is missing.
-const { ensureSqliteRuntime } = require("./sqliteRuntime");
+// Postinstall must not install or warm up any SQLite/native DB runtime.
+// CockroachDB/Postgres deployments only need DB_DRIVER/DATABASE_URL at app launch.
 const { ensureTrayRuntime } = require("./trayRuntime");
 
-try {
-  ensureSqliteRuntime({ silent: false });
-  console.log("[9router] runtime SQLite deps ready");
-} catch (e) {
-  console.warn(`[9router] runtime warm-up skipped: ${e.message}`);
-}
+console.log("[9router] DB runtime install skipped; using configured DB driver at launch");
 
 try {
   ensureTrayRuntime({ silent: false });

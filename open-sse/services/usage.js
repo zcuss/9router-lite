@@ -64,6 +64,19 @@ export async function getUsageForProvider(connection, proxyOptions = null) {
     ...(projectId ? { projectId } : {}),
   };
 
+  // Check if this is an Alibaba Cloud Model Studio (DashScope) connection
+  const baseUrl = providerSpecificData?.baseUrl || "";
+  const isAlibaba = provider === "alicode" || 
+                    provider === "alicode-intl" || 
+                    baseUrl.includes("dashscope.aliyuncs.com") || 
+                    baseUrl.includes("aliyun.com");
+
+  if (isAlibaba) {
+    return {
+      message: "Alibaba Coding Plan quota can only be viewed in the Alibaba Cloud Console. Please visit: https://modelstudio.console.alibabacloud.com/ap-southeast-1/?tab=globalset#/efm/coding_plan"
+    };
+  }
+
   switch (provider) {
     case "github":
       return await getGitHubUsage(accessToken, providerSpecificData, proxyOptions);

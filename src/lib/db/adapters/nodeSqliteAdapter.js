@@ -74,6 +74,18 @@ export async function createNodeSqliteAdapter(filePath) {
         throw e;
       }
     },
+    async transactionAsync(fn) {
+      const sp = `sp_${Math.random().toString(36).slice(2)}`;
+      db.exec(`SAVEPOINT ${sp}`);
+      try {
+        const r = await fn();
+        db.exec(`RELEASE ${sp}`);
+        return r;
+      } catch (e) {
+        try { db.exec(`ROLLBACK TO ${sp}`); db.exec(`RELEASE ${sp}`); } catch {}
+        throw e;
+      }
+    },
     checkpoint() { try { db.exec("PRAGMA wal_checkpoint(TRUNCATE)"); } catch {} },
     close() {
       clearInterval(checkpointTimer);

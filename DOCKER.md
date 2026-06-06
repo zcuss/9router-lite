@@ -1,6 +1,6 @@
 # Docker
 
-Run 9Router in a container. Published image: [`decolua/9router`](https://hub.docker.com/r/decolua/9router) — multi-platform `linux/amd64` + `linux/arm64`.
+Run 9Router Lite in a container.
 
 ---
 
@@ -10,32 +10,32 @@ Run 9Router in a container. Published image: [`decolua/9router`](https://hub.doc
 
 ```bash
 docker run -d \
-  -p 20128:20128 \
-  -v "$HOME/.9router:/app/data" \
+  -p 45231:45231 \
+  -v "$HOME/.9router-lite:/app/data" \
   -e DATA_DIR=/app/data \
-  --name 9router \
-  decolua/9router:latest
+  --name 9router-lite \
+  ghcr.io/YOUR_GITHUB_USERNAME/9router-lite:latest
 ```
 
-App listens on port `20128`. Open: http://localhost:20128
+App listens on port `45231`. Open: http://localhost:45231
 
 ## Manage container
 
 ```bash
-docker logs -f 9router        # view logs
-docker stop 9router           # stop
-docker start 9router          # start again
-docker rm -f 9router          # remove
+docker logs -f 9router-lite        # view logs
+docker stop 9router-lite           # stop
+docker start 9router-lite          # start again
+docker rm -f 9router-lite          # remove
 ```
 
 ## Data persistence
 
 ```bash
--v "$HOME/.9router:/app/data" \
+-v "$HOME/.9router-lite:/app/data" \
 -e DATA_DIR=/app/data
 ```
 
-Without `DATA_DIR`, the app falls back to `~/.9router/` (macOS/Linux) or `%APPDATA%\9router\` (Windows). In the container, `DATA_DIR=/app/data` makes the bind mount work.
+Without `DATA_DIR`, the app falls back to `~/.9router-lite/` (macOS/Linux) or `%APPDATA%\9router-lite\` (Windows). In the container, `DATA_DIR=/app/data` makes the bind mount work.
 
 Data layout under `$DATA_DIR/`:
 
@@ -47,28 +47,28 @@ $DATA_DIR/
 └── ...                   # certs, logs, runtime configs
 ```
 
-Host path: `$HOME/.9router/db/data.sqlite`
+Host path: `$HOME/.9router-lite/db/data.sqlite`
 Container path: `/app/data/db/data.sqlite`
 
 ## Optional env vars
 
 ```bash
 docker run -d \
-  -p 20128:20128 \
-  -v "$HOME/.9router:/app/data" \
+  -p 45231:45231 \
+  -v "$HOME/.9router-lite:/app/data" \
   -e DATA_DIR=/app/data \
-  -e PORT=20128 \
+  -e PORT=45231 \
   -e HOSTNAME=0.0.0.0 \
   -e DEBUG=true \
-  --name 9router \
-  decolua/9router:latest
+  --name 9router-lite \
+  ghcr.io/YOUR_GITHUB_USERNAME/9router-lite:latest
 ```
 
 ## Update to latest
 
 ```bash
-docker pull decolua/9router:latest
-docker rm -f 9router
+docker pull ghcr.io/YOUR_GITHUB_USERNAME/9router-lite:latest
+docker rm -f 9router-lite
 # re-run the quick start command
 ```
 
@@ -79,26 +79,17 @@ docker rm -f 9router
 ## Build image locally (test)
 
 ```bash
-cd app && docker build -t 9router .
+docker build -t 9router-lite .
 
-docker run --rm -p 20128:20128 \
-  -v "$HOME/.9router:/app/data" \
+docker run --rm -p 45231:45231 \
+  -v "$HOME/.9router-lite:/app/data" \
   -e DATA_DIR=/app/data \
-  9router
+  9router-lite
 ```
 
 ## Publish (automatic via CI)
 
 Push a git tag `v*` → GitHub Actions builds multi-platform (amd64+arm64) and pushes to:
-- `ghcr.io/decolua/9router:v{version}` + `:latest`
-- `decolua/9router:v{version}` + `:latest`
+- `ghcr.io/YOUR_GITHUB_USERNAME/9router-lite:v{version}` + `:latest`
 
-```bash
-# Use scripts/release.js (recommended)
-node scripts/release.js "Release title" "Notes"
-
-# Or manually
-git tag v0.4.x && git push origin v0.4.x
-```
-
-Workflow: `app/.github/workflows/docker-publish.yml`
+Workflow: `.github/workflows/docker-publish.yml`

@@ -43,14 +43,12 @@ function createSpinner(text) {
 }
 
 const pkg = require("./package.json");
-const { ensureSqliteRuntime, buildEnvWithRuntime } = require("./hooks/sqliteRuntime");
+const { buildEnvWithRuntime } = require("./hooks/sqliteRuntime");
 const { ensureTrayRuntime } = require("./hooks/trayRuntime");
 const args = process.argv.slice(2);
 
-// Self-heal SQLite runtime deps (sql.js + better-sqlite3) into ~/.9router/runtime
-// so the server can resolve them via NODE_PATH. Best-effort — sql.js is required,
-// better-sqlite3 is optional. Logs to stderr only on failure.
-try { ensureSqliteRuntime({ silent: true }); } catch {}
+// Do not install or warm up any SQLite runtime when launching the CLI.
+// DB selection is handled by the app via DB_DRIVER/DATABASE_URL.
 
 // Self-heal tray runtime (systray for macOS/Linux only). Windows skipped.
 try { ensureTrayRuntime({ silent: true }); } catch {}
@@ -59,7 +57,7 @@ try { ensureTrayRuntime({ silent: true }); } catch {}
 const APP_NAME = "9router-lite"; // Use custom package name since this is the lite version
 const INSTALL_CMD_LATEST = `npm i -g 9router-lite@latest --prefer-online`;
 
-const DEFAULT_PORT = 20128;
+const DEFAULT_PORT = 20129;
 const DEFAULT_HOST = "0.0.0.0";
 const MAX_PORT_ATTEMPTS = 10;
 // Identifiers for killAllAppProcesses - only kill 9router specifically
@@ -757,7 +755,16 @@ function startServer(latestVersion) {
       else { cleanup(); process.exit(1); }
     });
 
-    server.on("close", (code) => {
+    server.on("close", async (code) => {
+      if (code === 12) {
+        console.log("\n🔄 Restarting server (database configuration changed)...");
+        try {
+          await killProcessOnPort(port);
+        } catch { /* best effort */ }
+        server = spawnServer();
+        attachServerEvents();
+        return;
+      }
       if (isShuttingDown || code === 0) {
         process.exit(code || 0);
         return;

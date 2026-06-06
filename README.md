@@ -1092,13 +1092,19 @@ docker pull decolua/9router:latest   # update to latest
 
 **Data persistence:** `$HOME/.9router/db/data.sqlite` on host ↔ `/app/data/db/data.sqlite` in container.
 
+> Native `better-sqlite3` is no longer auto-installed by the CLI. By default, 9Router uses built-in `node:sqlite` when available, otherwise `sql.js`. To force optional native install, set `9ROUTER_INSTALL_BETTER_SQLITE3=1`.
+>
+> `CockroachDB` / `Postgres` mode is available through the async DB adapter. Set `DB_DRIVER=cockroach` or `DB_DRIVER=postgres` and provide `DATABASE_URL`.
+
 ### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `JWT_SECRET` | Auto-generated (`~/.9router/jwt-secret`) | JWT signing secret for dashboard auth cookie (override to share across instances) |
 | `INITIAL_PASSWORD` | `123456` | First login password when no saved hash exists |
-| `DATA_DIR` | `~/.9router` | Main app data location (SQLite at `$DATA_DIR/db/data.sqlite`) |
+| `DATA_DIR` | `~/.9router` | Main app data location (DB file at `$DATA_DIR/db/data.sqlite`) |
+| `DB_DRIVER` | empty | Remote DB mode selector (`cockroach`, `cockroachdb`, `postgres`, `postgresql`) |
+| `DATABASE_URL` | empty | CockroachDB/Postgres connection string (`postgresql://...`) |
 | `PORT` | framework default | Service port (`20128` in examples) |
 | `HOSTNAME` | framework default | Bind host (Docker defaults to `0.0.0.0`) |
 | `NODE_ENV` | runtime default | Set `production` for deploy |

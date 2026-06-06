@@ -1,11 +1,15 @@
 // Ensure proxyFetch is loaded to patch globalThis.fetch
 import "open-sse/index.js";
 
-import { getProviderConnectionById, updateProviderConnection } from "@/lib/localDb";
+import { getProviderConnectionById, updateProviderConnection, getProviderNodes } from "@/lib/localDb";
 import { getUsageForProvider } from "open-sse/services/usage.js";
 import { getExecutor } from "open-sse/executors/index.js";
 import { resolveConnectionProxyConfig } from "@/lib/network/connectionProxy";
-import { USAGE_APIKEY_PROVIDERS } from "@/shared/constants/providers";
+import {
+  USAGE_APIKEY_PROVIDERS,
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 
 // Detect auth-expired messages returned by usage providers instead of throwing
 const AUTH_EXPIRED_PATTERNS = ["expired", "authentication", "unauthorized", "401", "re-authorize"];
@@ -13,6 +17,12 @@ function isAuthExpiredMessage(usage) {
   if (!usage?.message) return false;
   const msg = usage.message.toLowerCase();
   return AUTH_EXPIRED_PATTERNS.some((p) => msg.includes(p));
+}
+
+function isCustomUsageProvider(provider, customProviderIds) {
+  return customProviderIds.has(provider) ||
+         isOpenAICompatibleProvider(provider) ||
+         isAnthropicCompatibleProvider(provider);
 }
 
 /**
@@ -114,13 +124,26 @@ export async function GET(request, { params }) {
       return Response.json({ error: "Connection not found" }, { status: 404 });
     }
 
-    // Allow OAuth connections, plus whitelisted apikey providers (glm/minimax/...)
+    const providerNodes = await getProviderNodes();
+    const customProviderIds = new Set();
+    for (const node of providerNodes) {
+      customProviderIds.add(node.id);
+      if (node.prefix) {
+        customProviderIds.add(node.prefix);
+      }
+    }
+
+    // Allow OAuth connections, whitelisted apikey providers (glm/minimax/...),
+    // and custom compatible providers so they can appear on /dashboard/quota.
     const isOAuth = connection.authType === "oauth";
     const isApikeyEligible =
       connection.authType === "apikey" &&
       USAGE_APIKEY_PROVIDERS.includes(connection.provider);
+    const isCustomEligible =
+      connection.authType === "apikey" &&
+      isCustomUsageProvider(connection.provider, customProviderIds);
 
-    if (!isOAuth && !isApikeyEligible) {
+    if (!isOAuth && !isApikeyEligible && !isCustomEligible) {
       return Response.json({ message: "Usage not available for this connection" });
     }
 

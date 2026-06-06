@@ -26,10 +26,11 @@ function sleep(ms) {
 export default function ProviderDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const providerId = params.id;
+  const routeProviderId = Array.isArray(params.id) ? params.id[0] : params.id;
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [providerNode, setProviderNode] = useState(null);
+  const providerId = providerNode?.id || routeProviderId;
   const [proxyPools, setProxyPools] = useState([]);
   const [showOAuthModal, setShowOAuthModal] = useState(false);
   const [showIFlowCookieModal, setShowIFlowCookieModal] = useState(false);
@@ -129,8 +130,12 @@ export default function ProviderDetailPage() {
   const models = getModelsByProviderId(providerId);
   const providerAlias = getProviderAlias(providerId);
   
-  const isOpenAICompatible = isOpenAICompatibleProvider(providerId);
-  const isAnthropicCompatible = isAnthropicCompatibleProvider(providerId);
+  const isOpenAICompatible =
+    isOpenAICompatibleProvider(routeProviderId) ||
+    providerNode?.type === "openai-compatible";
+  const isAnthropicCompatible =
+    isAnthropicCompatibleProvider(routeProviderId) ||
+    providerNode?.type === "anthropic-compatible";
   const isCompatible = isOpenAICompatible || isAnthropicCompatible;
   const hasDualAuthModes = !isCompatible && isOAuth && supportsApiKeyAuth;
   const oauthConnectionLabel = providerId === "xai" ? "Grok Build OAuth" : "OAuth";
@@ -238,22 +243,12 @@ export default function ProviderDetailPage() {
       const nodesData = await nodesRes.json();
       const proxyPoolsData = await proxyPoolsRes.json();
       const settingsData = settingsRes.ok ? await settingsRes.json() : {};
-      if (connectionsRes.ok) {
-        const filtered = (connectionsData.connections || []).filter(c => c.provider === providerId);
-        setConnections(filtered);
-      }
-      if (proxyPoolsRes.ok) {
-        setProxyPools(proxyPoolsData.proxyPools || []);
-      }
-      // Load per-provider strategy override
-      const override = (settingsData.providerStrategies || {})[providerId] || {};
-      setProviderStrategy(override.fallbackStrategy || null);
-      setProviderStickyLimit(override.stickyRoundRobinLimit != null ? String(override.stickyRoundRobinLimit) : "1");
-      // Load per-provider thinking config
-      const thinkingCfg = (settingsData.providerThinking || {})[providerId] || {};
-      setThinkingMode(thinkingCfg.mode || "auto");
+
+      let node = null;
       if (nodesRes.ok) {
-        let node = (nodesData.nodes || []).find((entry) => entry.id === providerId) || null;
+        node = (nodesData.nodes || []).find(
+          (entry) => entry.id === routeProviderId || entry.prefix === routeProviderId,
+        ) || null;
 
         // Newly created compatible nodes can be briefly unavailable on one worker.
         // Retry a few times before showing "Provider not found".
@@ -263,19 +258,40 @@ export default function ProviderDetailPage() {
             const retryRes = await fetch("/api/provider-nodes", { cache: "no-store" });
             if (!retryRes.ok) continue;
             const retryData = await retryRes.json();
-            node = (retryData.nodes || []).find((entry) => entry.id === providerId) || null;
+            node = (retryData.nodes || []).find(
+              (entry) => entry.id === routeProviderId || entry.prefix === routeProviderId,
+            ) || null;
             if (node) break;
           }
         }
 
         setProviderNode(node);
       }
+
+      const effectiveProviderId = node?.id || routeProviderId;
+
+      if (connectionsRes.ok) {
+        const filtered = (connectionsData.connections || []).filter(
+          (c) => c.provider === effectiveProviderId,
+        );
+        setConnections(filtered);
+      }
+      if (proxyPoolsRes.ok) {
+        setProxyPools(proxyPoolsData.proxyPools || []);
+      }
+      // Load per-provider strategy override
+      const override = (settingsData.providerStrategies || {})[effectiveProviderId] || {};
+      setProviderStrategy(override.fallbackStrategy || null);
+      setProviderStickyLimit(override.stickyRoundRobinLimit != null ? String(override.stickyRoundRobinLimit) : "1");
+      // Load per-provider thinking config
+      const thinkingCfg = (settingsData.providerThinking || {})[effectiveProviderId] || {};
+      setThinkingMode(thinkingCfg.mode || "auto");
     } catch (error) {
       console.log("Error fetching connections:", error);
     } finally {
       setLoading(false);
     }
-  }, [providerId, isCompatible]);
+  }, [routeProviderId, isCompatible]);
 
   const handleUpdateNode = async (formData) => {
     try {

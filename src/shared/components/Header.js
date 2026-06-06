@@ -104,6 +104,13 @@ const getPageInfo = (pathname) => {
       icon: "data_usage",
       breadcrumbs: [],
     };
+  if (pathname.includes("/ai-tuning"))
+    return {
+      title: "AI Tuning",
+      description: "Tune assistant name, personality, behavior, and system prompt",
+      icon: "psychology",
+      breadcrumbs: [],
+    };
   if (pathname.includes("/mitm"))
     return {
       title: "MITM Proxy",

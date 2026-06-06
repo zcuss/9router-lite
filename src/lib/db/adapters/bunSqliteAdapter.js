@@ -53,6 +53,18 @@ export async function createBunSqliteAdapter(filePath) {
       const tx = db.transaction(fn);
       return tx();
     },
+    async transactionAsync(fn) {
+      const sp = `tx_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+      db.exec(`SAVEPOINT ${sp}`);
+      try {
+        const result = await fn();
+        db.exec(`RELEASE ${sp}`);
+        return result;
+      } catch (err) {
+        try { db.exec(`ROLLBACK TO ${sp}`); db.exec(`RELEASE ${sp}`); } catch {}
+        throw err;
+      }
+    },
     checkpoint() { try { db.exec("PRAGMA wal_checkpoint(TRUNCATE)"); } catch {} },
     close() {
       clearInterval(checkpointTimer);

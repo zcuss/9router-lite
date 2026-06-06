@@ -196,7 +196,7 @@ console.log("");
 console.log("4️⃣  Copying static files...");
 const staticSrc = path.join(appDir, ".next", "static");
 const staticSrcResolved = path.join(buildDistDir, "static");
-const staticDest = path.join(cliAppDir, buildDistDirName, "static");
+const staticDest = path.join(cliAppDir, ".next", "static");
 if (fs.existsSync(staticSrcResolved) || fs.existsSync(staticSrc)) {
   copyRecursive(fs.existsSync(staticSrcResolved) ? staticSrcResolved : staticSrc, staticDest);
   console.log("✅ Copied static files\n");
@@ -215,11 +215,11 @@ if (fs.existsSync(publicSrc)) {
   console.log("⏭️  No public folder found\n");
 }
 
-// Step 6: Copy vendor-chunks (required for production)
+// Step 6: Copy vendor-chunks (required for production when emitted)
 console.log("6️⃣  Copying vendor-chunks...");
 const vendorChunksSrc = path.join(appDir, ".next", "server", "vendor-chunks");
 const vendorChunksSrcResolved = path.join(buildDistDir, "server", "vendor-chunks");
-const vendorChunksDest = path.join(cliAppDir, buildDistDirName, "server", "vendor-chunks");
+const vendorChunksDest = path.join(cliAppDir, ".next", "server", "vendor-chunks");
 if (fs.existsSync(vendorChunksSrcResolved) || fs.existsSync(vendorChunksSrc)) {
   copyRecursive(fs.existsSync(vendorChunksSrcResolved) ? vendorChunksSrcResolved : vendorChunksSrc, vendorChunksDest);
   console.log("✅ Copied vendor-chunks\n");

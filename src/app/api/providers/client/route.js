@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { getProviderConnections } from "@/lib/localDb";
+import { getProviderConnections, getProviderNodes } from "@/lib/localDb";
 import { backfillCodexEmails } from "@/lib/oauth/providers";
-import { USAGE_APIKEY_PROVIDERS, USAGE_SUPPORTED_PROVIDERS } from "@/shared/constants/providers";
+import {
+  USAGE_APIKEY_PROVIDERS,
+  USAGE_SUPPORTED_PROVIDERS,
+  isAnthropicCompatibleProvider,
+  isOpenAICompatibleProvider,
+} from "@/shared/constants/providers";
 
 const SAFE_FIELDS = [
   "id", "provider", "authType", "name", "email", "displayName",
@@ -42,9 +47,20 @@ function sanitize(c) {
   return safe;
 }
 
-function isUsageEligible(connection) {
-  return USAGE_SUPPORTED_PROVIDERS.includes(connection.provider) && (
-    connection.authType === "oauth" || USAGE_APIKEY_PROVIDERS.includes(connection.provider)
+function isCustomUsageProvider(provider, customProviderIds) {
+  return customProviderIds.has(provider) ||
+         isOpenAICompatibleProvider(provider) ||
+         isAnthropicCompatibleProvider(provider);
+}
+
+function isUsageEligible(connection, customProviderIds) {
+  const provider = connection.provider;
+  if (isCustomUsageProvider(provider, customProviderIds)) {
+    return connection.authType === "apikey";
+  }
+
+  return USAGE_SUPPORTED_PROVIDERS.includes(provider) && (
+    connection.authType === "oauth" || USAGE_APIKEY_PROVIDERS.includes(provider)
   );
 }
 
@@ -84,8 +100,17 @@ export async function GET(request) {
     const page = parsePositiveInt(searchParams.get("page"), 1);
     const pageSize = Math.min(parsePositiveInt(searchParams.get("pageSize"), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
 
+    const providerNodes = await getProviderNodes();
+    const customProviderIds = new Set();
+    for (const node of providerNodes) {
+      customProviderIds.add(node.id);
+      if (node.prefix) {
+        customProviderIds.add(node.prefix);
+      }
+    }
+
     const allConnections = await getProviderConnections();
-    const eligibleConnections = allConnections.filter(isUsageEligible);
+    const eligibleConnections = allConnections.filter((conn) => isUsageEligible(conn, customProviderIds));
     const providerOptions = Array.from(new Set(eligibleConnections.map((conn) => conn.provider))).sort();
 
     const providerFilteredConnections = eligibleConnections.filter((conn) => (

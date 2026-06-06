@@ -1,7 +1,8 @@
-// Ensure better-sqlite3 is installed in USER_DATA_DIR/runtime/node_modules
-// (user-writable, avoids Windows EBUSY locks during npm i -g updates).
-// sql.js is bundled in bin/app already; node:sqlite / bun:sqlite are built-in.
-const { execSync, spawnSync } = require("child_process");
+// Runtime DB helper.
+// Native better-sqlite3 auto-install is disabled to avoid first-run downloads,
+// build-tool prompts, and repeated runtime setup in the CLI.
+// The app now prefers built-in/fallback drivers unless explicitly enabled.
+const { spawnSync } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
@@ -90,32 +91,39 @@ function runNpmInstall({ cwd, pkgs, extraArgs = [], timeout = 180000 }) {
 function npmInstall(pkgs, opts = {}) {
   const cwd = ensureRuntimeDir();
   const extra = opts.optional ? ["--no-save"] : [];
-  if (!opts.silent) console.log("⏳ Installing SQLite engine (first run)...");
+  if (!opts.silent) console.log("⏳ Installing optional native DB engine...");
   const res = runNpmInstall({ cwd, pkgs, extraArgs: extra, timeout: opts.timeout || 180000 });
   if (!res.ok && !opts.silent) {
     const reason = summarizeNpmError(res.stderr);
-    console.warn("⚠️  SQLite engine install failed — using fallback");
+    console.warn("⚠️  Optional native DB engine install failed — continuing with built-in fallback");
     console.warn(`   Reason: ${reason}`);
     console.warn(`   Retry:  cd "${cwd}" && npm install ${pkgs.join(" ")}`);
   }
   return res.ok;
 }
 
-// Public: ensure better-sqlite3 native module is installed in user-writable
-// runtime dir. sql.js is bundled in bin/app already; node:sqlite is built-in.
-// This is purely a *speed optimization* — app works without it via fallbacks.
+// Public: keep runtime dir available, but do NOT auto-install better-sqlite3.
+// To force the optional native install, set 9ROUTER_INSTALL_BETTER_SQLITE3=1.
 function ensureSqliteRuntime({ silent = false } = {}) {
   ensureRuntimeDir();
 
-  const needBetterSqlite = !hasModule("better-sqlite3") || !isBetterSqliteBinaryValid();
-  if (!needBetterSqlite) {
-    if (!silent) console.log("✅ SQLite engine ready");
-    return { betterSqlite: true };
+  const enabled = process.env["9ROUTER_INSTALL_BETTER_SQLITE3"] === "1";
+  const ready = hasModule("better-sqlite3") && isBetterSqliteBinaryValid();
+
+  if (ready) {
+    if (!silent) console.log("✅ Optional native DB engine ready");
+    return { betterSqlite: true, skipped: false };
+  }
+
+  if (!enabled) {
+    if (!silent) console.log("ℹ️ Skipping optional better-sqlite3 install; using built-in DB fallback");
+    return { betterSqlite: false, skipped: true };
   }
 
   const ok = npmInstall([`better-sqlite3@${BETTER_SQLITE3_VERSION}`], { optional: true, silent });
   return {
     betterSqlite: ok && hasModule("better-sqlite3") && isBetterSqliteBinaryValid(),
+    skipped: false,
   };
 }
 

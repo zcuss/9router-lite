@@ -1,3 +1,18 @@
+# v0.4.67 (2026-06-06)
+
+## Features
+- Add bilingual CLI README in English and Bahasa Indonesia for `9router-lite`
+- Add AI Tuning dashboard page to define assistant name, behavior, tone, and custom system prompt
+- Add persistent AI tuning settings storage through dashboard settings
+
+## Improvements
+- Change default CLI port from `45231` to `20129`
+- Rebrand lite package docs around `9router-lite` and custom rebuild positioning
+- Improve npm publish automation flow for GitHub Actions-based releases
+
+## Fixes
+- Align standalone CLI asset packaging with Next.js `.next` runtime layout so CSS and static assets load correctly
+
 # v0.4.66 (2026-05-29)
 
 ## Features

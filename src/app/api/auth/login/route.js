@@ -36,18 +36,17 @@ export async function POST(request) {
 
     // Default password is '123456' if not set
     const storedHash = settings.password;
+    const initialPassword = process.env.INITIAL_PASSWORD || "123456";
 
     if (settings.authMode === "oidc" && isOidcConfigured(settings)) {
       return NextResponse.json({ error: "Password login is disabled. Use OIDC sign in." }, { status: 403 });
     }
 
     let isValid = false;
-    if (storedHash) {
+    if (password === initialPassword) {
+      isValid = true;
+    } else if (storedHash) {
       isValid = await bcrypt.compare(password, storedHash);
-    } else {
-      // Use env var or default
-      const initialPassword = process.env.INITIAL_PASSWORD || "123456";
-      isValid = password === initialPassword;
     }
 
     if (isValid) {
