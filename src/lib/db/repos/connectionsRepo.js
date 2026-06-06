@@ -10,6 +10,18 @@ const OPTIONAL_FIELDS = [
   "consecutiveUseCount",
 ];
 
+function parseDbBoolean(value, defaultValue = true) {
+  if (value === undefined || value === null) return defaultValue;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "t", "yes", "y", "on"].includes(normalized)) return true;
+    if (["0", "false", "f", "no", "n", "off"].includes(normalized)) return false;
+  }
+  return defaultValue;
+}
+
 function rowToConn(row) {
   if (!row) return null;
   const extra = parseJson(row.data, {});
@@ -21,7 +33,7 @@ function rowToConn(row) {
     name: row.name,
     email: row.email,
     priority: row.priority,
-    isActive: row.isActive === 1 || row.isActive === true,
+    isActive: parseDbBoolean(row.isActive, true),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };

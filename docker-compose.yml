@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:20128:20128"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/9router
+      - REQUIRE_API_KEY=true
+      - ALLOWED_ORIGINS=http://localhost:20128,https://yourdomain.com
+      - TOKEN_REFRESH_BUFFER_MINUTES=5
+      - CLOUD_SYNC_ENABLED=false
+      - ENCRYPTION_KEY=your_32_byte_hex_string_here
+      - RATE_LIMIT_PER_MINUTE=60
+    depends_on:
+      - db
+    volumes:
+      - ./data:/app/data
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=9router
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+
+volumes:
+  postgres_data:

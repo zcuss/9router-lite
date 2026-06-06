@@ -45,6 +45,18 @@ function fallbackBin() {
   return null;
 }
 
+function getTailscaledBin() {
+  if (IS_WINDOWS) return null;
+  const candidates = [
+    "/usr/local/bin/tailscaled",
+    "/opt/homebrew/bin/tailscaled",
+    "/usr/sbin/tailscaled",
+    "/usr/bin/tailscaled",
+    "/bin/tailscaled",
+  ];
+  return candidates.find((p) => fs.existsSync(p)) || "tailscaled";
+}
+
 function bgRefreshBin() {
   if (binCache.refreshing) return;
   binCache.refreshing = true;
@@ -450,7 +462,11 @@ async function ensureUserOwnedDir(dir) {
 /** Check if running daemon uses TUN mode (Funnel TLS requires TUN). */
 function isDaemonTunMode() {
   try {
-    const ps = execSync(`pgrep -af "tailscaled.*${TAILSCALE_SOCKET}"`, { encoding: "utf8", timeout: 2000 }).trim();
+    const ps = execSync(`pgrep -af "tailscaled.*${TAILSCALE_SOCKET}"`, {
+      encoding: "utf8",
+      timeout: 2000,
+      env: { ...process.env, PATH: EXTENDED_PATH },
+    }).trim();
     if (!ps) return null;
     return !ps.includes("--tun=userspace-networking");
   } catch { return null; }
@@ -514,7 +530,11 @@ export async function startDaemonWithPassword(sudoPassword) {
   // Reclaim folder ownership (previous root daemon may have locked it)
   await ensureUserOwnedDir(TAILSCALE_DIR);
 
-  const tailscaledBin = IS_MAC ? "/usr/local/bin/tailscaled" : "tailscaled";
+  const tailscaledBin = getTailscaledBin();
+  if (!tailscaledBin || !fs.existsSync(tailscaledBin)) {
+    throw new Error("tailscaled binary not found. Install Tailscale first.");
+  }
+
   const daemonArgs = [
     `--socket=${TAILSCALE_SOCKET}`,
     `--statedir=${TAILSCALE_DIR}`,

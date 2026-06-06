@@ -22,7 +22,7 @@ LABEL org.opencontainers.image.title="9router"
 
 ENV NODE_ENV=production
 ENV PORT=20128
-ENV HOSTNAME=0.0.0.0
+ENV HOSTNAME=127.0.0.1
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATA_DIR=/app/data
 

@@ -8,7 +8,7 @@ import {
   isTunnelManuallyDisabled, isTunnelReconnecting, isTailscaleReconnecting,
   getTunnelService, getTailscaleService, setTunnelUnexpectedExitCallback,
   killCloudflared, isCloudflaredRunning, ensureCloudflared,
-  isTailscaleRunning, isTailscaleRunningStrict,
+  isTailscaleInstalled, isTailscaleRunning, isTailscaleRunningStrict,
   loadState,
   checkInternet,
   probeCloudflareAlive, probeTailscaleAlive,
@@ -186,6 +186,10 @@ async function safeRestartTailscale(reason) {
   if (!settings.tailscaleEnabled) return;
   if (svc.cancelToken.cancelled) return;
   if (svc.spawnInProgress) return;
+  if (!isTailscaleInstalled()) {
+    console.log(`[Tailscale] skip restart (${reason}) — tailscale not installed`);
+    return;
+  }
 
   // Tailscale daemon is OS-level with built-in reconnect; trust it when running.
   // Startup uses strict probe — cached state is cold after process/dev reload.

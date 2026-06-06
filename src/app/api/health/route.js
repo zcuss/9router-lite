@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAdapter } from "@/lib/db/driver";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -7,7 +8,19 @@ const CORS_HEADERS = {
 };
 
 export async function GET() {
-  return NextResponse.json({ ok: true }, { headers: CORS_HEADERS });
+  let dbStatus = "ok";
+  try {
+    const db = await getAdapter();
+    await db.get("SELECT 1");
+  } catch (e) {
+    dbStatus = "error";
+  }
+
+  return NextResponse.json({ 
+    ok: true,
+    db: dbStatus,
+    timestamp: new Date().toISOString()
+  }, { headers: CORS_HEADERS });
 }
 
 export async function OPTIONS() {

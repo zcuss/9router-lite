@@ -1,3 +1,13 @@
+# v0.4.69 (2026-06-06)
+
+## Improvements
+- Point updater, changelog fetch, and skills links to `zcuss/9router-lite`
+- Bump package version for the GitHub-linked release
+
+## Fixes
+- Prevent duplicate process shutdown listeners during dev hot reload
+- Skip Tailscale watchdog restart when Tailscale binaries are unavailable
+
 # v0.4.67 (2026-06-06)
 
 ## Features

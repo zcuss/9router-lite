@@ -211,11 +211,12 @@ export async function checkAndRefreshToken(provider, credentials) {
     const remaining = expiresAt - now;
 
     const refreshLead = _getRefreshLeadMs(provider);
-    if (remaining < refreshLead) {
+    const bufferMs = process.env.TOKEN_REFRESH_BUFFER_MINUTES ? parseInt(process.env.TOKEN_REFRESH_BUFFER_MINUTES, 10) * 60 * 1000 : refreshLead;
+    if (remaining < bufferMs) {
       log.info("TOKEN_REFRESH", "Token expiring soon, refreshing proactively", {
         provider,
         expiresIn: Math.round(remaining / 1000),
-        refreshLeadMs: refreshLead,
+        refreshLeadMs: bufferMs,
       });
 
       const newCreds = await getAccessToken(provider, creds);

@@ -42,6 +42,17 @@ const parseOpenAIStyleModels = (data) => {
   return data?.data || data?.models || data?.results || [];
 };
 
+function normalizeCompatibleBaseUrl(baseUrl) {
+  return String(baseUrl || "")
+    .trim()
+    .replace(/\/$/, "")
+    .replace(/\/v\d+\/chat\/completions$/i, (match) => match.replace(/\/chat\/completions$/i, ""))
+    .replace(/\/chat\/completions$/i, "")
+    .replace(/\/responses$/i, "")
+    .replace(/\/completions$/i, "")
+    .replace(/\/messages$/i, "");
+}
+
 // Matches provider IDs that are upstream/cross-instance connections (contain a UUID suffix)
 const UPSTREAM_CONNECTION_RE = /[-_][0-9a-f]{8,}$/i;
 
@@ -77,7 +88,7 @@ async function fetchCompatibleModelIds(connection) {
   if (!connection?.apiKey) return [];
 
   const baseUrl = typeof connection?.providerSpecificData?.baseUrl === "string"
-    ? connection.providerSpecificData.baseUrl.trim().replace(/\/$/, "")
+    ? normalizeCompatibleBaseUrl(connection.providerSpecificData.baseUrl)
     : "";
 
   if (!baseUrl) return [];

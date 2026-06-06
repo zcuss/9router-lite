@@ -177,6 +177,25 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
   // Execute request
   let providerResponse, providerUrl, providerHeaders, finalBody;
   try {
+    // Preemptive refresh check
+    if (credentials && credentials.expiresAt) {
+      const bufferMs = process.env.TOKEN_REFRESH_BUFFER_MINUTES ? parseInt(process.env.TOKEN_REFRESH_BUFFER_MINUTES, 10) * 60 * 1000 : 5 * 60 * 1000;
+      if (isTokenExpiringSoon(credentials.expiresAt, bufferMs)) {
+        log?.info?.("TOKEN", `${provider.toUpperCase()} | preemptive refresh triggered`);
+        try {
+          const newCredentials = await refreshWithRetry(() => executor.refreshCredentials(credentials, log), 3, log);
+          if (newCredentials?.accessToken || newCredentials?.copilotToken) {
+            Object.assign(credentials, newCredentials);
+            if (onCredentialsRefreshed) {
+              await onCredentialsRefreshed(newCredentials);
+            }
+          }
+        } catch (e) {
+          log?.warn?.("TOKEN", `Preemptive refresh failed: ${e.message}`);
+        }
+      }
+    }
+
     const result = await executor.execute({ model, body: translatedBody, stream, credentials, signal: streamController.signal, log, proxyOptions });
     providerResponse = result.response;
     providerUrl = result.url;
@@ -220,7 +239,10 @@ export async function handleChatCore({ body, modelInfo, credentials, log, onCred
           if (retryResult.response.ok) { providerResponse = retryResult.response; providerUrl = retryResult.url; }
         } catch { log?.warn?.("TOKEN", `${provider.toUpperCase()} | retry after refresh failed`); }
       } else {
-        log?.warn?.("TOKEN", `${provider.toUpperCase()} | refresh failed`);
+        log?.warn?.("TOKEN", `${provider.toUpperCase()} | refresh failed, disabling account`);
+        if (connectionId && onCredentialsRefreshed) {
+          await onCredentialsRefreshed({ isActive: false });
+        }
       }
     } catch (e) {
       log?.warn?.("TOKEN", `${provider.toUpperCase()} | refresh threw: ${e.message}`);

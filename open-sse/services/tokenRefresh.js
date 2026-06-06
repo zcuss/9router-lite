@@ -32,7 +32,7 @@ async function refreshXaiToken(refreshToken, log) {
 }
 
 // Default token expiry buffer (refresh if expires within 5 minutes)
-export const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000;
+export const TOKEN_EXPIRY_BUFFER_MS = (process.env.TOKEN_REFRESH_BUFFER_MINUTES ? parseInt(process.env.TOKEN_REFRESH_BUFFER_MINUTES, 10) : 5) * 60 * 1000;
 
 // Dedup: cache in-flight promise + recent result to prevent refresh_token_reused (Auth0 family revoke)
 const REFRESH_RESULT_TTL_MS = 10_000;
@@ -40,6 +40,7 @@ const refreshDedupCache = new Map();
 
 async function dedupRefresh(provider, oldToken, fn, log) {
   if (!oldToken) return fn();
+  // Use provider:accountId or provider:oldToken to prevent parallel refreshes
   const key = `${provider}:${oldToken}`;
   const hit = refreshDedupCache.get(key);
   if (hit) {

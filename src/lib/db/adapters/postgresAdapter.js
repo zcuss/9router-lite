@@ -156,7 +156,12 @@ export async function createPostgresAdapter() {
     throw new Error("[DB] CockroachDB/Postgres mode requires dependency 'pg'. Run npm install after pulling this change.");
   }
 
-  const pool = new Pool({ connectionString: url });
+  const pool = new Pool({
+    connectionString: url,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000, // Increased from 2000 to 10000 for remote DB stability
+  });
 
   async function query(sql, params = []) {
     const translated = translateSql(sql);

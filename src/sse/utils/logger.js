@@ -1,4 +1,17 @@
-// Logger utility for cloud
+// Logger utility for cloud using pino
+import pino from "pino";
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  transport: process.env.NODE_ENV !== "production" ? {
+    target: "pino-pretty",
+    options: {
+      colorize: true,
+      translateTime: "HH:MM:ss Z",
+      ignore: "pid,hostname",
+    }
+  } : undefined
+});
 
 const LOG_LEVELS = {
   DEBUG: 0,
@@ -24,47 +37,31 @@ function formatData(data) {
 }
 
 export function debug(tag, message, data) {
-  if (LEVEL <= LOG_LEVELS.DEBUG) {
-    const dataStr = data ? ` ${formatData(data)}` : "";
-    console.log(`[${formatTime()}] 🔍 [${tag}] ${message}${dataStr}`);
-  }
+  logger.debug({ tag, data }, message);
 }
 
 export function info(tag, message, data) {
-  if (LEVEL <= LOG_LEVELS.INFO) {
-    const dataStr = data ? ` ${formatData(data)}` : "";
-    console.log(`[${formatTime()}] ℹ️  [${tag}] ${message}${dataStr}`);
-  }
+  logger.info({ tag, data }, message);
 }
 
 export function warn(tag, message, data) {
-  if (LEVEL <= LOG_LEVELS.WARN) {
-    const dataStr = data ? ` ${formatData(data)}` : "";
-    // console.warn(`[${formatTime()}] ⚠️  [${tag}] ${message}${dataStr}`);
-  }
+  logger.warn({ tag, data }, message);
 }
 
 export function error(tag, message, data) {
-  if (LEVEL <= LOG_LEVELS.ERROR) {
-    const dataStr = data ? ` ${formatData(data)}` : "";
-    console.log(`[${formatTime()}] ❌ [${tag}] ${message}${dataStr}`);
-  }
+  logger.error({ tag, data }, message);
 }
 
 export function request(method, path, extra) {
-  const dataStr = extra ? ` ${formatData(extra)}` : "";
-  console.log(`\x1b[36m[${formatTime()}] 📥 ${method} ${path}${dataStr}\x1b[0m`);
+  logger.info({ method, path, extra }, `Request: ${method} ${path}`);
 }
 
 export function response(status, duration, extra) {
-  const icon = status < 400 ? "📤" : "💥";
-  const dataStr = extra ? ` ${formatData(extra)}` : "";
-  console.log(`[${formatTime()}] ${icon} ${status} (${duration}ms)${dataStr}`);
+  logger.info({ status, duration, extra }, `Response: ${status} (${duration}ms)`);
 }
 
 export function stream(event, data) {
-  const dataStr = data ? ` ${formatData(data)}` : "";
-  console.log(`[${formatTime()}] 🌊 [STREAM] ${event}${dataStr}`);
+  logger.info({ event, data }, `Stream: ${event}`);
 }
 
 // Mask sensitive data

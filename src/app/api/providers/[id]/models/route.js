@@ -67,6 +67,27 @@ const createOpenAIModelsConfig = (url) => ({
   parseResponse: parseOpenAIStyleModels
 });
 
+function normalizeCompatibleBaseUrl(baseUrl) {
+  return String(baseUrl || "")
+    .trim()
+    .replace(/\/$/, "")
+    .replace(/\/v\d+\/chat\/completions$/i, (match) => match.replace(/\/chat\/completions$/i, ""))
+    .replace(/\/chat\/completions$/i, "")
+    .replace(/\/responses$/i, "")
+    .replace(/\/completions$/i, "")
+    .replace(/\/messages$/i, "");
+}
+
+function collectModelIds(models = []) {
+  return Array.from(
+    new Set(
+      models
+        .map((model) => model?.id || model?.name || model?.model)
+        .filter((modelId) => typeof modelId === "string" && modelId.trim() !== "")
+    )
+  );
+}
+
 const resolveQwenModelsUrl = (connection) => {
   const fallback = "https://portal.qwen.ai/v1/models";
   const raw = connection?.providerSpecificData?.resourceUrl;
@@ -374,77 +395,102 @@ export async function GET(request, { params }) {
     }
 
     if (isOpenAICompatibleProvider(connection.provider)) {
-      const baseUrl = connection.providerSpecificData?.baseUrl;
-      if (!baseUrl) {
+      const rawBaseUrl = connection.providerSpecificData?.baseUrl;
+      if (!rawBaseUrl) {
         return NextResponse.json({ error: "No base URL configured for OpenAI compatible provider" }, { status: 400 });
       }
-      const url = `${baseUrl.replace(/\/$/, "")}/models`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${connection.apiKey}`,
-        },
-      });
+      const baseUrl = normalizeCompatibleBaseUrl(rawBaseUrl);
+      const url = `${baseUrl}/models`;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log(`Error fetching models from ${connection.provider}:`, errorText);
-        return NextResponse.json(
-          { error: `Failed to fetch models: ${response.status}` },
-          { status: response.status }
-        );
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${connection.apiKey}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log(`Error fetching models from ${connection.provider}:`, errorText);
+          return NextResponse.json({
+            provider: connection.provider,
+            connectionId: connection.id,
+            models: [],
+            warning: `Model listing endpoint returned ${response.status}. Add models manually if your upstream does not expose /models.`,
+            upstreamStatus: response.status,
+          });
+        }
+
+        const data = await response.json();
+        const models = parseOpenAIStyleModels(data);
+
+        return NextResponse.json({
+          provider: connection.provider,
+          connectionId: connection.id,
+          models,
+        });
+      } catch (error) {
+        console.log(`Error fetching models from ${connection.provider}:`, error);
+        return NextResponse.json({
+          provider: connection.provider,
+          connectionId: connection.id,
+          models: [],
+          warning: "Failed to reach upstream /models endpoint. Add models manually or verify the compatible base URL.",
+        });
       }
-
-      const data = await response.json();
-      const models = data.data || data.models || [];
-
-      return NextResponse.json({
-        provider: connection.provider,
-        connectionId: connection.id,
-        models
-      });
     }
 
     if (isAnthropicCompatibleProvider(connection.provider)) {
-      let baseUrl = connection.providerSpecificData?.baseUrl;
-      if (!baseUrl) {
+      const rawBaseUrl = connection.providerSpecificData?.baseUrl;
+      if (!rawBaseUrl) {
         return NextResponse.json({ error: "No base URL configured for Anthropic compatible provider" }, { status: 400 });
       }
 
-      baseUrl = baseUrl.replace(/\/$/, "");
-      if (baseUrl.endsWith("/messages")) {
-        baseUrl = baseUrl.slice(0, -9);
-      }
-
+      const baseUrl = normalizeCompatibleBaseUrl(rawBaseUrl);
       const url = `${baseUrl}/models`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": connection.apiKey,
-          "anthropic-version": "2023-06-01",
-          "Authorization": `Bearer ${connection.apiKey}`
-        },
-      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log(`Error fetching models from ${connection.provider}:`, errorText);
-        return NextResponse.json(
-          { error: `Failed to fetch models: ${response.status}` },
-          { status: response.status }
-        );
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": connection.apiKey,
+            "anthropic-version": "2023-06-01",
+            "Authorization": `Bearer ${connection.apiKey}`
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.log(`Error fetching models from ${connection.provider}:`, errorText);
+          return NextResponse.json({
+            provider: connection.provider,
+            connectionId: connection.id,
+            models: [],
+            warning: `Model listing endpoint returned ${response.status}. Add models manually if your upstream does not expose /models.`,
+            upstreamStatus: response.status,
+          });
+        }
+
+        const data = await response.json();
+        const models = parseOpenAIStyleModels(data);
+
+        return NextResponse.json({
+          provider: connection.provider,
+          connectionId: connection.id,
+          models,
+        });
+      } catch (error) {
+        console.log(`Error fetching models from ${connection.provider}:`, error);
+        return NextResponse.json({
+          provider: connection.provider,
+          connectionId: connection.id,
+          models: [],
+          warning: "Failed to reach upstream /models endpoint. Add models manually or verify the compatible base URL.",
+        });
       }
-
-      const data = await response.json();
-      const models = data.data || data.models || [];
-
-      return NextResponse.json({
-        provider: connection.provider,
-        connectionId: connection.id,
-        models
-      });
     }
 
     const config = PROVIDER_MODELS_CONFIG[connection.provider];

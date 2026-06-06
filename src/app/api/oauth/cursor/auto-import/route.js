@@ -82,7 +82,8 @@ const normalize = (value) => {
 function extractTokensViaBetterSqlite(dbPath) {
   // Optional native runtime: avoid a literal module specifier so webpack
   // does not try to resolve better-sqlite3 unless this path is actually used.
-  const Database = require(BETTER_SQLITE3_MODULE);
+  const dynamicRequire = (0, eval)("require");
+  const Database = dynamicRequire(BETTER_SQLITE3_MODULE);
   const db = new Database(dbPath, { readonly: true, fileMustExist: true });
 
   const query = (key) => {

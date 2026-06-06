@@ -165,6 +165,22 @@ export const __test__ = {
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
+  // CORS check
+  const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
+  const origin = request.headers.get('origin');
+  
+  if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
+    return NextResponse.json({ error: 'Forbidden by CORS' }, { status: 403 });
+  }
+
+  // Mandatory API Key in production for management APIs
+  const requireApiKey = process.env.REQUIRE_API_KEY === 'true';
+  if (requireApiKey && pathname.startsWith('/api/') && !isPublicApi(pathname)) {
+    if (!(await hasValidApiKey(request)) && !(await hasValidCliToken(request))) {
+      return NextResponse.json({ error: 'API Key required' }, { status: 401 });
+    }
+  }
+
   // Local-only gate for spawn-capable / host-secret routes.
   if (LOCAL_ONLY_PATHS.some((p) => pathname.startsWith(p))) {
     if (!(await canAccessLocalOnlyRoute(request))) {
