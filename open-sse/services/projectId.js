@@ -234,8 +234,7 @@ async function onboardUser(accessToken, tierID, externalSignal) {
                     console.log(`[ProjectId] Successfully onboarded, project ID: ${projectId}`);
                     return projectId;
                 }
-                console.warn("[ProjectId] onboardUser returned done=true without a project ID; refusing to fall back to a synthetic project");
-                return null;
+                throw new Error("onboardUser done but no project_id in response");
             }
 
             // Server not done yet – wait and retry
@@ -271,27 +270,14 @@ async function onboardUser(accessToken, tierID, externalSignal) {
 function extractProjectId(data) {
     if (!data) return null;
 
-    const candidates = [
-        data.cloudaicompanionProject,
-        data.projectId,
-        data.project?.id,
-        data.project,
-        data.response?.cloudaicompanionProject,
-        data.response?.projectId,
-        data.response?.project?.id,
-        data.response?.project,
-    ];
+    if (typeof data.cloudaicompanionProject === "string") {
+        const id = data.cloudaicompanionProject.trim();
+        if (id) return id;
+    }
 
-    for (const candidate of candidates) {
-        if (typeof candidate === "string") {
-            const id = candidate.trim();
-            if (id) return id;
-        }
-
-        if (candidate && typeof candidate === "object") {
-            const id = candidate.id;
-            if (typeof id === "string" && id.trim()) return id.trim();
-        }
+    if (data.cloudaicompanionProject && typeof data.cloudaicompanionProject === "object") {
+        const id = data.cloudaicompanionProject.id;
+        if (typeof id === "string" && id.trim()) return id.trim();
     }
 
     return null;
@@ -301,5 +287,19 @@ function extractProjectId(data) {
  * Extract project ID from onboardUser response.
  */
 function extractProjectIdFromOnboard(data) {
-    return extractProjectId(data);
+    if (!data?.response) return null;
+
+    const project = data.response.cloudaicompanionProject;
+
+    if (typeof project === "string") {
+        const id = project.trim();
+        if (id) return id;
+    }
+
+    if (project && typeof project === "object") {
+        const id = project.id;
+        if (typeof id === "string" && id.trim()) return id.trim();
+    }
+
+    return null;
 }

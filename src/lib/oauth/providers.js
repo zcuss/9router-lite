@@ -478,7 +478,7 @@ const PROVIDERS = {
         console.log("Failed to load code assist:", e);
       }
 
-      // Fire-and-forget onboarding — does not block DB save, but never invents a project ID
+      // Fire-and-forget onboarding — does not block DB save
       if (projectId) {
         const doOnboard = async () => {
           for (let i = 0; i < 10; i++) {
@@ -499,10 +499,6 @@ const PROVIDERS = {
           }
         };
         doOnboard().catch(() => {});
-      }
-
-      if (!projectId) {
-        console.warn("[OAuth][antigravity] loadCodeAssist returned no cloudaicompanionProject; connection saved without projectId");
       }
 
       return { userInfo, projectId };

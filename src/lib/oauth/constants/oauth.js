@@ -1,5 +1,9 @@
 /**
- * OAuth Configuration Constants
+ * Purpose: Define OAuth provider constants and Google Code Assist metadata for dashboard/API connection flows.
+ * Caller: OAuth provider registry, service classes, and token exchange handlers under `src/lib/oauth/*`.
+ * Dependencies: Node `os` platform helpers and provider OAuth endpoint contracts.
+ * Main Functions: `getOAuthClientMetadata` plus exported provider config objects.
+ * Side Effects: Reads optional environment overrides for Google OAuth client credentials.
  */
 import { platform, arch } from "os";
 
@@ -40,10 +44,10 @@ export const CODEX_CONFIG = {
   },
 };
 
-const GOOGLE_GEMINI_CLIENT_ID = process.env.GOOGLE_GEMINI_CLIENT_ID || "GOOGLE_GEMINI_CLIENT_ID";
-const GOOGLE_GEMINI_CLIENT_SECRET = process.env.GOOGLE_GEMINI_CLIENT_SECRET || "GOOGLE_GEMINI_CLIENT_SECRET";
-const GOOGLE_ANTIGRAVITY_CLIENT_ID = process.env.GOOGLE_ANTIGRAVITY_CLIENT_ID || "GOOGLE_ANTIGRAVITY_CLIENT_ID";
-const GOOGLE_ANTIGRAVITY_CLIENT_SECRET = process.env.GOOGLE_ANTIGRAVITY_CLIENT_SECRET || "GOOGLE_ANTIGRAVITY_CLIENT_SECRET";
+const GOOGLE_GEMINI_CLIENT_ID = process.env.GOOGLE_GEMINI_CLIENT_ID || "429507493251-j48eq5euk6g0g42is0reutmt9b77p3cu.apps.googleusercontent.com";
+const GOOGLE_GEMINI_CLIENT_SECRET = process.env.GOOGLE_GEMINI_CLIENT_SECRET || "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";
+const GOOGLE_ANTIGRAVITY_CLIENT_ID = process.env.GOOGLE_ANTIGRAVITY_CLIENT_ID || "1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com";
+const GOOGLE_ANTIGRAVITY_CLIENT_SECRET = process.env.GOOGLE_ANTIGRAVITY_CLIENT_SECRET || "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";
 
 // Gemini (Google) OAuth Configuration (Standard OAuth2)
 export const GEMINI_CONFIG = {

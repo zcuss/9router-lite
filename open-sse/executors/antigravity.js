@@ -49,13 +49,7 @@ export class AntigravityExecutor extends BaseExecutor {
   }
 
   transformRequest(model, body, stream, credentials) {
-    const projectId = typeof credentials?.projectId === "string" ? credentials.projectId.trim() : "";
-    if (!projectId) {
-      const error = new Error("Antigravity requires a real Google project ID. Reconnect the provider so loadCodeAssist can return cloudaicompanionProject.");
-      error.status = HTTP_STATUS.FORBIDDEN;
-      error.code = "ANTIGRAVITY_PROJECT_ID_REQUIRED";
-      throw error;
-    }
+    const projectId = credentials?.projectId || this.generateProjectId();
 
     // Fix contents for Claude models via Antigravity
     const contents = body.request?.contents?.map(c => {
