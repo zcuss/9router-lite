@@ -3,6 +3,9 @@ import { initTranslators } from "open-sse/translator/index.js";
 
 let initialized = false;
 
+/**
+ * Initialize translators once
+ */
 async function ensureInitialized() {
   if (!initialized) {
     await initTranslators();
@@ -20,11 +23,16 @@ export async function OPTIONS() {
   });
 }
 
-/**
- * POST /v1/responses - OpenAI Responses API format
- * Now handled by translator pattern (openai-responses format auto-detected)
- */
 export async function POST(request) {
   await ensureInitialized();
-  return await handleChat(request);
+  const res = await handleChat(request);
+  if (res instanceof Response) {
+    return res;
+  }
+  if (res && typeof res === "object" && res.response instanceof Response) {
+    return res.response;
+  }
+  return new Response(JSON.stringify(res), {
+    headers: { "Content-Type": "application/json" }
+  });
 }

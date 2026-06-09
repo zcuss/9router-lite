@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { getAdapter } from "../driver.js";
 import { parseJson, stringifyJson } from "../helpers/jsonCol.js";
+import { encrypt, decrypt } from "../../crypto";
 
 const OPTIONAL_FIELDS = [
   "displayName", "email", "globalPriority", "defaultModel",
@@ -25,6 +26,14 @@ function parseDbBoolean(value, defaultValue = true) {
 function rowToConn(row) {
   if (!row) return null;
   const extra = parseJson(row.data, {});
+  let decryptedApiKey = '';
+  if (row.api_key) {
+    try {
+      decryptedApiKey = decrypt(row.api_key);
+    } catch (e) {
+      decryptedApiKey = row.api_key; // Fallback if not encrypted
+    }
+  }
   return {
     ...extra,
     id: row.id,
@@ -36,11 +45,29 @@ function rowToConn(row) {
     isActive: parseDbBoolean(row.isActive, true),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    // New fields from PRD v2 schema
+    apiKey: decryptedApiKey,
+    baseUrl: row.base_url ?? null,
+    status: row.status ?? 'pending',
+    allowedRoles: row.allowed_roles ? JSON.parse(row.allowed_roles) : ['admin','dev','premium+'],
+    submittedBy: row.submitted_by ?? null,
+    approvedBy: row.approved_by ?? null,
+    approvedAt: row.approved_at ?? null,
+    rejectionReason: row.rejection_reason ?? null,
+    pendingRevision: row.pending_revision ? JSON.parse(row.pending_revision) : null,
   };
 }
 
 function connToRow(c) {
-  const { id, provider, authType, name, email, priority, isActive, createdAt, updatedAt, ...rest } = c;
+  const { id, provider, authType, name, email, priority, isActive, createdAt, updatedAt, apiKey, baseUrl, status, allowedRoles, submittedBy, approvedBy, approvedAt, rejectionReason, pendingRevision, ...rest } = c;
+  let encryptedApiKey = '';
+  if (apiKey) {
+    try {
+      encryptedApiKey = encrypt(apiKey);
+    } catch (e) {
+      encryptedApiKey = apiKey; // Fallback if encryption fails
+    }
+  }
   return {
     id,
     provider,
@@ -52,19 +79,32 @@ function connToRow(c) {
     data: stringifyJson(rest),
     createdAt,
     updatedAt,
+    // New fields from PRD v2 schema
+    api_key: encryptedApiKey,
+    base_url: baseUrl ?? null,
+    status: status ?? 'pending',
+    allowed_roles: allowedRoles ? JSON.stringify(allowedRoles) : '["admin","dev","premium+"]',
+    submitted_by: submittedBy ?? null,
+    approved_by: approvedBy ?? null,
+    approved_at: approvedAt ?? null,
+    rejection_reason: rejectionReason ?? null,
+    pending_revision: pendingRevision ? JSON.stringify(pendingRevision) : null,
   };
 }
 
 async function upsert(db, c) {
   const r = connToRow(c);
   await db.run(
-    `INSERT INTO providerConnections(id, provider, authType, name, email, priority, isActive, data, createdAt, updatedAt)
-     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO providerConnections(id, provider, authType, name, email, priority, isActive, data, createdAt, updatedAt, api_key, base_url, status, allowed_roles, submitted_by, approved_by, approved_at, rejection_reason, pending_revision)
+     VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        provider=excluded.provider, authType=excluded.authType, name=excluded.name,
        email=excluded.email, priority=excluded.priority, isActive=excluded.isActive,
-       data=excluded.data, updatedAt=excluded.updatedAt`,
-    [r.id, r.provider, r.authType, r.name, r.email, r.priority, r.isActive, r.data, r.createdAt, r.updatedAt]
+       data=excluded.data, updatedAt=excluded.updatedAt, api_key=excluded.api_key,
+       base_url=excluded.base_url, status=excluded.status, allowed_roles=excluded.allowed_roles,
+       submitted_by=excluded.submitted_by, approved_by=excluded.approved_by, approved_at=excluded.approved_at,
+       rejection_reason=excluded.rejection_reason, pending_revision=excluded.pending_revision`,
+    [r.id, r.provider, r.authType, r.name, r.email, r.priority, r.isActive, r.data, r.createdAt, r.updatedAt, r.api_key, r.base_url, r.status, r.allowed_roles, r.submitted_by, r.approved_by, r.approved_at, r.rejection_reason, r.pending_revision]
   );
 }
 

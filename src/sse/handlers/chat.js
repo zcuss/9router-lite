@@ -19,6 +19,9 @@ import { detectFormatByEndpoint } from "open-sse/translator/formats.js";
 import * as log from "../utils/logger.js";
 import { updateProviderCredentials, checkAndRefreshToken } from "../services/tokenRefresh.js";
 import { getProjectIdForConnection } from "open-sse/services/projectId.js";
+import { verifyDashboardAuthToken } from "@/lib/auth/dashboardSession";
+import { checkRateLimit } from "@/lib/rateLimit";
+import { isLocked } from "@/lib/circuitBreaker";
 
 /**
  * Handle chat completion request
@@ -107,7 +110,7 @@ export async function handleChat(request, clientRawRequest = null) {
       return await handleComboChat({
         body,
         models: comboModels,
-        handleSingleModel: (b, m) => handleSingleModelChat(b, m, clientRawRequest, request, apiKey),
+        handleSingleModel: (b, m, step = 0) => handleSingleModelChat(b, m, clientRawRequest, request, apiKey, { comboName: modelStr, stepOrder: step }),
         log,
         comboName: modelStr,
         comboStrategy,
@@ -123,11 +126,62 @@ export async function handleChat(request, clientRawRequest = null) {
   return handleSingleModelChat(body, modelStr, clientRawRequest, request, apiKey);
 }
 
+// Extract login user info from token cookie or Authorization bearer if dashboard call
+async function getLoginUserInfo(request) {
+  if (!request) return null;
+  
+  // Try cookie first
+  let token = null;
+  if (request.cookies && typeof request.cookies.get === 'function') {
+    token = request.cookies.get("auth_token")?.value;
+  }
+  
+  // Try Authorization header if no cookie
+  if (!token && request.headers) {
+    const authHeader = request.headers.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.slice(7);
+    }
+  }
+  
+  if (!token) return null;
+  
+  try {
+    const payload = await verifyDashboardAuthToken(token);
+    if (payload) {
+      return {
+        userId: payload.userId || payload.id || null,
+        username: payload.username || null,
+        role: payload.role || null,
+      };
+    }
+  } catch (e) {
+    // Ignore token verification errors
+  }
+  return null;
+}
+
 /**
  * Handle single model chat request
  */
-async function handleSingleModelChat(body, modelStr, clientRawRequest = null, request = null, apiKey = null) {
+async function handleSingleModelChat(body, modelStr, clientRawRequest = null, request = null, apiKey = null, comboContext = null) {
   const modelInfo = await getModelInfo(modelStr);
+  
+  // Extract user info for usage tracking and governance
+  const userInfo = await getLoginUserInfo(request);
+  const userId = userInfo?.userId || null;
+  const role = userInfo?.role || "user";
+  const username = userInfo?.username || null;
+  const comboId = comboContext?.comboName || null;
+  const comboStep = comboContext?.stepOrder || 0;
+
+  if (userId) {
+    const limit = await checkRateLimit(userId, role);
+    if (!limit.allowed) {
+      log.warn("AUTHZ", `Rate limit exceeded for user ${username || userId} (${role})`);
+      return errorResponse(HTTP_STATUS.RATE_LIMITED, "Daily rate limit exceeded");
+    }
+  }
 
   // If provider is null, this might be a combo name - check and handle
   if (!modelInfo.provider) {
@@ -144,7 +198,7 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       return handleComboChat({
         body,
         models: comboModels,
-        handleSingleModel: (b, m) => handleSingleModelChat(b, m, clientRawRequest, request, apiKey),
+        handleSingleModel: (b, m, step = 0) => handleSingleModelChat(b, m, clientRawRequest, request, apiKey, { comboName: modelStr, stepOrder: step }),
         log,
         comboName: modelStr,
         comboStrategy,
@@ -191,6 +245,15 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       return errorResponse(lastStatus || HTTP_STATUS.SERVICE_UNAVAILABLE, lastError || "All accounts unavailable");
     }
 
+    const locked = await isLocked(credentials.connectionId, model);
+    if (locked) {
+      log.warn("AUTHZ", `Circuit breaker locked ${provider}/${model} on ${credentials.connectionName}, trying fallback`);
+      excludeConnectionIds.add(credentials.connectionId);
+      lastError = "Model temporarily locked";
+      lastStatus = HTTP_STATUS.SERVICE_UNAVAILABLE;
+      continue;
+    }
+
     // Log account selection
     log.info("AUTH", `\x1b[32mUsing ${provider} account: ${credentials.connectionName}\x1b[0m`);
 
@@ -209,6 +272,8 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
     // Use shared chatCore
     const chatSettings = await getSettings();
     const providerThinking = (chatSettings.providerThinking || {})[provider] || null;
+    const loginUser = await getLoginUserInfo(request);
+
     const result = await handleChatCore({
       body: { ...body, model: `${provider}/${model}` },
       modelInfo: { provider, model },
@@ -223,6 +288,11 @@ async function handleSingleModelChat(body, modelStr, clientRawRequest = null, re
       cavemanEnabled: !!chatSettings.cavemanEnabled,
       cavemanLevel: chatSettings.cavemanLevel || "full",
       providerThinking,
+      userId,
+      role,
+      username,
+      comboId,
+      comboStep,
       // Detect source format by endpoint + body
       sourceFormatOverride: request?.url ? detectFormatByEndpoint(new URL(request.url).pathname, body) : null,
       onCredentialsRefreshed: async (newCreds) => {

@@ -4,27 +4,29 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 
 export default function ProviderIcon({
-  src,
-  alt,
+  src = "",
+  alt = "",
   size = 32,
   className = "",
   fallbackText = "?",
-  fallbackColor,
+  fallbackColor = "",
+  providerId = "",
 }) {
   const [errored, setErrored] = useState(false);
 
   if (!src || errored) {
+    const text = fallbackText !== "?" ? fallbackText : (providerId ? providerId.substring(0, 2).toUpperCase() : "?");
     return (
       <span
-        className={`inline-flex items-center justify-center font-bold rounded-lg ${className}`.trim()}
+        className={`inline-flex items-center justify-center font-bold rounded-lg bg-white/5 border border-white/10 ${className}`.trim()}
         style={{
           width: size,
           height: size,
-          color: fallbackColor,
+          color: fallbackColor || "inherit",
           fontSize: Math.max(10, Math.floor(size * 0.38)),
         }}
       >
-        {fallbackText}
+        {text}
       </span>
     );
   }

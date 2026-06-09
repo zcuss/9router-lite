@@ -3,17 +3,16 @@
 import { cn } from "@/shared/utils/cn";
 
 export default function Select({
-  label,
+  label = "",
   options = [],
   value,
   onChange,
   placeholder = "Select an option",
-  error,
-  hint,
+  error = "",
+  hint = "",
   disabled = false,
-  required = false,
-  className,
-  selectClassName,
+  className = "",
+  selectClassName = "",
   ...props
 }) {
   return (
@@ -21,7 +20,6 @@ export default function Select({
       {label && (
         <label className="text-sm font-medium text-text-main">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <div className="relative">

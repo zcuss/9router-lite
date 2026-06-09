@@ -9,6 +9,8 @@ import {
 import { APIKEY_PROVIDERS } from "@/shared/constants/config";
 import { AI_PROVIDERS, FREE_TIER_PROVIDERS, WEB_COOKIE_PROVIDERS, isOpenAICompatibleProvider, isAnthropicCompatibleProvider, isCustomEmbeddingProvider } from "@/shared/constants/providers";
 import { normalizeProviderId, normalizeProviderSpecificData } from "@/lib/providerNormalization";
+import { getDashboardAuthSession } from "@/lib/auth/dashboardSession";
+import { hasRole } from "@/lib/auth/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -47,8 +49,12 @@ async function normalizeProxyPoolId(proxyPoolId) {
 }
 
 // GET /api/providers - List all connections
-export async function GET() {
+export async function GET(request) {
   try {
+    const token = request.cookies.get("auth_token")?.value;
+    const session = await getDashboardAuthSession(token);
+    const userRole = session?.role || "user";
+
     const connections = await getProviderConnections();
 
     // Build nodeNameMap for compatible providers (id → name)
@@ -60,8 +66,15 @@ export async function GET() {
       }
     } catch { }
 
+    // Filter connections based on allowed_roles
+    const filteredConnections = connections.filter(c => {
+      if (userRole === "admin") return true;
+      const allowed = c.allowedRoles || ["admin", "dev", "premium+"];
+      return allowed.includes(userRole);
+    });
+
     // Hide sensitive fields, enrich name for compatible providers
-    const safeConnections = connections.map(c => {
+    const safeConnections = filteredConnections.map(c => {
       const isCompatible = isOpenAICompatibleProvider(c.provider) || isAnthropicCompatibleProvider(c.provider);
       const name = isCompatible
         ? (c.name || nodeNameMap[c.provider] || c.providerSpecificData?.nodeName || c.provider)
@@ -99,6 +112,19 @@ export async function POST(request) {
       return NextResponse.json({ error: proxyPoolResult.error }, { status: 400 });
     }
     const proxyPoolId = proxyPoolResult.proxyPoolId;
+
+    // RBAC & Governance
+    const token = request.cookies.get("auth_token")?.value;
+    const session = await getDashboardAuthSession(token);
+    const userRole = session?.role || "user";
+    const userId = session?.userId || null;
+
+    if (!hasRole(userRole, "dev")) {
+      return NextResponse.json({ error: "Insufficient permissions to create provider" }, { status: 403 });
+    }
+
+    const autoApprove = hasRole(userRole, "admin");
+    const status = autoApprove ? "approved" : "pending";
 
     // Validation
     const isWebCookieProvider = !!WEB_COOKIE_PROVIDERS[provider];
@@ -177,6 +203,10 @@ export async function POST(request) {
       providerSpecificData: mergedProviderSpecificData,
       isActive: true,
       testStatus: testStatus || "unknown",
+      status,
+      submittedBy: userId,
+      approvedBy: autoApprove ? userId : null,
+      approvedAt: autoApprove ? new Date().toISOString() : null,
     });
 
     // Hide sensitive fields

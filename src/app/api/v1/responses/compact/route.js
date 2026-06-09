@@ -33,5 +33,14 @@ export async function POST(request) {
     headers: request.headers,
     body: JSON.stringify(body)
   });
-  return await handleChat(newRequest);
+  const res = await handleChat(newRequest);
+  if (res instanceof Response) {
+    return res;
+  }
+  if (res && typeof res === "object" && res.response instanceof Response) {
+    return res.response;
+  }
+  return new Response(JSON.stringify(res), {
+    headers: { "Content-Type": "application/json" }
+  });
 }

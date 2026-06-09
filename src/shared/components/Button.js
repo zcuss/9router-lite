@@ -21,12 +21,12 @@ export default function Button({
   children,
   variant = "primary",
   size = "md",
-  icon,
-  iconRight,
+  icon = null,
+  iconRight = null,
   disabled = false,
   loading = false,
   fullWidth = false,
-  className,
+  className = "",
   ...props
 }) {
   return (

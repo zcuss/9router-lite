@@ -34,7 +34,7 @@ export default function Input({
         <input
           type={type}
           placeholder={placeholder}
-          value={value}
+          value={value || ""}
           onChange={onChange}
           disabled={disabled}
           className={cn(

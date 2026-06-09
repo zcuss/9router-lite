@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSettings, validateApiKey } from "@/lib/localDb";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { verifyDashboardAuthToken } from "@/lib/auth/dashboardSession";
+import { hasRole } from "@/lib/auth/rbac";
 
 const CLI_TOKEN_HEADER = "x-9r-cli-token";
 const CLI_TOKEN_SALT = "9r-cli-auth";
@@ -37,11 +38,14 @@ const PUBLIC_PREFIXES = ["/v1", "/v1beta", "/api/v1", "/api/v1beta"];
 // Always require JWT token regardless of requireLogin setting
 const ALWAYS_PROTECTED = [
   "/api/shutdown",
-  "/api/settings/database",
+  "/api/settings/database/save-config",
+  "/api/settings/database/test-connect",
+  "/api/settings/database/config",
   "/api/version/shutdown",
   "/api/version/update",
   "/api/oauth/cursor/auto-import",
   "/api/oauth/kiro/auto-import",
+  "/api/admin",
 ];
 
 // Require auth, but allow through if requireLogin is disabled
@@ -63,6 +67,14 @@ const PROTECTED_API_PATHS = [
   "/api/mcp",
   "/api/translator",
   "/api/tunnel",
+];
+
+// Routes that require specific roles
+const ROLE_PROTECTED_PATHS = [
+  { path: "/api/admin", minRole: "dev" },
+  { path: "/api/providers", method: "POST", minRole: "dev" },
+  { path: "/api/providers", method: "PUT", minRole: "dev" },
+  { path: "/api/providers", method: "DELETE", minRole: "dev" },
 ];
 
 // Routes that spawn child processes or read host secrets — restrict to localhost.
@@ -170,13 +182,17 @@ export async function proxy(request) {
   const origin = request.headers.get('origin');
   
   if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
-    return NextResponse.json({ error: 'Forbidden by CORS' }, { status: 403 });
+    // Exclude same-origin / localhost logins from strict CORS blocking if origin is present
+    const isSameHost = request.headers.get("host") && origin.includes(request.headers.get("host"));
+    if (!isSameHost) {
+      return NextResponse.json({ error: 'Forbidden by CORS' }, { status: 403 });
+    }
   }
 
   // Mandatory API Key in production for management APIs
   const requireApiKey = process.env.REQUIRE_API_KEY === 'true';
   if (requireApiKey && pathname.startsWith('/api/') && !isPublicApi(pathname)) {
-    if (!(await hasValidApiKey(request)) && !(await hasValidCliToken(request))) {
+    if (!(await hasValidApiKey(request)) && !(await hasValidCliToken(request)) && !(await hasValidToken(request))) {
       return NextResponse.json({ error: 'API Key required' }, { status: 401 });
     }
   }
@@ -185,6 +201,21 @@ export async function proxy(request) {
   if (LOCAL_ONLY_PATHS.some((p) => pathname.startsWith(p))) {
     if (!(await canAccessLocalOnlyRoute(request))) {
       return NextResponse.json({ error: "Local only: CLI token required" }, { status: 403 });
+    }
+  }
+
+  // Role-based access control check
+  const token = request.cookies.get("auth_token")?.value;
+  const session = await verifyDashboardAuthToken(token);
+  const userRole = session?.role || "user";
+
+  for (const rule of ROLE_PROTECTED_PATHS) {
+    if (pathname.startsWith(rule.path)) {
+      if (!rule.method || request.method === rule.method) {
+        if (!hasRole(userRole, rule.minRole)) {
+          return NextResponse.json({ error: "Forbidden: Insufficient permissions" }, { status: 403 });
+        }
+      }
     }
   }
 

@@ -1,0 +1,14 @@
+export type ComboAutopilotCombo = any;
+export type ComboAutopilotIssue = any;
+export type ComboAutopilotReport = any;
+export type ComboForecastHorizon = any;
+export type ComboForecastMetrics = any;
+export type ComboForecastResponse = any;
+export type ComboHealthDashboardResponse = any;
+export type ComboHealthMetrics = any;
+export type ComboHealthResponse = any;
+export type ComboScoringInspectorCombo = any;
+export type ComboScoringInspectorResponse = any;
+export type UtilizationTimeRange = any;
+export type ProviderUtilizationPoint = any;
+export type ProviderUtilizationResponse = any;

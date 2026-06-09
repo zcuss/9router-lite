@@ -342,6 +342,6 @@ export function logUsage(provider, usage, model = null, connectionId = null, api
     cache_creation_input_tokens: cacheCreation || 0,
     reasoning_tokens: reasoning || 0
   };
-  saveRequestUsage({ model, provider, connectionId, tokens, apiKey: apiKey || undefined }).catch(() => { });
+  saveRequestUsage({ model, provider, connectionId, tokens, apiKey: apiKey || undefined, userId: null, role: null, comboId: null, comboStep: null, username: null }).catch(() => { });
   appendRequestLog({ model, provider, connectionId, tokens, status: "200 OK" }).catch(() => { });
 }

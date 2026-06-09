@@ -9,6 +9,7 @@ import HeaderMenu from "@/shared/components/HeaderMenu";
 import ThemeToggle from "@/shared/components/ThemeToggle";
 import DonateModal from "@/shared/components/DonateModal";
 import { useHeaderSearchStore } from "@/store/headerSearchStore";
+import useSettingsStore from "@/store/settingsStore";
 import { OAUTH_PROVIDERS, APIKEY_PROVIDERS } from "@/shared/constants/config";
 import { MEDIA_PROVIDER_KINDS, AI_PROVIDERS } from "@/shared/constants/providers";
 import { translate } from "@/i18n/runtime";
@@ -183,10 +184,16 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
   const [displayName, setDisplayName] = useState("");
   const [loginMethod, setLoginMethod] = useState("");
   const [donateOpen, setDonateOpen] = useState(false);
+  const { settings, fetchSettings, patchSettings } = useSettingsStore();
+  const uiMode = settings?.uiMode || "expert";
 
   // Memoize page info to prevent unnecessary recalculations
   const pageInfo = useMemo(() => getPageInfo(pathname), [pathname]);
   const { title, description, icon, breadcrumbs } = pageInfo;
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -313,6 +320,20 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
           </div>
         )}
         <HeaderSearch />
+        <button
+          onClick={() => patchSettings({ uiMode: uiMode === "expert" ? "lite" : "expert" })}
+          className={`flex items-center gap-1.5 px-3 h-8 rounded-lg border transition-colors text-sm font-medium ${
+            uiMode === "expert"
+              ? "border-primary/30 bg-primary/10 text-primary"
+              : "border-border bg-surface text-text-muted hover:border-primary/30 hover:bg-primary/5"
+          }`}
+          title={`Switch to ${uiMode === "expert" ? "Lite" : "Expert"} Mode`}
+        >
+          <span className="material-symbols-outlined text-[18px]">
+            {uiMode === "expert" ? "psychology" : "bolt"}
+          </span>
+          <span className="hidden sm:inline capitalize">{uiMode}</span>
+        </button>
         <button
           onClick={() => setDonateOpen(true)}
           className="flex items-center gap-1.5 px-3 h-8 rounded-lg border border-pink-500/30 bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 transition-colors text-sm font-medium"

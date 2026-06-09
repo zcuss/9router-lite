@@ -143,8 +143,8 @@ export async function GET(request, { params }) {
       connection.authType === "apikey" &&
       isCustomUsageProvider(connection.provider, customProviderIds);
 
-    if (!isOAuth && !isApikeyEligible && !isCustomEligible) {
-      return Response.json({ message: "Usage not available for this connection" });
+    if (!isOAuth && !isApikeyEligible) {
+      return Response.json({ message: "Usage not available for this connection", unsupported: true });
     }
 
     // Resolve connection proxy config; force strictProxy=false so quota/refresh fall back to direct on failure
@@ -172,6 +172,9 @@ export async function GET(request, { params }) {
 
     // Fetch usage from provider API
     let usage = await getUsageForProvider(connection, proxyOptions);
+    if (usage?.message?.startsWith("Usage API not implemented for ")) {
+      return Response.json({ message: "Usage not available for this connection", unsupported: true });
+    }
 
     // If provider returned an auth-expired message instead of throwing,
     // force-refresh token and retry once (OAuth only)

@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import { getAdapter } from "../driver.js";
 import { parseJson, stringifyJson } from "../helpers/jsonCol.js";
 import { getMeta, setMeta } from "../helpers/metaStore.js";
+import crypto from "crypto";
 
 const PENDING_TIMEOUT_MS = 60 * 1000;
 const RING_CAP = 50;
@@ -55,6 +56,8 @@ function aggregateEntryToDay(day, entry) {
   day.byProvider ||= {};
   day.byModel ||= {};
   day.byAccount ||= {};
+  day.byUser ||= {};
+  day.byCombo ||= {};
   day.byApiKey ||= {};
   day.byEndpoint ||= {};
 
@@ -65,6 +68,14 @@ function aggregateEntryToDay(day, entry) {
 
   if (entry.connectionId) {
     addToCounter(day.byAccount, entry.connectionId, { ...vals, meta: { rawModel: entry.model, provider: entry.provider } });
+  }
+
+  if (entry.userId) {
+    addToCounter(day.byUser, entry.userId, { ...vals, meta: { rawModel: entry.model, provider: entry.provider, role: entry.role || "user", username: entry.username || entry.userId } });
+  }
+
+  if (entry.comboId) {
+    addToCounter(day.byCombo, entry.comboId, { ...vals, meta: { rawModel: entry.model, provider: entry.provider, comboStep: entry.comboStep || 0, comboName: entry.comboName || entry.comboId } });
   }
 
   const apiKeyVal = entry.apiKey && typeof entry.apiKey === "string" ? entry.apiKey : "local-no-key";
@@ -259,7 +270,33 @@ export async function saveRequestUsage(entry) {
           entry.timestamp, entry.provider || null, entry.model || null,
           entry.connectionId || null, entry.apiKey || null, entry.endpoint || null,
           promptTokens, completionTokens, entry.cost || 0, entry.status || "ok",
-          stringifyJson(tokens), stringifyJson({}),
+          stringifyJson(tokens), stringifyJson({ userId: entry.userId || null, role: entry.role || null, comboId: entry.comboId || null, comboStep: entry.comboStep || null, username: entry.username || null }),
+        ]
+      );
+
+      // Write to usage_logs table for PRD v2
+      await db.run(
+        `INSERT INTO usage_logs(id, user_id, role, combo_id, combo_step, connection_id, provider, model, prompt_tokens, completion_tokens, total_tokens, cost_in, cost_out, total_cost, latency_ms, status_code, error_message, created_at)
+         VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+          entry.userId || 'anonymous',
+          entry.role || 'user',
+          entry.comboId || null,
+          entry.comboStep || 0,
+          entry.connectionId || null,
+          entry.provider || 'unknown',
+          entry.model || 'unknown',
+          promptTokens,
+          completionTokens,
+          promptTokens + completionTokens,
+          entry.cost || 0, // cost_in
+          0, // cost_out
+          entry.cost || 0, // total_cost
+          entry.latencyMs || 0,
+          entry.statusCode || 200,
+          entry.errorMessage || null,
+          entry.timestamp
         ]
       );
 
@@ -267,7 +304,7 @@ export async function saveRequestUsage(entry) {
       const row = await db.get(`SELECT data FROM usageDaily WHERE dateKey = ?`, [dateKey]);
       const day = row ? parseJson(row.data, {}) : {
         requests: 0, promptTokens: 0, completionTokens: 0, cost: 0,
-        byProvider: {}, byModel: {}, byAccount: {}, byApiKey: {}, byEndpoint: {},
+        byProvider: {}, byModel: {}, byAccount: {}, byUser: {}, byCombo: {}, byApiKey: {}, byEndpoint: {},
       };
       aggregateEntryToDay(day, entry);
       await db.run(`INSERT INTO usageDaily(dateKey, data) VALUES(?, ?) ON CONFLICT(dateKey) DO UPDATE SET data = excluded.data`, [dateKey, stringifyJson(day)]);
@@ -366,7 +403,7 @@ export async function getUsageStats(period = "all") {
   const stats = {
     totalRequests: 0,
     totalPromptTokens: 0, totalCompletionTokens: 0, totalCost: 0,
-    byProvider: {}, byModel: {}, byAccount: {}, byApiKey: {}, byEndpoint: {},
+    byProvider: {}, byModel: {}, byAccount: {}, byUser: {}, byCombo: {}, byApiKey: {}, byEndpoint: {},
     last10Minutes: [],
     pending: pendingRequests,
     activeRequests: [],
@@ -465,6 +502,31 @@ export async function getUsageStats(period = "all") {
         stats.byAccount[accountKey].completionTokens += a.completionTokens || 0;
         stats.byAccount[accountKey].cost += a.cost || 0;
         if (dateKey > (stats.byAccount[accountKey].lastUsed || "")) stats.byAccount[accountKey].lastUsed = dateKey;
+      }
+
+      for (const [userId, a] of Object.entries(day.byUser || {})) {
+        const username = a.username || userId;
+        const role = a.role || "user";
+        if (!stats.byUser[userId]) {
+          stats.byUser[userId] = { requests: 0, promptTokens: 0, completionTokens: 0, cost: 0, userId, username, role, lastUsed: dateKey };
+        }
+        stats.byUser[userId].requests += a.requests || 0;
+        stats.byUser[userId].promptTokens += a.promptTokens || 0;
+        stats.byUser[userId].completionTokens += a.completionTokens || 0;
+        stats.byUser[userId].cost += a.cost || 0;
+        if (dateKey > (stats.byUser[userId].lastUsed || "")) stats.byUser[userId].lastUsed = dateKey;
+      }
+
+      for (const [comboId, a] of Object.entries(day.byCombo || {})) {
+        const comboName = a.comboName || comboId;
+        if (!stats.byCombo[comboId]) {
+          stats.byCombo[comboId] = { requests: 0, promptTokens: 0, completionTokens: 0, cost: 0, comboId, comboName, comboStep: a.comboStep || 0, lastUsed: dateKey };
+        }
+        stats.byCombo[comboId].requests += a.requests || 0;
+        stats.byCombo[comboId].promptTokens += a.promptTokens || 0;
+        stats.byCombo[comboId].completionTokens += a.completionTokens || 0;
+        stats.byCombo[comboId].cost += a.cost || 0;
+        if (dateKey > (stats.byCombo[comboId].lastUsed || "")) stats.byCombo[comboId].lastUsed = dateKey;
       }
 
       for (const [akKey, ak] of Object.entries(day.byApiKey || {})) {

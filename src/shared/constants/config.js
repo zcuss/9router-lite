@@ -85,11 +85,13 @@ export const PROVIDER_ENDPOINTS = {
 // Re-export from providers.js for backward compatibility
 export {
   FREE_PROVIDERS,
+  FREE_TIER_PROVIDERS,
   OAUTH_PROVIDERS,
   APIKEY_PROVIDERS,
   WEB_COOKIE_PROVIDERS,
   AI_PROVIDERS,
   AUTH_METHODS,
+  MEDIA_PROVIDER_KINDS,
 } from "./providers.js";
 
 // Re-export from models.js for backward compatibility

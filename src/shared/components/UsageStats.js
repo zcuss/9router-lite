@@ -151,9 +151,15 @@ const MODEL_COLUMNS = [
 ];
 
 const ACCOUNT_COLUMNS = [
-  { field: "rawModel", label: "Model" },
-  { field: "provider", label: "Provider" },
-  { field: "accountName", label: "Account" },
+  { field: "username", label: "Login Account" },
+  { field: "role", label: "Role" },
+  { field: "requests", label: "Requests", align: "right" },
+  { field: "lastUsed", label: "Last Used", align: "right" },
+];
+
+const COMBO_COLUMNS = [
+  { field: "comboName", label: "Combo" },
+  { field: "comboStep", label: "Step" },
   { field: "requests", label: "Requests", align: "right" },
   { field: "lastUsed", label: "Last Used", align: "right" },
 ];
@@ -176,7 +182,8 @@ const ENDPOINT_COLUMNS = [
 
 const TABLE_OPTIONS = [
   { value: "model", label: "Usage by Model" },
-  { value: "account", label: "Usage by Account" },
+  { value: "account", label: "Usage by Login Account" },
+  { value: "combo", label: "Usage by Combo" },
   { value: "apiKey", label: "Usage by API Key" },
   { value: "endpoint", label: "Usage by Endpoint" },
 ];
@@ -317,24 +324,13 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
         };
       }
       case "account": {
-        const pendingMap = {};
-        if (stats?.pending?.byAccount) {
-          Object.entries(stats.byAccount || {}).forEach(([accountKey, data]) => {
-            const connPending = stats.pending.byAccount[data.connectionId];
-            if (connPending) {
-              const modelKey = data.provider ? `${data.rawModel} (${data.provider})` : data.rawModel;
-              pendingMap[accountKey] = connPending[modelKey] || 0;
-            }
-          });
-        }
         return {
           columns: ACCOUNT_COLUMNS,
-          groupedData: groupDataByKey(sortData(stats.byAccount, pendingMap, sortBy, sortOrder), "accountName"),
-          storageKey: "usage-stats:expanded-accounts",
-          emptyMessage: "No account-specific usage recorded yet.",
+          groupedData: groupDataByKey(sortData(stats.byUser || {}, {}, sortBy, sortOrder), "username"),
+          storageKey: "usage-stats:expanded-users",
+          emptyMessage: "No login user usage recorded yet.",
           renderSummaryCells: (group) => (
             <>
-              <td className="px-6 py-3 text-text-muted">—</td>
               <td className="px-6 py-3 text-text-muted">—</td>
               <td className="px-6 py-3 text-right">{fmt(group.summary.requests)}</td>
               <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">{fmtTime(group.summary.lastUsed)}</td>
@@ -342,9 +338,31 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
           ),
           renderDetailCells: (item) => (
             <>
-              <td className={`px-6 py-3 font-medium transition-colors ${item.pending > 0 ? "text-primary" : ""}`}>{item.accountName || `Account ${item.connectionId?.slice(0, 8)}...`}</td>
-              <td className={`px-6 py-3 font-medium transition-colors ${item.pending > 0 ? "text-primary" : ""}`}>{item.rawModel}</td>
-              <td className="px-6 py-3"><Badge variant={item.pending > 0 ? "primary" : "neutral"} size="sm">{item.provider}</Badge></td>
+              <td className="px-6 py-3 font-medium">{item.username}</td>
+              <td className="px-6 py-3"><Badge variant="neutral" size="sm">{item.role}</Badge></td>
+              <td className="px-6 py-3 text-right">{fmt(item.requests)}</td>
+              <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">{fmtTime(item.lastUsed)}</td>
+            </>
+          ),
+        };
+      }
+      case "combo": {
+        return {
+          columns: COMBO_COLUMNS,
+          groupedData: groupDataByKey(sortData(stats.byCombo || {}, {}, sortBy, sortOrder), "comboName"),
+          storageKey: "usage-stats:expanded-combos",
+          emptyMessage: "No combo routing usage recorded yet.",
+          renderSummaryCells: (group) => (
+            <>
+              <td className="px-6 py-3 text-text-muted">—</td>
+              <td className="px-6 py-3 text-right">{fmt(group.summary.requests)}</td>
+              <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">{fmtTime(group.summary.lastUsed)}</td>
+            </>
+          ),
+          renderDetailCells: (item) => (
+            <>
+              <td className="px-6 py-3 font-medium">{item.comboName}</td>
+              <td className="px-6 py-3"><Badge variant="neutral" size="sm">Step {item.comboStep}</Badge></td>
               <td className="px-6 py-3 text-right">{fmt(item.requests)}</td>
               <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">{fmtTime(item.lastUsed)}</td>
             </>

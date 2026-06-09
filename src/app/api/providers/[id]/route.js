@@ -5,6 +5,8 @@ import {
   updateProviderConnection,
   deleteProviderConnection,
 } from "@/models";
+import { getDashboardAuthSession } from "@/lib/auth/dashboardSession";
+import { hasRole } from "@/lib/auth/rbac";
 
 function normalizeProxyConfig(body = {}) {
   const hasAnyProxyField =
@@ -116,6 +118,18 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: proxyPoolResult.error }, { status: 400 });
     }
 
+    // RBAC & Governance
+    const token = request.cookies.get("auth_token")?.value;
+    const session = await getDashboardAuthSession(token);
+    const userRole = session?.role || "user";
+    const userId = session?.userId || null;
+
+    if (!hasRole(userRole, "dev")) {
+      return NextResponse.json({ error: "Insufficient permissions to update provider" }, { status: 403 });
+    }
+
+    const isAdmin = hasRole(userRole, "admin");
+
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (priority !== undefined) updateData.priority = priority;
@@ -155,7 +169,15 @@ export async function PUT(request, { params }) {
       }
     }
 
-    const updated = await updateProviderConnection(id, updateData);
+    let finalUpdateData = updateData;
+    if (!isAdmin) {
+      // Devs can only submit revisions, not apply them directly
+      finalUpdateData = {
+        pendingRevision: updateData
+      };
+    }
+
+    const updated = await updateProviderConnection(id, finalUpdateData);
 
     // Hide sensitive fields
     const result = { ...updated };
@@ -175,6 +197,23 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
+
+    // RBAC & Governance
+    const token = request.cookies.get("auth_token")?.value;
+    const session = await getDashboardAuthSession(token);
+    const userRole = session?.role || "user";
+
+    if (!hasRole(userRole, "dev")) {
+      return NextResponse.json({ error: "Insufficient permissions to delete provider" }, { status: 403 });
+    }
+
+    const isAdmin = hasRole(userRole, "admin");
+
+    if (!isAdmin) {
+      // Devs can only request deletion (status = delete_pending)
+      const updated = await updateProviderConnection(id, { status: "delete_pending" });
+      return NextResponse.json({ message: "Deletion request submitted", connection: updated });
+    }
 
     const deleted = await deleteProviderConnection(id);
     if (!deleted) {

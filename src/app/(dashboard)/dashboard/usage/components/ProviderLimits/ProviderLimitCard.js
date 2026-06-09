@@ -133,12 +133,12 @@ export default function ProviderLimitCard({
 
       {/* Info Message (for providers without API) */}
       {!loading && !error && message && (
-        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+        <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-border">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-blue-500 text-[20px]">
+            <span className="material-symbols-outlined text-text-muted text-[20px]">
               info
             </span>
-            <p className="text-sm text-blue-600 dark:text-blue-400">
+            <p className="text-sm text-text-muted">
               {message}
             </p>
           </div>

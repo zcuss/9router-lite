@@ -125,6 +125,8 @@ function translateSql(input) {
       (_m, table) => `INSERT INTO ${quoteIdent(table)} (`)
     .replace(/UPDATE\s+([A-Za-z_][\w]*)\s+SET\s+/gi,
       (_m, table) => `UPDATE ${quoteIdent(table)} SET `)
+    .replace(/ALTER\s+TABLE\s+([A-Za-z_][\w]*)\s+ADD\s+COLUMN\s+/gi,
+      (_m, table) => `ALTER TABLE ${quoteIdent(table)} ADD COLUMN `)
     .replace(/DELETE\s+FROM\s+([A-Za-z_][\w]*)/gi,
       (_m, table) => `DELETE FROM ${quoteIdent(table)}`)
     .replace(/FROM\s+([A-Za-z_][\w]*)/gi,

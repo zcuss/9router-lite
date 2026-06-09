@@ -4,14 +4,14 @@ import { cn } from "@/shared/utils/cn";
 
 export default function Card({
   children,
-  title,
-  subtitle,
-  icon,
-  action,
+  title = null,
+  subtitle = null,
+  icon = null,
+  action = null,
   padding = "md",
   hover = false,
   elev = false,
-  className,
+  className = "",
   ...props
 }) {
   const paddings = {

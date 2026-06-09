@@ -116,19 +116,5 @@ export async function DELETE(request) {
   }
 }
 
-/**
- * GET /api/pricing/defaults
- * Get default pricing configuration
- */
-export async function GET_DEFAULTS() {
-  try {
-    const defaultPricing = getDefaultPricing();
-    return NextResponse.json(defaultPricing);
-  } catch (error) {
-    console.error("Error fetching default pricing:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch default pricing" },
-      { status: 500 }
-    );
-  }
-}
+// GET_DEFAULTS removed to prevent next build ts generation issues.
+// Use different route or structure if default pricing list required by dashboard.

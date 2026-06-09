@@ -41,6 +41,7 @@ const DEFAULT_SETTINGS = {
   aiPersonaTone: "balanced",
   aiPersonaBehavior: "Helpful, concise, technical, and honest.",
   aiSystemPrompt: "You are a helpful AI assistant routed through 9Router Lite. Follow the user's instructions, keep answers clear, and adapt to the configured persona.",
+  uiMode: "expert", // "lite" or "expert"
 };
 
 async function readRaw() {

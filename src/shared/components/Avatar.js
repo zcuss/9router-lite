@@ -5,9 +5,12 @@ import { cn } from "@/shared/utils/cn";
 export default function Avatar({
   src,
   alt = "Avatar",
-  name,
+  name = "",
   size = "md",
-  className,
+  className = "",
+  providerId = "",
+  fallbackText = "",
+  fallbackColor = "",
 }) {
   const sizes = {
     xs: "size-6 text-xs",

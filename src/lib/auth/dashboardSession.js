@@ -34,12 +34,12 @@ export async function createDashboardAuthToken(claims = {}) {
 }
 
 export async function verifyDashboardAuthToken(token) {
-  if (!token) return false;
+  if (!token) return null;
   try {
-    await jwtVerify(token, SECRET);
-    return true;
+    const { payload } = await jwtVerify(token, SECRET);
+    return payload;
   } catch {
-    return false;
+    return null;
   }
 }
 

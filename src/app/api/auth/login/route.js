@@ -1,75 +1,53 @@
 import { NextResponse } from "next/server";
-import { getSettings } from "@/lib/localDb";
-import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
-import { setDashboardAuthCookie } from "@/lib/auth/dashboardSession";
-import { isOidcConfigured } from "@/lib/auth/oidc";
-import { checkLock, recordFail, recordSuccess, getClientIp } from "@/lib/auth/loginLimiter";
+import { createUser, verifyPassword } from "@/lib/db/users";
+import { createDashboardAuthToken, shouldUseSecureCookie } from "@/lib/auth/dashboardSession";
 
-const RESET_HINT = "Forgot password? Reset to default via 9Router CLI → Settings → Reset Password to Default.";
-
-function isTunnelRequest(request, settings) {
-  const host = (request.headers.get("host") || "").split(":")[0].toLowerCase();
-  const tunnelHost = settings.tunnelUrl ? new URL(settings.tunnelUrl).hostname.toLowerCase() : "";
-  const tailscaleHost = settings.tailscaleUrl ? new URL(settings.tailscaleUrl).hostname.toLowerCase() : "";
-  return (tunnelHost && host === tunnelHost) || (tailscaleHost && host === tailscaleHost);
+function setAuthCookie(response, token, request) {
+  response.cookies.set("auth_token", token, {
+    httpOnly: true,
+    secure: shouldUseSecureCookie(request),
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
 }
 
 export async function POST(request) {
   try {
-    const ip = getClientIp(request);
-    const lock = checkLock(ip);
-    if (lock.locked) {
-      return NextResponse.json(
-        { error: `Too many failed attempts. Try again in ${lock.retryAfter}s. ${RESET_HINT}`, retryAfter: lock.retryAfter, resetHint: RESET_HINT },
-        { status: 429, headers: { "Retry-After": String(lock.retryAfter) } }
-      );
+    const { action = "login", username, password, role } = await request.json();
+    const safeUsername = String(username || "").trim();
+    const safePassword = String(password || "");
+
+    if (!safeUsername || !safePassword) {
+      return NextResponse.json({ success: false, error: "Username and password required" }, { status: 400 });
     }
 
-    const { password } = await request.json();
-    const settings = await getSettings();
-
-    // Block login via tunnel/tailscale if dashboard access is disabled
-    if (isTunnelRequest(request, settings) && settings.tunnelDashboardAccess !== true) {
-      return NextResponse.json({ error: "Dashboard access via tunnel is disabled" }, { status: 403 });
+    if (action === "register") {
+      const user = await createUser(safeUsername, safePassword, role || "user");
+      const token = await createDashboardAuthToken({
+        userId: user.id,
+        username: user.username,
+        role: user.role,
+      });
+      const response = NextResponse.json({ success: true, user });
+      setAuthCookie(response, token, request);
+      return response;
     }
 
-    // Default password is '123456' if not set
-    const storedHash = settings.password;
-    const initialPassword = process.env.INITIAL_PASSWORD || "123456";
-
-    if (settings.authMode === "oidc" && isOidcConfigured(settings)) {
-      return NextResponse.json({ error: "Password login is disabled. Use OIDC sign in." }, { status: 403 });
+    const user = await verifyPassword(safeUsername, safePassword);
+    if (!user) {
+      return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 });
     }
 
-    let isValid = false;
-    if (password === initialPassword) {
-      isValid = true;
-    } else if (storedHash) {
-      isValid = await bcrypt.compare(password, storedHash);
-    }
-
-    if (isValid) {
-      recordSuccess(ip);
-      const cookieStore = await cookies();
-      await setDashboardAuthCookie(cookieStore, request);
-
-      return NextResponse.json({ success: true });
-    }
-
-    const { remainingBeforeLock } = recordFail(ip);
-    const postLock = checkLock(ip);
-    if (postLock.locked) {
-      return NextResponse.json(
-        { error: `Too many failed attempts. Try again in ${postLock.retryAfter}s. ${RESET_HINT}`, retryAfter: postLock.retryAfter, resetHint: RESET_HINT },
-        { status: 429, headers: { "Retry-After": String(postLock.retryAfter) } }
-      );
-    }
-    return NextResponse.json(
-      { error: `Invalid password. ${remainingBeforeLock} attempt(s) left before lockout.`, remainingBeforeLock },
-      { status: 401 }
-    );
+    const token = await createDashboardAuthToken({
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    });
+    const response = NextResponse.json({ success: true, user });
+    setAuthCookie(response, token, request);
+    return response;
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

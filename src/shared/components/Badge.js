@@ -22,8 +22,8 @@ export default function Badge({
   variant = "default",
   size = "md",
   dot = false,
-  icon,
-  className,
+  icon = null,
+  className = "",
 }) {
   return (
     <span

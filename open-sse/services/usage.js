@@ -105,6 +105,9 @@ export async function getUsageForProvider(connection, proxyOptions = null) {
     case "minimax-cn":
       return await getMiniMaxUsage(apiKey, provider, proxyOptions);
     default:
+      if (provider?.startsWith("openai-compatible-chat")) {
+        return { message: "Usage API not implemented for this compatible endpoint", unsupported: true };
+      }
       return { message: `Usage API not implemented for ${provider}` };
   }
 }
