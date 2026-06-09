@@ -446,7 +446,7 @@ export default function RouteExplainabilityTab({
 }: {
   initialRequestId?: string;
 }) {
-  const t = useTranslations("analytics") as AnalyticsTranslator;
+  const t = useSafeTranslations("analytics") as AnalyticsTranslator;
   const [logs, setLogs] = useState<CallLogOption[]>([]);
   const [selectedId, setSelectedId] = useState(initialRequestId);
   const [explanation, setExplanation] = useState<RouteExplainabilityResponse | null>(null);

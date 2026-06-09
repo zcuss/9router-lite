@@ -487,7 +487,7 @@ function ComboHealthCard({
   autopilot?: ComboAutopilotCombo;
   scoringInspector?: ComboScoringInspectorCombo;
 }) {
-  const t = useTranslations("analytics");
+  const t = useSafeTranslations("analytics");
 
   const sortedDistribution = useMemo(
     () =>
@@ -771,7 +771,7 @@ function ComboHealthSkeleton() {
 }
 
 export default function ComboHealthTab() {
-  const t = useTranslations("analytics");
+  const t = useSafeTranslations("analytics");
   const [range, setRange] = useState<UtilizationTimeRange>("24h");
   const [horizon, setHorizon] = useState<ComboForecastHorizon>("30d");
   const [data, setData] = useState<ComboHealthResponse | null>(null);
