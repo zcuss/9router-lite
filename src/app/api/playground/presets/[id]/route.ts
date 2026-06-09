@@ -10,8 +10,8 @@
  */
 
 import { z } from "zod";
-import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-import { HTTP_STATUS } from "@omniroute/open-sse/config/runtimeConfig";
+import { buildErrorBody, sanitizeErrorMessage } from "open-sse/utils/error";
+import { HTTP_STATUS } from "open-sse/config/runtimeConfig";
 import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
 import {
   getPlaygroundPreset,

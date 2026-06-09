@@ -113,7 +113,6 @@ try {
       USERPROFILE: buildHomeDir,
       APPDATA: path.join(buildHomeDir, "AppData", "Roaming"),
       LOCALAPPDATA: path.join(buildHomeDir, "AppData", "Local"),
-      NEXT_TRACING_ROOT_MODE: "workspace",
     }
   });
   console.log("✅ Next.js build completed\n");

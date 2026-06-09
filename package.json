@@ -42,6 +42,7 @@
     "react-is": "^16.13.1",
     "react-markdown": "^10.1.0",
     "recharts": "^3.7.0",
+    "remark-gfm": "^4.0.1",
     "selfsigned": "^5.5.0",
     "socks-proxy-agent": "^8.0.5",
     "sonner": "^2.0.7",

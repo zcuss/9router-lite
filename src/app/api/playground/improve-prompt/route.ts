@@ -14,8 +14,8 @@
  * Hard Rule #12: ALL error paths route through buildErrorBody.
  */
 
-import { buildErrorBody } from "@omniroute/open-sse/utils/error";
-import { HTTP_STATUS } from "@omniroute/open-sse/config/runtimeConfig";
+import { buildErrorBody } from "open-sse/utils/error";
+import { HTTP_STATUS } from "open-sse/config/runtimeConfig";
 
 const sanitizeErrorMessage = (msg: any) => String(msg);
 
