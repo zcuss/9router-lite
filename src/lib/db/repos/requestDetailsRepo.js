@@ -192,6 +192,7 @@ function ensureShutdownHandler() {
   process.on("beforeExit", _shutdownHandler);
   process.on("SIGINT", _shutdownHandler);
   process.on("SIGTERM", _shutdownHandler);
+  process.on("SIGHUP", _shutdownHandler);
   process.on("exit", _shutdownHandler);
   g.registered = true;
 }

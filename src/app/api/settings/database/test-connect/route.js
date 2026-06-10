@@ -7,11 +7,9 @@ function encodeDatabaseUrlPassword(urlStr) {
   if (!urlStr) return urlStr;
   try {
     const parsed = new URL(urlStr);
-    if (parsed.password) {
-      parsed.password = encodeURIComponent(decodeURIComponent(parsed.password));
-    }
+    if (parsed.password) parsed.password = encodeURIComponent(decodeURIComponent(parsed.password));
     return parsed.toString();
-  } catch (e) {
+  } catch {
     const match = urlStr.match(/^(postgresql:\/\/|postgres:\/\/)([^:]+):(.*)@([^/]+)(.*)$/);
     if (match) {
       const [_, protocol, user, password, hostAndPort, rest] = match;
@@ -22,24 +20,23 @@ function encodeDatabaseUrlPassword(urlStr) {
   }
 }
 
+function normalizeDriver(rawDriver) {
+  const driver = (rawDriver || "").toLowerCase();
+  if (["postgres", "postgresql"].includes(driver)) return "postgres";
+  if (["cockroach", "cockroachdb"].includes(driver)) return "cockroach";
+  return "local";
+}
+
 export async function POST(request) {
   try {
     const { DATABASE_URL, DB_DRIVER } = await request.json();
+    const normalizedDriver = normalizeDriver(DB_DRIVER);
 
-    if (DB_DRIVER === "local") {
-      return NextResponse.json({ success: true });
+    if (normalizedDriver === "local") {
+      return NextResponse.json({ success: true, DB_DRIVER: normalizedDriver });
     }
 
-    let Database;
-    switch (DB_DRIVER) {
-      case "postgres":
-      case "cockroach":
-        Database = require("pg").Client;
-        break;
-      default:
-        return NextResponse.json({ error: "Driver database tidak didukung" }, { status: 400 });
-    }
-
+    const Database = require("pg").Client;
     if (!DATABASE_URL) {
       return NextResponse.json({ error: "URL database tidak boleh kosong" }, { status: 400 });
     }
@@ -50,7 +47,7 @@ export async function POST(request) {
     await client.query("SELECT 1");
     await client.end();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, DB_DRIVER: normalizedDriver });
   } catch (error) {
     console.error("Database connection error:", error);
     return NextResponse.json({ error: "Koneksi gagal: " + error.message }, { status: 500 });

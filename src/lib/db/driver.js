@@ -6,74 +6,26 @@ const state = global._dbAdapter;
 const PREFER_NATIVE_SQLITE = process.env.PREFER_NATIVE_SQLITE === "1";
 const REQUESTED_DB_DRIVER = (process.env.DB_DRIVER || process.env.DATABASE_DRIVER || "").toLowerCase();
 const HAS_DATABASE_URL = !!process.env.DATABASE_URL;
-
-async function tryBunSqlite() {
-  // Bun runtime only — built-in, no install needed
-  if (!process.versions.bun) return null;
-  try {
-    const { createBunSqliteAdapter } = await import("./adapters/bunSqliteAdapter.js");
-    return await createBunSqliteAdapter(DATA_FILE);
-  } catch (e) {
-    console.warn(`[DB] bun:sqlite unavailable: ${e.message}`);
-    return null;
-  }
-}
-
-async function tryBetterSqlite() {
-  // Optional native runtime. Keep this out of Next's webpack graph by using eval import.
-  if (process.versions.bun) return null;
-  try {
-    const dynamicImport = (0, eval)("(p) => import(p)");
-    const { createBetterSqliteAdapter } = await dynamicImport("./adapters/betterSqliteAdapter.js");
-    return createBetterSqliteAdapter(DATA_FILE);
-  } catch (e) {
-    console.warn(`[DB] better-sqlite3 unavailable: ${e.message}`);
-    return null;
-  }
-}
-
-async function tryNodeSqlite() {
-  // Built-in since Node 22.5.0 — no install needed. Skip under Bun (no node:sqlite).
-  if (process.versions.bun) return null;
-  const [maj, min] = process.versions.node.split(".").map(Number);
-  if (maj < 22 || (maj === 22 && min < 5)) return null;
-  try {
-    const { createNodeSqliteAdapter } = await import("./adapters/nodeSqliteAdapter.js");
-    return await createNodeSqliteAdapter(DATA_FILE);
-  } catch (e) {
-    console.warn(`[DB] node:sqlite unavailable: ${e.message}`);
-    return null;
-  }
-}
-
-async function trySqlJs() {
-  try {
-    const { createSqlJsAdapter } = await import("./adapters/sqljsAdapter.js");
-    return await createSqlJsAdapter(DATA_FILE);
-  } catch (e) {
-    console.warn(`[DB] sql.js unavailable: ${e.message}`);
-    return null;
-  }
-}
+const REMOTE_DB_DRIVERS = new Set(["cockroach", "cockroachdb", "postgres", "postgresql"]);
+const FORCE_REMOTE_DB = process.env.FORCE_REMOTE_DB === "1";
 
 async function initAdapter() {
   ensureDirs();
 
   let adapter;
-  const useRemoteDb = HAS_DATABASE_URL || REQUESTED_DB_DRIVER === "cockroach" || REQUESTED_DB_DRIVER === "cockroachdb" || REQUESTED_DB_DRIVER === "postgres" || REQUESTED_DB_DRIVER === "postgresql";
+  const useRemoteDb = HAS_DATABASE_URL || REMOTE_DB_DRIVERS.has(REQUESTED_DB_DRIVER);
 
   if (useRemoteDb) {
     const { createPostgresAdapter } = await import("./adapters/postgresAdapter.js");
     adapter = await createPostgresAdapter();
+  } else if (!FORCE_REMOTE_DB) {
+    const { createSqlJsAdapter } = await import("./adapters/sqljsAdapter.js");
+    adapter = await createSqlJsAdapter(DATA_FILE);
+    if (!state.logged) {
+      console.warn("[DB] DATABASE_URL/DB_DRIVER missing, fallback to local sqlite for login/bootstrap only");
+    }
   } else {
-    // Default order avoids optional native better-sqlite3 downloads in CLI installs:
-    //   Bun:  bun:sqlite → sql.js
-    //   Node: node:sqlite (≥22.5) → sql.js → better-sqlite3 (opt-in)
-    adapter = await tryBunSqlite();
-    if (!adapter) adapter = await tryNodeSqlite();
-    if (!adapter) adapter = await trySqlJs();
-    if (!adapter && PREFER_NATIVE_SQLITE) adapter = await tryBetterSqlite();
-    if (!adapter) throw new Error("[DB] No database driver available (bun/node/sql.js/better-sqlite3 all failed)");
+    throw new Error("[DB] Remote DB required. Set DATABASE_URL or DB_DRIVER=cockroach/postgres etc.");
   }
 
   if (!state.logged) {

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 
+const FALLBACK_PROVIDER_ICON = "/icons/provider-default.svg";
+
 export default function ProviderIcon({
   src = "",
   alt = "",
@@ -13,8 +15,9 @@ export default function ProviderIcon({
   providerId = "",
 }) {
   const [errored, setErrored] = useState(false);
+  const normalizedSrc = src && src.endsWith(".png") ? src : FALLBACK_PROVIDER_ICON;
 
-  if (!src || errored) {
+  if (!normalizedSrc || errored) {
     const text = fallbackText !== "?" ? fallbackText : (providerId ? providerId.substring(0, 2).toUpperCase() : "?");
     return (
       <span
@@ -33,7 +36,7 @@ export default function ProviderIcon({
 
   return (
     <img
-      src={src}
+      src={normalizedSrc}
       alt={alt}
       width={size}
       height={size}

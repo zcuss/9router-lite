@@ -161,8 +161,33 @@ export async function createPostgresAdapter() {
   const pool = new Pool({
     connectionString: url,
     max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000, // Increased from 2000 to 10000 for remote DB stability
+    idleTimeoutMillis: 60000, // Increased from 30s for remote DB stability
+    connectionTimeoutMillis: 30000, // Increased from 10s for remote DB reliability
+  });
+
+  // Graceful shutdown handler for SIGINT/SIGTERM/SIGHUP (signal 1)
+  // This prevents data loss when connecting to remote databases
+  let shuttingDown = false;
+  async function gracefulShutdown() {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log('[DB] Graceful shutdown initiated...');
+    try {
+      await pool.end();
+      console.log('[DB] Connection pool closed gracefully');
+    } catch (err) {
+      console.error('[DB] Error during shutdown:', err.message);
+    } finally {
+      process.exit(0);
+    }
+  }
+
+  // Handle termination signals
+  process.once('SIGINT', gracefulShutdown);
+  process.once('SIGTERM', gracefulShutdown);
+  process.once('SIGHUP', () => {
+    // Ignore SIGHUP - don't exit on terminal hangup, just continue running
+    console.log('[DB] Ignoring SIGHUP (terminal hangup), continuing...');
   });
 
   async function query(sql, params = []) {

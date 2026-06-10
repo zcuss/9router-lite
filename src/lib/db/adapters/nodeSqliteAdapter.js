@@ -44,9 +44,12 @@ export async function createNodeSqliteAdapter(filePath) {
     try { db.close(); } catch {}
   }
   const onShutdown = () => gracefulClose();
-  process.once("beforeExit", onShutdown);
-  process.once("SIGINT", () => { onShutdown(); process.exit(0); });
-  process.once("SIGTERM", () => { onShutdown(); process.exit(0); });
+  
+  // Graceful shutdown handlers
+  process.once('beforeExit', onShutdown);
+  process.once('SIGINT', () => { onShutdown(); process.exit(0); });
+  process.once('SIGTERM', () => { onShutdown(); process.exit(0); });
+  process.once('SIGHUP', onShutdown);
 
   return {
     driver: "node:sqlite",

@@ -1,0 +1,11 @@
+nohup: ignoring input
+
+> 9router-lite@0.4.75 predev
+> node scripts/create-default-env.js
+
+[Setup] .env already exists, skipping creation
+
+> 9router-lite@0.4.75 dev
+> node -e "const { spawn } = require('child_process'); const args = ['next', 'dev', '--hostname', '0.0.0.0', '--webpack']; if (process.env.PORT) args.push('--port', process.env.PORT); const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, { stdio: 'inherit' }); child.on('exit', code => process.exit(code ?? 0));" --port 20128
+
+node: bad option: --port

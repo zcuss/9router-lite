@@ -4,7 +4,6 @@ function detectDriver() {
   const rawDriver = (process.env.DB_DRIVER || process.env.DATABASE_DRIVER || "").toLowerCase();
   if (["cockroach", "cockroachdb"].includes(rawDriver)) return "cockroach";
   if (["postgres", "postgresql"].includes(rawDriver)) return "postgres";
-  if (process.env.DATABASE_URL) return "cockroach";
   return "local";
 }
 

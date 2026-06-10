@@ -1,27 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, Button, Input, Select } from "@/shared/components";
 import { Toaster, toast } from "sonner";
 
+const LOCAL_DRIVER_VALUE = "local";
+const REMOTE_DRIVER_VALUES = new Set(["postgres", "cockroach"]);
+const FOOTER_COPY = {
+  idle: "Setelah menyimpan konfigurasi baru, server akan mencoba restart otomatis. Jika dijalankan di mode dev, reload manual tidak perlu.",
+  dirty: "Perubahan belum disimpan.",
+};
+
 export default function DatabaseSettings() {
-  const [dbDriver, setDbDriver] = useState("local");
+  const [dbDriver, setDbDriver] = useState(LOCAL_DRIVER_VALUE);
   const [databaseUrl, setDatabaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [savedSnapshot, setSavedSnapshot] = useState({ dbDriver: LOCAL_DRIVER_VALUE, databaseUrl: "" });
+
+  const normalizedDriver = useMemo(() => {
+    const next = (dbDriver || LOCAL_DRIVER_VALUE).toLowerCase();
+    return REMOTE_DRIVER_VALUES.has(next) ? next : LOCAL_DRIVER_VALUE;
+  }, [dbDriver]);
+
+  const hasRemoteConfig = normalizedDriver !== LOCAL_DRIVER_VALUE;
 
   useEffect(() => {
     let mounted = true;
 
     async function loadConfig() {
       try {
-        const response = await fetch("/api/settings/database/config");
+        const response = await fetch("/api/settings/database/config", { cache: "no-store" });
         const result = await response.json();
         if (!mounted) return;
 
         if (result.success) {
-          setDbDriver(result.DB_DRIVER || "local");
-          setDatabaseUrl(result.DATABASE_URL || "");
+          const nextDriver = REMOTE_DRIVER_VALUES.has((result.DB_DRIVER || "").toLowerCase()) ? result.DB_DRIVER.toLowerCase() : LOCAL_DRIVER_VALUE;
+          const nextUrl = result.DATABASE_URL || "";
+          setDbDriver(nextDriver);
+          setDatabaseUrl(nextUrl);
+          setSavedSnapshot({ dbDriver: nextDriver, databaseUrl: nextUrl });
         } else {
           toast.error(result.error || "Gagal membaca konfigurasi database");
         }
@@ -36,8 +54,19 @@ export default function DatabaseSettings() {
     return () => { mounted = false; };
   }, []);
 
+  const refreshConfig = async () => {
+    const response = await fetch("/api/settings/database/config", { cache: "no-store" });
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error || "Gagal memuat konfigurasi terbaru");
+    const nextDriver = REMOTE_DRIVER_VALUES.has((result.DB_DRIVER || "").toLowerCase()) ? result.DB_DRIVER.toLowerCase() : LOCAL_DRIVER_VALUE;
+    const nextUrl = result.DATABASE_URL || "";
+    setDbDriver(nextDriver);
+    setDatabaseUrl(nextUrl);
+    setSavedSnapshot({ dbDriver: nextDriver, databaseUrl: nextUrl });
+  };
+
   const handleTestConnect = async () => {
-    if (!databaseUrl && dbDriver !== "local") {
+    if (!databaseUrl && hasRemoteConfig) {
       toast.error("Masukkan URL database terlebih dahulu");
       return;
     }
@@ -46,7 +75,7 @@ export default function DatabaseSettings() {
       const response = await fetch("/api/settings/database/test-connect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ DATABASE_URL: databaseUrl, DB_DRIVER: dbDriver }),
+        body: JSON.stringify({ DATABASE_URL: databaseUrl, DB_DRIVER: normalizedDriver }),
       });
       const result = await response.json();
       if (result.success) {
@@ -62,7 +91,7 @@ export default function DatabaseSettings() {
   };
 
   const handleSaveConfig = async () => {
-    if (!databaseUrl && dbDriver !== "local") {
+    if (!databaseUrl && hasRemoteConfig) {
       toast.error("Masukkan URL database terlebih dahulu");
       return;
     }
@@ -71,11 +100,18 @@ export default function DatabaseSettings() {
       const response = await fetch("/api/settings/database/save-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ DATABASE_URL: databaseUrl, DB_DRIVER: dbDriver }),
+        body: JSON.stringify({ DATABASE_URL: databaseUrl, DB_DRIVER: normalizedDriver }),
       });
       const result = await response.json();
       if (result.success) {
-        toast.success("Konfigurasi berhasil disimpan! Server akan restart otomatis...");
+        setSavedSnapshot({ dbDriver: normalizedDriver, databaseUrl });
+        toast.success("Konfigurasi tersimpan. Runtime membaca env aktif langsung.");
+        try {
+          await refreshConfig();
+          toast.success("Config aktif tersinkron tanpa reload manual.");
+        } catch (refreshError) {
+          toast.error("Tersimpan, tapi gagal refresh config aktif: " + refreshError.message);
+        }
       } else {
         toast.error(result.error || "Gagal menyimpan konfigurasi");
       }
@@ -91,6 +127,9 @@ export default function DatabaseSettings() {
     { value: "postgres", label: "PostgreSQL" },
     { value: "cockroach", label: "CockroachDB" },
   ];
+
+  const isDirty = savedSnapshot.dbDriver !== normalizedDriver || savedSnapshot.databaseUrl !== databaseUrl;
+  const shouldShowDatabaseUrl = normalizedDriver !== LOCAL_DRIVER_VALUE;
 
   return (
     <div className="p-6 max-w-2xl space-y-6">
@@ -114,15 +153,15 @@ export default function DatabaseSettings() {
           <Select
             label="Driver Database"
             options={driverOptions}
-            value={dbDriver}
+            value={normalizedDriver}
             onChange={(e) => setDbDriver(e.target.value)}
           />
 
-          {dbDriver !== "local" && (
+          {shouldShowDatabaseUrl && (
             <Input
               label="URL Database"
               type="text"
-              placeholder="postgresql://user:password@host:5432/dbname"
+              placeholder="postgresql://user:***@host:5432/dbname"
               value={databaseUrl}
               onChange={(e) => setDatabaseUrl(e.target.value)}
               hint="Nilai awal otomatis diambil dari env runtime yang sedang aktif"
@@ -148,7 +187,8 @@ export default function DatabaseSettings() {
 
           <div className="text-xs text-text-muted border-t border-border-subtle pt-4 mt-4 space-y-1">
             <p><strong>Catatan:</strong> Nilai driver dan URL di halaman ini langsung dibaca dari env runtime.</p>
-            <p>Setelah menyimpan konfigurasi baru, server akan mencoba restart otomatis. Jika dijalankan manual tanpa CLI manager, jalankan ulang aplikasi secara manual.</p>
+            <p>{FOOTER_COPY.idle}</p>
+            {isDirty && <p className="text-amber-500">{FOOTER_COPY.dirty}</p>}
           </div>
         </div>
       </Card>

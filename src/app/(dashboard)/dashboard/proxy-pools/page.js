@@ -26,6 +26,41 @@ function normalizeFormData(data = {}) {
     strictProxy: data.strictProxy === true,
   };
 }
+function buildProxyUrl(input) {
+  const raw = (input || "").trim();
+  if (!raw) throw new Error("Empty proxy line");
+
+  if (raw.includes("://")) {
+    const parsed = new URL(raw);
+    if (!parsed.username || !parsed.password) throw new Error("Proxy URL must include credentials");
+    return {
+      proxyUrl: parsed.toString(),
+      name: `Imported ${parsed.hostname}${parsed.port ? `:${parsed.port}` : ""}`,
+    };
+  }
+
+  const parts = raw.split(":");
+  if (parts.length === 4) {
+    const [host, port, username, password] = parts;
+    if (!host || !port || !username || !password) throw new Error("Invalid host:port:user:pass format");
+    const parsed = new URL(`http://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${host}:${port}`);
+    return {
+      proxyUrl: parsed.toString(),
+      name: `Imported ${host}:${port}`,
+    };
+  }
+
+  if (parts.length === 2) {
+    const [host, port] = parts;
+    if (!host || !port) throw new Error("Invalid host:port format");
+    return {
+      proxyUrl: `http://${host}:${port}`,
+      name: `Imported ${host}:${port}`,
+    };
+  }
+
+  throw new Error("Unsupported format");
+}
 
 export default function ProxyPoolsPage() {
   const [proxyPools, setProxyPools] = useState([]);
@@ -450,32 +485,7 @@ export default function ProxyPoolsPage() {
   const parseProxyLine = (line) => {
     const trimmed = line.trim();
     if (!trimmed) return null;
-
-    if (trimmed.includes("://")) {
-      const parsed = new URL(trimmed);
-      const hostLabel = parsed.port ? `${parsed.hostname}:${parsed.port}` : parsed.hostname;
-      return {
-        proxyUrl: parsed.toString(),
-        name: `Imported ${hostLabel}`,
-      };
-    }
-
-    const parts = trimmed.split(":");
-    if (parts.length === 4) {
-      const [host, port, username, password] = parts;
-      if (!host || !port || !username || !password) {
-        throw new Error("Invalid host:port:user:pass format");
-      }
-
-      const proxyUrl = `http://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${host}:${port}`;
-      const parsed = new URL(proxyUrl);
-      return {
-        proxyUrl: parsed.toString(),
-        name: `Imported ${host}:${port}`,
-      };
-    }
-
-    throw new Error("Unsupported format");
+    return buildProxyUrl(trimmed);
   };
 
   const handleBatchImport = async () => {

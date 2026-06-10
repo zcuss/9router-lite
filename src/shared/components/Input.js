@@ -15,6 +15,7 @@ export default function Input({
   required = false,
   className,
   inputClassName,
+  suppressHydrationWarning = true,
   ...props
 }) {
   return (
@@ -37,6 +38,8 @@ export default function Input({
           value={value || ""}
           onChange={onChange}
           disabled={disabled}
+          suppressHydrationWarning={suppressHydrationWarning}
+          data-hydration-safe="true"
           className={cn(
             "w-full py-2.5 px-3 text-sm text-text-main bg-surface-2 rounded-[10px]",
             "border border-transparent placeholder-text-muted/70",

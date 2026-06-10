@@ -1,10 +1,3 @@
-/**
- * Tujuan: Endpoint untuk mengambil data utilisasi provider/koneksi.
- * Caller: ProviderUtilizationTab.tsx (Dashboard Analytics)
- * Dependensi: usageRepo (mocked sementara)
- * Main Functions: GET
- * Side Effects: None
- */
 import { NextResponse } from "next/server";
 import { getUsageHistory } from "@/lib/db/repos/usageRepo";
 
@@ -16,30 +9,68 @@ export async function GET(request) {
     const range = searchParams.get("range") || "24h";
     const aggregateBy = searchParams.get("aggregateBy") || "provider";
 
-    // Mock data for now to satisfy the UI while PRD v2 is being finalized
-    // In a real scenario, this would query usageHistory with proper grouping
-    const now = new Date();
-    const data = [];
-    const providers = ["openai", "anthropic", "gemini", "groq"];
+    // Query real data from usageHistory
+    const rawData = await getUsageHistory({
+      startDate: new Date(Date.now() - 30 * 24 * 3600000).toISOString(),
+    });
 
-    // Generate some dummy points for the last 24 hours
-    for (let i = 0; i < 24; i++) {
-      const ts = new Date(now.getTime() - (23 - i) * 3600000).toISOString();
-      for (const p of providers) {
-        data.push({
+    const now = Date.now();
+    let cutoffMs = 24 * 3600000;
+    if (range === "1h") cutoffMs = 3600000;
+    else if (range === "6h") cutoffMs = 6 * 3600000;
+    else if (range === "7d") cutoffMs = 7 * 24 * 3600000;
+    else if (range === "30d") cutoffMs = 30 * 24 * 3600000;
+
+    const filtered = rawData.filter(
+      (r) => r.timestamp && now - new Date(r.timestamp).getTime() <= cutoffMs
+    );
+
+    const providerSet = new Set();
+    const utilizationPoints = [];
+
+    // Group by timestamp & provider/connection
+    const groups = new Map();
+
+    for (const r of filtered) {
+      if (!r.timestamp || !r.provider) continue;
+      const key = r.provider;
+      providerSet.add(key);
+
+      // Round to hour
+      const date = new Date(r.timestamp);
+      date.setMinutes(0, 0, 0);
+      const roundedTs = date.toISOString();
+
+      if (!groups.has(roundedTs)) {
+        groups.set(roundedTs, new Map());
+      }
+      const timeGroup = groups.get(roundedTs);
+      if (!timeGroup.has(key)) {
+        timeGroup.set(key, { total: 0, success: 0 });
+      }
+      const stats = timeGroup.get(key);
+      stats.total += 1;
+      if (r.status === "ok") stats.success += 1;
+    }
+
+    for (const [ts, timeGroup] of groups.entries()) {
+      for (const [key, stats] of timeGroup.entries()) {
+        utilizationPoints.push({
           timestamp: ts,
-          provider: p,
-          remainingPct: 70 + Math.random() * 30,
-          usedPct: Math.random() * 20
+          provider: key,
+          remainingPct: stats.total > 0 ? (stats.success / stats.total) * 100 : 100,
+          usedPct: stats.total > 0 ? ((stats.total - stats.success) / stats.total) * 100 : 0,
         });
       }
     }
 
+    const providers = Array.from(providerSet);
+
     return NextResponse.json({
-      data,
-      providers,
+      data: utilizationPoints,
+      providers: providers.length > 0 ? providers : [],
       timeRange: range,
-      aggregateBy
+      aggregateBy,
     });
   } catch (error) {
     console.error("[API] Utilization error:", error);

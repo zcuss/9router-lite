@@ -124,6 +124,7 @@ export async function createSqlJsAdapter(filePath) {
   process.on("beforeExit", flush);
   process.on("SIGINT", flush);
   process.on("SIGTERM", flush);
+  process.on("SIGHUP", flush);
 
   return { driver: "sql.js", run, get, all, exec, transaction, transactionAsync, close, raw: db };
 }

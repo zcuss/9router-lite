@@ -4,7 +4,7 @@
   "description": "9Router web dashboard",
   "scripts": {
     "predev": "node scripts/create-default-env.js",
-    "dev": "next dev --hostname 0.0.0.0 --webpack --port 45231",
+    "dev": "node -e \"const { spawn } = require('child_process'); const args = ['next', 'dev', '--hostname', '0.0.0.0', '--webpack']; if (process.env.PORT) args.push('--port', process.env.PORT); const child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', args, { stdio: 'inherit' }); child.on('exit', code => process.exit(code ?? 0));\"",
     "build": "next build --webpack",
     "start": "next start",
     "dev:bun": "bun --bun next dev --hostname 0.0.0.0 --webpack --port 45231",
