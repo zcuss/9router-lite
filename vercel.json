@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "outputDirectory": ".next",
+  "functions": {
+    "src/app/api/**/*.js": { "maxDuration": 10 },
+    "src/app/api/**/*.ts": { "maxDuration": 10 }
+  }
+}
