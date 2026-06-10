@@ -11,7 +11,26 @@ interface AutoRoutingStats {
   topProviders: Array<{ provider: string; count: number }>;
   explorationRate: number;
   lkgpHitRate: number;
+  perApiKey: Array<{
+    apiKeyLabel: string;
+    totalRequests: number;
+    totalInputTokens: number;
+    totalOutputTokens: number;
+    minRequestsPerMin: number;
+    maxRequestsPerMin: number;
+    avgRequestsPerMin: number;
+  }>;
 }
+
+const emptyStats = (): AutoRoutingStats => ({
+  totalRequests: 0,
+  variantBreakdown: {},
+  avgSelectionScore: 0,
+  topProviders: [],
+  explorationRate: 0,
+  lkgpHitRate: 0,
+  perApiKey: [],
+});
 
 export default function AutoRoutingAnalyticsTab() {
   const [stats, setStats] = useState<AutoRoutingStats | null>(null);
@@ -19,14 +38,23 @@ export default function AutoRoutingAnalyticsTab() {
   const t = useSafeTranslations("analytics");
 
   useEffect(() => {
+    setLoading(true);
     fetch("/api/analytics/auto-routing")
       .then((res) => res.json())
       .then((data) => {
-        setStats(data);
-        setLoading(false);
+        setStats({
+          ...emptyStats(),
+          ...data,
+          variantBreakdown: data?.variantBreakdown ?? {},
+          topProviders: data?.topProviders ?? [],
+          perApiKey: data?.perApiKey ?? [],
+        });
       })
-      .catch(() => setLoading(false));
+      .catch(() => setStats(emptyStats()))
+      .finally(() => setLoading(false));
   }, []);
+
+  const perApiKeyRows = stats?.perApiKey ?? [];
 
   if (loading) {
     return (
@@ -51,7 +79,6 @@ export default function AutoRoutingAnalyticsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center gap-3">
@@ -102,20 +129,16 @@ export default function AutoRoutingAnalyticsTab() {
         </Card>
       </div>
 
-      {/* Variant Breakdown */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">{t("autoRoutingRequestsByVariant")}</h3>
         <div className="space-y-3">
-          {Object.entries(stats.variantBreakdown).map(([variant, count]) => {
+          {Object.entries(stats.variantBreakdown ?? {}).map(([variant, count]) => {
             const percentage = stats.totalRequests > 0 ? (count / stats.totalRequests) * 100 : 0;
             return (
               <div key={variant} className="flex items-center gap-3">
                 <div className="w-32 text-sm font-medium capitalize">{variant || "default"}</div>
                 <div className="flex-1 h-3 bg-border rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-500 rounded-full transition-all"
-                    style={{ width: `${percentage}%` }}
-                  />
+                  <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${percentage}%` }} />
                 </div>
                 <div className="w-20 text-sm text-text-muted text-right">
                   {count.toLocaleString()} ({percentage.toFixed(1)}%)
@@ -126,7 +149,6 @@ export default function AutoRoutingAnalyticsTab() {
         </div>
       </Card>
 
-      {/* Top Providers */}
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">{t("autoRoutingTopRoutedProviders")}</h3>
         <div className="overflow-x-auto">
@@ -140,8 +162,7 @@ export default function AutoRoutingAnalyticsTab() {
             </thead>
             <tbody>
               {stats.topProviders.map((provider, index) => {
-                const percentage =
-                  stats.totalRequests > 0 ? (provider.count / stats.totalRequests) * 100 : 0;
+                const percentage = stats.totalRequests > 0 ? (provider.count / stats.totalRequests) * 100 : 0;
                 return (
                   <tr key={provider.provider} className="border-b border-border/50">
                     <td className="py-2 px-3">
@@ -151,12 +172,42 @@ export default function AutoRoutingAnalyticsTab() {
                       </div>
                     </td>
                     <td className="text-right py-2 px-3">{provider.count.toLocaleString()}</td>
-                    <td className="text-right py-2 px-3 text-text-muted">
-                      {percentage.toFixed(1)}%
-                    </td>
+                    <td className="text-right py-2 px-3 text-text-muted">{percentage.toFixed(1)}%</td>
                   </tr>
                 );
               })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4">Per API key</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 px-3 font-medium">API key</th>
+                <th className="text-right py-2 px-3 font-medium">Req</th>
+                <th className="text-right py-2 px-3 font-medium">Input</th>
+                <th className="text-right py-2 px-3 font-medium">Output</th>
+                <th className="text-right py-2 px-3 font-medium">Req/min min</th>
+                <th className="text-right py-2 px-3 font-medium">Req/min max</th>
+                <th className="text-right py-2 px-3 font-medium">Req/min avg</th>
+              </tr>
+            </thead>
+            <tbody>
+              {perApiKeyRows.map((row) => (
+                <tr key={row.apiKeyLabel} className="border-b border-border/50">
+                  <td className="py-2 px-3 font-medium">{row.apiKeyLabel}</td>
+                  <td className="text-right py-2 px-3">{row.totalRequests.toLocaleString()}</td>
+                  <td className="text-right py-2 px-3">{row.totalInputTokens.toLocaleString()}</td>
+                  <td className="text-right py-2 px-3">{row.totalOutputTokens.toLocaleString()}</td>
+                  <td className="text-right py-2 px-3">{row.minRequestsPerMin.toLocaleString()}</td>
+                  <td className="text-right py-2 px-3">{row.maxRequestsPerMin.toLocaleString()}</td>
+                  <td className="text-right py-2 px-3">{row.avgRequestsPerMin.toFixed(2)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

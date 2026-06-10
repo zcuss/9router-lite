@@ -11,7 +11,7 @@ export async function ensureOutboundProxyInitialized() {
     applyOutboundProxyEnv(settings);
     initialized = true;
   } catch (error) {
-    console.error("[ServerInit] Error initializing outbound proxy:", error);
+    console.warn("[ServerInit] Outbound proxy init skipped:", error?.message || error);
   }
 
   return initialized;
@@ -19,7 +19,7 @@ export async function ensureOutboundProxyInitialized() {
 
 // Defer init so HTTP server accepts connections first
 setImmediate(() => {
-  ensureOutboundProxyInitialized().catch(console.log);
+  ensureOutboundProxyInitialized().catch(() => {});
 });
 
 export default ensureOutboundProxyInitialized;

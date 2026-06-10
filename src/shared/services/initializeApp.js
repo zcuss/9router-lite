@@ -56,7 +56,13 @@ export async function initializeApp() {
     } catch (error) {
       console.warn("[InitApp] cleanupProviderConnections skipped:", error?.message || error);
     }
-    const settings = await getSettings();
+    let settings;
+    try {
+      settings = await getSettings();
+    } catch (error) {
+      console.warn("[InitApp] getSettings skipped:", error?.message || error);
+      settings = {};
+    }
 
     if (settings.tunnelEnabled && !g.tunnelAutoResumed) {
       g.tunnelAutoResumed = true;

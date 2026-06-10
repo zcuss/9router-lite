@@ -1,12 +1,38 @@
 import fs from "node:fs";
-import initSqlJs from "sql.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PRAGMA_SQL } from "../schema.js";
+
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const wasmPath = path.resolve(moduleDir, "../../../node_modules/sql.js/dist/sql-wasm.wasm");
 
 let SQL = null;
 
+function resolveWasmPath(file) {
+  if (file !== "sql-wasm.wasm") return path.join(path.dirname(wasmPath), file);
+  if (fs.existsSync(wasmPath)) return wasmPath;
+
+  const candidates = [
+    path.resolve(process.cwd(), "node_modules/sql.js/dist/sql-wasm.wasm"),
+    path.resolve(process.cwd(), "src/node_modules/sql.js/dist/sql-wasm.wasm"),
+    path.resolve(process.cwd(), "../node_modules/sql.js/dist/sql-wasm.wasm"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  return wasmPath;
+}
+
 async function loadSql() {
   if (SQL) return SQL;
-  SQL = await initSqlJs();
+  const initSqlJs = (await import("sql.js")).default;
+  SQL = await initSqlJs({
+    locateFile(file) {
+      return resolveWasmPath(file);
+    },
+  });
   return SQL;
 }
 

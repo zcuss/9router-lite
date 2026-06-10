@@ -31,5 +31,6 @@ if (typeof window === "undefined" && !isBuildPhase && !global.__appBootstrapped)
     .catch((e) => {
       console.error("[Bootstrap] init failed:", e?.message || e);
       global.__appBootstrapped = false;
+      global.__bootstrapStartedAt = 0;
     });
 }

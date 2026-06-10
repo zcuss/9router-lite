@@ -14,32 +14,26 @@ function isSqliteAdapter(adapter) {
 }
 
 async function migrateSqliteToRemote(adapter) {
-  const { DATA_FILE } = await import("./paths.js");
-  const fs = await import("node:fs");
-  if (!(await fs.promises.access(DATA_FILE).then(() => true).catch(() => false))) {
-    return; // SQLite file does not exist
-  }
+  const exists = fs.existsSync(DATA_FILE);
+  if (!exists) return; // SQLite file does not exist
   try {
     const SQLiteJs = await import("sql.js");
     const buffer = await fs.promises.readFile(DATA_FILE);
     const SQLite = await SQLiteJs.default();
     const db = new SQLite.Database(buffer);
-    // Get list of tables (excluding internal sqlite_* tables)
     const tableRows = db.all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
     for (const { name: tableName } of tableRows) {
-      // Get column info via PRAGMA table_info
       const cols = db.all(`PRAGMA table_info(${tableName})`);
-      const columnNames = cols.map(c => c.name);
-      // For usageHistory, skip the autoincrement id column; let Postgres generate new IDs.
+      const columnNames = cols.map((c) => c.name);
       const insertCols = tableName === "usageHistory"
-        ? columnNames.filter(col => col !== "id")
+        ? columnNames.filter((col) => col !== "id")
         : columnNames;
       if (insertCols.length === 0) continue;
       const placeholders = insertCols.map(() => "?").join(", ");
       const sql = `INSERT INTO ${tableName} (${insertCols.join(", ")}) VALUES (${placeholders})`;
       const rows = db.all(`SELECT * FROM ${tableName}`);
       for (const row of rows) {
-        const values = insertCols.map(col => row[col]);
+        const values = insertCols.map((col) => row[col]);
         await adapter.run(sql, values);
       }
     }
@@ -276,6 +270,7 @@ export async function runMigrationOnce(adapter) {
       console.warn('[DB] SQLite migration failed:', err);
     }
   }
+
 
 
   // 3. One-time legacy JSON import (only if DB was fresh on entry)

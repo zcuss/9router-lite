@@ -23,7 +23,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  allowedDevOrigins: ["100.74.16.78", "9router-test.zcuss.xyz", "127.0.0.1", "localhost"],
+  allowedDevOrigins: ["100.74.16.78", "9router-test.zcuss.xyz", "tes.zcuss.xyz", "127.0.0.1", "localhost"],
   webpack: (config, { isServer }) => {
     // Ignore fs/path modules in browser bundle
     if (!isServer) {

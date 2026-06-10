@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUsageHistory } from "@/lib/db/repos/usageRepo";
+import { getUsageHistory } from "@/lib/usageDb";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +9,6 @@ export async function GET(request) {
     const range = searchParams.get("range") || "24h";
     const aggregateBy = searchParams.get("aggregateBy") || "provider";
 
-    // Query real data from usageHistory
     const rawData = await getUsageHistory({
       startDate: new Date(Date.now() - 30 * 24 * 3600000).toISOString(),
     });
@@ -27,8 +26,6 @@ export async function GET(request) {
 
     const providerSet = new Set();
     const utilizationPoints = [];
-
-    // Group by timestamp & provider/connection
     const groups = new Map();
 
     for (const r of filtered) {
@@ -36,7 +33,6 @@ export async function GET(request) {
       const key = r.provider;
       providerSet.add(key);
 
-      // Round to hour
       const date = new Date(r.timestamp);
       date.setMinutes(0, 0, 0);
       const roundedTs = date.toISOString();

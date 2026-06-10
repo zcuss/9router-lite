@@ -1,6 +1,6 @@
 {
   "name": "9router-lite",
-  "version": "0.4.73",
+  "version": "0.4.74",
   "description": "9Router web dashboard",
   "scripts": {
     "predev": "node scripts/create-default-env.js",
