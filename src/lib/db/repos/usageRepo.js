@@ -405,10 +405,12 @@ export async function getUsageStats(period = "all") {
     totalPromptTokens: 0, totalCompletionTokens: 0, totalCost: 0,
     byProvider: {}, byModel: {}, byAccount: {}, byUser: {}, byCombo: {}, byApiKey: {}, byEndpoint: {},
     last10Minutes: [],
+    last1Minutes: [],
     pending: pendingRequests,
     activeRequests: [],
     recentRequests,
     errorProvider: (Date.now() - lastErrorProvider.ts < 10000) ? lastErrorProvider.provider : "",
+    throughput: { min: 0, max: 0, avg: 0 }
   };
 
   // Active requests
@@ -449,6 +451,49 @@ export async function getUsageStats(period = "all") {
       bucketMap[minuteStart].completionTokens += r.completionTokens || 0;
       bucketMap[minuteStart].cost += r.cost || 0;
     }
+  }
+
+  // last1Minutes — query 1min window (second-by-second breakdown for min/max/avg throughput)
+  const currentSecondStart = new Date(Math.floor(now.getTime() / 1000) * 1000);
+  const oneMinuteAgo = new Date(currentSecondStart.getTime() - 59 * 1000);
+  const secBucketMap = {};
+  for (let i = 0; i < 60; i++) {
+    const ts = currentSecondStart.getTime() - (59 - i) * 1000;
+    secBucketMap[ts] = { requests: 0, promptTokens: 0, completionTokens: 0, cost: 0 };
+    stats.last1Minutes.push(secBucketMap[ts]);
+  }
+  const recent1 = await db.all(
+    `SELECT timestamp, promptTokens, completionTokens, cost FROM usageHistory WHERE timestamp >= ? AND timestamp <= ?`,
+    [oneMinuteAgo.toISOString(), now.toISOString()]
+  );
+  for (const r of recent1) {
+    const tt = new Date(r.timestamp).getTime();
+    const secondStart = Math.floor(tt / 1000) * 1000;
+    if (secBucketMap[secondStart]) {
+      secBucketMap[secondStart].requests++;
+      secBucketMap[secondStart].promptTokens += r.promptTokens || 0;
+      secBucketMap[secondStart].completionTokens += r.completionTokens || 0;
+      secBucketMap[secondStart].cost += r.cost || 0;
+    }
+  }
+  // Calculate throughput min/max/avg per minute based on the last 10 minutes bucketMap
+  const counts = Object.values(bucketMap).map(b => b.requests);
+  if (counts.length > 0) {
+    stats.throughput.min = Math.min(...counts);
+    stats.throughput.max = Math.max(...counts);
+    stats.throughput.avg = Number((counts.reduce((a, b) => a + b, 0) / counts.length).toFixed(1));
+  }
+
+  // Add 1-minute second-by-second throughput stats (scaled to RPM representation)
+  const secCounts = Object.values(secBucketMap).map(b => b.requests);
+  if (secCounts.length > 0) {
+    stats.throughput1m = {
+      min: Math.min(...secCounts) * 60,
+      max: Math.max(...secCounts) * 60,
+      avg: Number((secCounts.reduce((a, b) => a + b, 0) * 60 / secCounts.length).toFixed(1))
+    };
+  } else {
+    stats.throughput1m = { min: 0, max: 0, avg: 0 };
   }
 
   const useDailySummary = period !== "24h" && period !== "today";

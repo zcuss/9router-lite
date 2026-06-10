@@ -6,16 +6,12 @@ const state = global._dbAdapter;
 const REQUESTED_DB_DRIVER = (process.env.DB_DRIVER || process.env.DATABASE_DRIVER || "").toLowerCase();
 const HAS_DATABASE_URL = !!process.env.DATABASE_URL;
 const REMOTE_DB_DRIVERS = new Set(["cockroach", "cockroachdb", "postgres", "postgresql"]);
-const FORCE_REMOTE_DB = process.env.FORCE_REMOTE_DB === "1";
 
 async function initAdapter() {
   ensureDirs();
 
   const useRemoteDb = HAS_DATABASE_URL || REMOTE_DB_DRIVERS.has(REQUESTED_DB_DRIVER);
-  if (!useRemoteDb || FORCE_REMOTE_DB) {
-    if (!useRemoteDb) {
-      throw new Error("[DB] Remote DB required. Set DATABASE_URL or DB_DRIVER=postgres|cockroach.");
-    }
+  if (useRemoteDb) {
     const { createPostgresAdapter } = await import("./adapters/postgresAdapter.js");
     const adapter = await createPostgresAdapter();
 

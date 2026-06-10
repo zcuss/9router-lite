@@ -1,6 +1,6 @@
 {
   "name": "9router-lite",
-  "version": "0.4.74",
+  "version": "0.4.75",
   "bin": {
     "9router-lite": "./cli.js"
   },
