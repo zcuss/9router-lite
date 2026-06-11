@@ -43,9 +43,56 @@ function createSpinner(text) {
 }
 
 const pkg = require("./package.json");
-const { buildEnvWithRuntime } = require("./hooks/sqliteRuntime");
 const { ensureTrayRuntime } = require("./hooks/trayRuntime");
 const args = process.argv.slice(2);
+
+function loadDotEnvFile(filePath) {
+  try {
+    if (!fs.existsSync(filePath)) return false;
+    const text = fs.readFileSync(filePath, "utf8");
+    for (const line of text.split(/\r?\n/)) {
+      const s = line.trim();
+      if (!s || s.startsWith("#")) continue;
+      const eq = s.indexOf("=");
+      if (eq <= 0) continue;
+      const key = s.slice(0, eq).trim();
+      if (!key || process.env[key] !== undefined) continue;
+      let value = s.slice(eq + 1).trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      process.env[key] = value;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function hydrateEnvForLocalSource() {
+  const candidateRoots = [
+    path.resolve(__dirname, ".."),
+    process.cwd(),
+  ];
+  for (const root of candidateRoots) {
+    const envPath = path.join(root, ".env");
+    if (loadDotEnvFile(envPath)) {
+      // Force store absolute path to process.env so it is inherited by any spawned subprocesses
+      process.env.ROUTER_LITE_ENV_LOADED_PATH = envPath;
+      return envPath;
+    }
+  }
+  return null;
+}
+
+// If child process or detached daemon inherits the variable but processes in a different cwd
+if (process.env.ROUTER_LITE_ENV_LOADED_PATH) {
+  loadDotEnvFile(process.env.ROUTER_LITE_ENV_LOADED_PATH);
+}
+const loadedEnvPath = hydrateEnvForLocalSource() || process.env.ROUTER_LITE_ENV_LOADED_PATH;
+if (loadedEnvPath && process.env.DEBUG === "1") {
+  console.log(`[env] loaded ${loadedEnvPath}`);
+}
 
 // Do not install or warm up any SQLite runtime when launching the CLI.
 // DB selection is handled by the app via DB_DRIVER/DATABASE_URL.
@@ -548,13 +595,16 @@ function startServer(latestVersion) {
   function spawnServer() {
     serverStartTime = Date.now();
     crashLog = [];
+    if (process.env.DEBUG === "1") {
+      console.log(`[debug] Spawning server on port ${port} with DB_DRIVER=${process.env.DB_DRIVER} and DATABASE_URL length=${process.env.DATABASE_URL?.length || 0}`);
+    }
     const child = spawn(RUNTIME, ["--max-old-space-size=6144", serverPath], {
       cwd: standaloneDir,
       stdio: showLog ? "inherit" : ["ignore", "ignore", "pipe"],
       detached: true,
       windowsHide: true,
       env: {
-        ...buildEnvWithRuntime(process.env),
+        ...process.env,
         PORT: port.toString(),
         HOSTNAME: host
       }

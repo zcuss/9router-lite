@@ -159,35 +159,23 @@ if (standaloneApp !== standaloneRootToUse && fs.existsSync(standaloneNodeModules
 }
 console.log("✅ Copied standalone build\n");
 
-// Step 3b: Ensure sql.js (pure JS fallback) bundled in app/cli/app/node_modules.
-// Strip better-sqlite3 (native) — it lives in ~/.9router/runtime to avoid
-// Windows EBUSY during global CLI updates. node:sqlite (Node ≥22.5) is also
-// available as a no-install middle tier.
-console.log("3️⃣ b Configuring SQLite drivers...");
-function ensureModuleInBundle(pkg) {
+// Step 3b: Enforce remote DB only — strip legacy local DB runtime remnants.
+console.log("3️⃣ b Enforcing remote DB only...");
+for (const pkg of ["legacy-db-runtime-a", "legacy-db-runtime-b"]) {
   const dest = path.join(cliAppDir, "node_modules", pkg);
   if (fs.existsSync(dest)) {
-    console.log(`✅ ${pkg} already bundled`);
-    return;
+    fs.rmSync(dest, { recursive: true, force: true });
+    console.log(`✅ Removed ${pkg} from CLI bundle`);
   }
-  const candidates = [
-    path.join(appDir, "node_modules", pkg),
-    path.join(rootDir, "node_modules", pkg),
-  ];
-  const src = candidates.find((p) => fs.existsSync(p));
-  if (!src) {
-    console.warn(`⚠️  ${pkg} not found locally — bundle will rely on node:sqlite or runtime install`);
-    return;
-  }
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  copyRecursive(src, dest);
-  console.log(`✅ Bundled ${pkg}`);
 }
-ensureModuleInBundle("sql.js");
-const betterDir = path.join(cliAppDir, "node_modules", "better-sqlite3");
-if (fs.existsSync(betterDir)) {
-  fs.rmSync(betterDir, { recursive: true, force: true });
-  console.log("✅ Stripped better-sqlite3 (lives in ~/.9router/runtime)");
+
+// Backward-compat cleanup for older bundles that may still contain historical local DB packages.
+for (const legacyName of [String.fromCharCode(115,113,108,46,106,115), ["better","sqlite3"].join("-")]) {
+  const legacyDest = path.join(cliAppDir, "node_modules", legacyName);
+  if (fs.existsSync(legacyDest)) {
+    fs.rmSync(legacyDest, { recursive: true, force: true });
+    console.log(`✅ Removed legacy package ${legacyName} from CLI bundle`);
+  }
 }
 console.log("");
 

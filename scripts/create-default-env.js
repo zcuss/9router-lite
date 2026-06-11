@@ -19,13 +19,9 @@ DATA_DIR=/var/lib/9router
 PORT=20129
 NODE_ENV=development
 
-# Optional: set to 1 only if you want CLI/runtime to install and prefer better-sqlite3
-# PREFER_NATIVE_SQLITE=1
-# 9ROUTER_INSTALL_BETTER_SQLITE3=1
-
-# Remote DB mode. Set these after install to push/migrate tables to DB automatically.
+# Remote DB mode (required)
 # DB_DRIVER=cockroach
-# DATABASE_URL=postgresql://root:password@localhost:26257/9router?sslmode=disable
+# DATABASE_URL=postgresql://root:***@localhost:26257/9router?sslmode=disable
 
 # Recommended security and ops variables
 API_KEY_SECRET=endpoint-proxy-api-key-secret

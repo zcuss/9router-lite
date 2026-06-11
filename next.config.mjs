@@ -12,7 +12,7 @@ const tracingRoot = process.env.NEXT_TRACING_ROOT_MODE === "workspace"
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   output: "standalone",
-  serverExternalPackages: ["better-sqlite3", "sql.js", "node:sqlite", "bun:sqlite"],
+  serverExternalPackages: [],
   turbopack: {
     root: tracingRoot
   },
@@ -23,7 +23,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  allowedDevOrigins: ["100.74.16.78", "9router-test.zcuss.xyz", "tes.zcuss.xyz", "127.0.0.1", "localhost"],
+  allowedDevOrigins: ["100.122.213.74", "100.74.16.78", "9router-test.zcuss.xyz", "tes.zcuss.xyz", "127.0.0.1", "localhost"],
   webpack: (config, { isServer }) => {
     // Ignore fs/path modules in browser bundle
     if (!isServer) {

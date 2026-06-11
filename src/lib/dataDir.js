@@ -13,7 +13,13 @@ function defaultDir() {
 
 export function getDataDir() {
   const configured = process.env.DATA_DIR;
-  if (!configured) return defaultDir();
+  if (!configured) {
+    // Check if running in Vercel Serverless environment
+    if (process.env.VERCEL) {
+      return "/tmp";
+    }
+    return defaultDir();
+  }
   try {
     fs.mkdirSync(configured, { recursive: true });
     return configured;
@@ -21,6 +27,10 @@ export function getDataDir() {
     if (e?.code === "EACCES" || e?.code === "EPERM") {
       console.warn(`[DATA_DIR] '${configured}' not writable → fallback ~/.${APP_NAME}`);
       return defaultDir();
+    }
+    // Vercel serverless functions filesystem fallback
+    if (process.env.VERCEL) {
+      return "/tmp";
     }
     throw e;
   }

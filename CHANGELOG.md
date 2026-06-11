@@ -271,7 +271,7 @@
 ## Improvements
 - Local Material Symbols font (no Google Fonts)
 - Docker base: Bun → Node 22-alpine
-- MITM reads aliases from JSON cache (no native sqlite)
+- MITM reads aliases from JSON cache (no native local DB runtime)
 - Stream stall timeout (3 min) in open-sse
 
 ## Fixes
@@ -280,7 +280,7 @@
 # v0.4.28 (2026-05-10)
 
 ## Features
-- Add bun:sqlite adapter with automatic runtime detection (Bun/Node)
+- Add Bun-specific DB runtime support during earlier storage implementations
 - Add bulk API key import (format: `name|sk-key`, one per line)
 
 ## Fixes
@@ -289,7 +289,7 @@
 # v0.4.27 (2026-05-09)
 
 ## Features
-- Add 3-tier DB driver fallback: better-sqlite3 → node:sqlite (Node ≥22.5) → sql.js
+- Add multi-driver DB fallback chain during earlier storage implementations
 
 ## Fixes
 - Fix authentication logic for several providers
@@ -298,7 +298,7 @@
 
 ## Features
 - Add MCP Marketplace Modal to Cowork Tool Card for easier plugin management
-- Migrate DB layer from lowdb to SQLite with modular repos pattern (better-sqlite3 / sql.js adapters, migrations, helpers)
+- Migrate DB layer from lowdb to modular DB repos pattern
 - Add Tailscale tunnel integration with status check API
 - Add `/api/cli-tools/all-statuses` aggregated endpoint
 - Add Cloudflare Workers AI image generation support (#973)

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { LEGACY_FILES, DB_DIR, DATA_FILE } from "./paths.js";
+import { LEGACY_FILES, DB_DIR } from "./paths.js";
 import { TABLES, buildCreateTableSql } from "./schema.js";
 import { MIGRATIONS, latestVersion } from "./migrations/index.js";
 import { getMetaSync, setMetaSync } from "./helpers/metaStore.js";
@@ -8,41 +8,6 @@ import { makeBackupDir, backupFile, pruneOldBackups } from "./backup.js";
 import { getAppVersion } from "./version.js";
 import { stringifyJson } from "./helpers/jsonCol.js";
 
-function isSqliteAdapter(adapter) {
-  const driver = adapter.driver || "";
-  return driver.startsWith("sqlite") || driver === "better-sqlite3" || driver === "sql.js" || driver === "node:sqlite" || driver === "bun:sqlite";
-}
-
-async function migrateSqliteToRemote(adapter) {
-  const exists = fs.existsSync(DATA_FILE);
-  if (!exists) return; // SQLite file does not exist
-  try {
-    const SQLiteJs = await import("sql.js");
-    const buffer = await fs.promises.readFile(DATA_FILE);
-    const SQLite = await SQLiteJs.default();
-    const db = new SQLite.Database(buffer);
-    const tableRows = db.all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
-    for (const { name: tableName } of tableRows) {
-      const cols = db.all(`PRAGMA table_info(${tableName})`);
-      const columnNames = cols.map((c) => c.name);
-      const insertCols = tableName === "usageHistory"
-        ? columnNames.filter((col) => col !== "id")
-        : columnNames;
-      if (insertCols.length === 0) continue;
-      const placeholders = insertCols.map(() => "?").join(", ");
-      const sql = `INSERT INTO ${tableName} (${insertCols.join(", ")}) VALUES (${placeholders})`;
-      const rows = db.all(`SELECT * FROM ${tableName}`);
-      for (const row of rows) {
-        const values = insertCols.map((col) => row[col]);
-        await adapter.run(sql, values);
-      }
-    }
-    db.close();
-  } catch (err) {
-    console.error("[DB] SQLite migration error:", err);
-    throw err;
-  }
-}
 const migratedMarker = path.join(DB_DIR, ".migrated-json");
 
 // Track per-adapter so reusing same adapter skips re-run, but new adapter (after reset) re-runs.
@@ -262,16 +227,6 @@ export async function runMigrationOnce(adapter) {
 
   // 2. Additive sync (auto add missing columns/indexes declared in TABLES)
   await syncSchemaFromTables(adapter);
-  // 2.5. Migrate from SQLite to remote DB if remote DB is fresh and SQLite file exists
-  if (!isSqliteAdapter(adapter) && await isFreshDb(adapter)) {
-    try {
-      await migrateSqliteToRemote(adapter);
-    } catch (err) {
-      console.warn('[DB] SQLite migration failed:', err);
-    }
-  }
-
-
 
   // 3. One-time legacy JSON import (only if DB was fresh on entry)
   const alreadyImported = fs.existsSync(migratedMarker);
@@ -305,7 +260,7 @@ export async function runMigrationOnce(adapter) {
 
     try { fs.writeFileSync(migratedMarker, new Date().toISOString()); } catch {}
     pruneOldBackups();
-    console.log(`[DB][migrate] JSON → SQLite in ${Date.now() - t0}ms | legacy JSON kept at DATA_DIR | backup: ${backupDir}`);
+    console.log(`[DB][migrate] JSON → remote DB in ${Date.now() - t0}ms | legacy JSON kept at DATA_DIR | backup: ${backupDir}`);
     return;
   }
 
@@ -314,19 +269,23 @@ export async function runMigrationOnce(adapter) {
     return;
   }
 
-  // 4. App version bump → backup data.sqlite (safety net before user-side upgrade)
+  // 4. App version bump → backup legacy/local artifacts if present (safety net before user-side upgrade)
   const oldVer = await getMetaSync(adapter, "appVersion", null);
   const newVer = getAppVersion();
   if (oldVer && oldVer !== newVer) {
     const backupDir = makeBackupDir(`upgrade-${oldVer}-to-${newVer}`);
-    try { backupFile(DATA_FILE, backupDir); } catch {}
+    for (const f of Object.values(LEGACY_FILES)) {
+      try { backupFile(f, backupDir); } catch {}
+    }
     await setMetaSync(adapter, "appVersion", newVer);
     pruneOldBackups();
     console.log(`[DB][migrate] App ${oldVer} → ${newVer} | schema ${migInfo.from} → ${migInfo.to} | backup: ${backupDir}`);
   } else if (migInfo.applied > 0) {
     // Schema upgrade without app version bump — still backup
     const backupDir = makeBackupDir(`schema-${migInfo.from}-to-${migInfo.to}`);
-    try { backupFile(DATA_FILE, backupDir); } catch {}
+    for (const f of Object.values(LEGACY_FILES)) {
+      try { backupFile(f, backupDir); } catch {}
+    }
     pruneOldBackups();
   }
 }

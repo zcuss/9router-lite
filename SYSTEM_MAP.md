@@ -13,7 +13,7 @@ Dokumen ini berfungsi sebagai peta navigasi utama untuk memahami arsitektur, alu
 * **Auto Fallback**: Mekanisme fallback berjenjang (Subscription → Cheap → Free) untuk menjamin ketersediaan layanan tanpa downtime.
 * **Multi-Account Round-Robin**: Rotasi akun per penyedia layanan untuk menghindari batas kuota/rate limit.
 * **Format Translation**: Penerjemahan format request/response secara transparan antara berbagai ekosistem (OpenAI, Claude, Gemini, dll.).
-* **Local Persistence**: Penyimpanan data lokal menggunakan SQLite (dengan fallback WASM sql.js) untuk koneksi, kunci API, alias model, kombo, pengaturan, dan pelacakan penggunaan.
+* **Persistence**: Penyimpanan data aplikasi utama menggunakan CockroachDB/PostgreSQL melalui `DATABASE_URL`, dengan file lokal hanya untuk secret, runtime, dan backup.
 
 ---
 
@@ -76,7 +76,7 @@ Struktur folder utama proyek `9router-lite`:
 9router-lite/
 ├── cli/                            # Paket CLI untuk menjalankan 9Router secara lokal
 │   ├── cli.js                      # Entrypoint CLI
-│   ├── hooks/                      # Script runtime (sqlite, tray, postinstall)
+│   ├── hooks/                      # Script runtime (tray, postinstall)
 │   └── scripts/                    # Script build CLI dan MITM
 ├── docs/                           # Dokumentasi arsitektur proyek
 ├── gitbook/                        # Aplikasi dokumentasi terpisah (GitBook)
@@ -93,7 +93,7 @@ Struktur folder utama proyek `9router-lite`:
 │   │   ├── (dashboard)/            # Halaman Dashboard UI (Providers, Settings, dll.)
 │   │   └── api/                    # API Management (/api/*) & Compatibility (/api/v1/*)
 │   ├── lib/                        # Pustaka internal (Database, Cloud Sync, Proxy)
-│   │   └── db/                     # Lapisan database SQLite (driver, repos, migrasi)
+│   │   └── db/                     # Lapisan database remote (driver, repos, migrasi)
 │   ├── shared/                     # Komponen UI bersama, konstanta, dan utilitas
 │   └── sse/                        # Handler SSE tingkat tinggi (chat, model, auth)
 └── tests/                          # Paket pengujian unit dan integrasi
@@ -130,7 +130,7 @@ Struktur folder utama proyek `9router-lite`:
   * `response/`: Penerjemah response (misal: `claude-to-openai.js`, `gemini-to-openai.js`).
 
 ### C. Persistence Layer (`src/lib/db/`)
-* **`driver.js`**: Menginisialisasi adapter database berdasarkan lingkungan (Node SQLite, Better-SQLite3, Bun, Postgres, atau SQL.js WASM).
+* **`driver.js`**: Menginisialisasi adapter database remote CockroachDB/PostgreSQL berdasarkan `DATABASE_URL` / `DB_DRIVER`.
 * **`schema.js`**: Definisi skema tabel database (settings, providerConnections, providerNodes, proxyPools, apiKeys, combos, kv, usageHistory, requestDetails).
 * **`repos/`**:
   * `connectionsRepo.js`: Manajemen koneksi provider (termasuk parsing boolean CockroachDB/Postgres).
@@ -141,8 +141,8 @@ Struktur folder utama proyek `9router-lite`:
 
 ## 5. Data & Konfigurasi (Data & Config)
 
-### Database Lokal:
-* **Lokasi**: `${DATA_DIR}/db/data.sqlite` (default: `~/.9router/db/data.sqlite`).
+### Database:
+* **Lokasi**: CockroachDB / PostgreSQL yang ditentukan oleh `DATABASE_URL`.
 * **Tabel Utama**:
   * `settings`: Menyimpan konfigurasi global (RTK, Caveman, requireApiKey, dll.).
   * `providerConnections`: Menyimpan kredensial akun provider (API Key, OAuth tokens, proxy, prioritas).
@@ -175,4 +175,3 @@ Struktur folder utama proyek `9router-lite`:
 * **Compatible Base URL Normalization**: Pengguna sering memasukkan URL endpoint lengkap (seperti `https://api.example.com/v1/chat/completions`) pada kolom Base URL untuk provider kompatibel. URL ini harus dinormalisasi (dihapus path `/chat/completions` atau `/v1`) sebelum melakukan pemanggilan ke endpoint `/models`.
 * **OAuth Token Expiration**: Provider berbasis OAuth memerlukan mekanisme refresh token yang andal. Jika refresh gagal di tengah jalan, request akan gagal dengan error 401/403. Pastikan penanganan error di `chatCore.js` dapat memicu `refreshCredentials` dengan benar.
 * **Webpack Build Dependency**: Aplikasi Next.js di root menggunakan konfigurasi Webpack kustom secara eksplisit. Perubahan pada konfigurasi bundler harus diuji dengan `npm run build` untuk memastikan tidak ada pemecahan modul (module resolution) yang rusak.
-* **WASM Fallback**: Jika driver SQLite native gagal dimuat, sistem akan jatuh kembali (fallback) ke `sql.js` berbasis WASM yang menyimpan data di memori atau menulis ulang file secara penuh. Hal ini dapat mempengaruhi performa pada sistem dengan I/O lambat.

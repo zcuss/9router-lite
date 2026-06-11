@@ -9,7 +9,8 @@
 const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
-const { getRuntimeDir, getRuntimeNodeModules, runNpmInstall, summarizeNpmError } = require("./sqliteRuntime");
+const { getRuntimeDir, getRuntimeNodeModules } = require("./runtimeEnv");
+const { runNpmInstall, summarizeNpmError } = require("./sqliteRuntime");
 
 const SYSTRAY_PKG = "systray2";
 const SYSTRAY_VERSION = "2.1.4";

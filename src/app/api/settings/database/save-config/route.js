@@ -67,8 +67,16 @@ export async function POST(request) {
     const normalizedDriver = normalizeDriver(DB_DRIVER);
     const finalDatabaseUrl = normalizedDriver === "local" ? "" : encodeDatabaseUrlPassword(DATABASE_URL);
 
-    await updateEnvFile(envPath, normalizedDriver, finalDatabaseUrl);
-    if (envPath !== rootEnvPath) await updateEnvFile(rootEnvPath, normalizedDriver, finalDatabaseUrl);
+    // Write file in background after sending response with a longer delay (1.5 seconds)
+    // to give client ample time to finish save-config and subsequent config-refresh calls.
+    setTimeout(async () => {
+      try {
+        await updateEnvFile(envPath, normalizedDriver, finalDatabaseUrl);
+        if (envPath !== rootEnvPath) await updateEnvFile(rootEnvPath, normalizedDriver, finalDatabaseUrl);
+      } catch (e) {
+        console.error("Delayed env write failed:", e);
+      }
+    }, 1500);
 
     return NextResponse.json({ success: true, DATABASE_URL: finalDatabaseUrl, DB_DRIVER: normalizedDriver });
   } catch (error) {

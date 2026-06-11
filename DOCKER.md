@@ -35,20 +35,18 @@ docker rm -f 9router-lite          # remove
 -e DATA_DIR=/app/data
 ```
 
-Without `DATA_DIR`, the app falls back to `~/.9router-lite/` (macOS/Linux) or `%APPDATA%\9router-lite\` (Windows). In the container, `DATA_DIR=/app/data` makes the bind mount work.
+Without `DATA_DIR`, the app falls back to `~/.9router-lite/` (macOS/Linux) or `%APPDATA%\\9router-lite\\` (Windows). In the container, `DATA_DIR=/app/data` makes the bind mount work.
 
 Data layout under `$DATA_DIR/`:
 
 ```text
 $DATA_DIR/
 ├── db/
-│   ├── data.sqlite       # main SQLite database
 │   └── backups/          # auto backups
 └── ...                   # certs, logs, runtime configs
 ```
 
-Host path: `$HOME/.9router-lite/db/data.sqlite`
-Container path: `/app/data/db/data.sqlite`
+Main application data is stored in CockroachDB/Postgres via `DATABASE_URL`.
 
 ## Optional env vars
 

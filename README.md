@@ -1090,11 +1090,9 @@ docker stop 9router && docker rm 9router
 docker pull decolua/9router:latest   # update to latest
 ```
 
-**Data persistence:** `$HOME/.9router/db/data.sqlite` on host ↔ `/app/data/db/data.sqlite` in container.
+**Data persistence:** bind-mount `${DATA_DIR}` (for secrets, logs, and backups). Main application data is stored in CockroachDB/Postgres via `DATABASE_URL`.
 
-> Native `better-sqlite3` is no longer auto-installed by the CLI. By default, 9Router uses built-in `node:sqlite` when available, otherwise `sql.js`. To force optional native install, set `9ROUTER_INSTALL_BETTER_SQLITE3=1`.
->
-> `CockroachDB` / `Postgres` mode is available through the async DB adapter. Set `DB_DRIVER=cockroach` or `DB_DRIVER=postgres` and provide `DATABASE_URL`.
+> `CockroachDB` / `Postgres` is required. Set `DB_DRIVER=cockroach` or `DB_DRIVER=postgres` and provide `DATABASE_URL`.
 
 ### Environment Variables
 
@@ -1102,7 +1100,7 @@ docker pull decolua/9router:latest   # update to latest
 |----------|---------|-------------|
 | `JWT_SECRET` | Auto-generated (`~/.9router/jwt-secret`) | JWT signing secret for dashboard auth cookie (override to share across instances) |
 | `INITIAL_PASSWORD` | `123456` | First login password when no saved hash exists |
-| `DATA_DIR` | `~/.9router` | Main app data location (DB file at `$DATA_DIR/db/data.sqlite`) |
+| `DATA_DIR` | `~/.9router` | Main app data location for secrets, backups, and runtime files |
 | `DB_DRIVER` | empty | Remote DB mode selector (`cockroach`, `cockroachdb`, `postgres`, `postgresql`) |
 | `DATABASE_URL` | empty | CockroachDB/Postgres connection string (`postgresql://...`) |
 | `PORT` | framework default | Service port (`20128` in examples) |
@@ -1127,9 +1125,10 @@ Notes:
 
 ### Runtime Files and Storage
 
-- Main app state: `${DATA_DIR}/db/data.sqlite` (SQLite — providers, combos, aliases, keys, settings, usage history)
+- Main app runtime files: `${DATA_DIR}/` (JWT secret, runtime files, backups)
 - Auto backups: `${DATA_DIR}/db/backups/`
 - Optional request/translator logs: `<repo>/logs/...` when `ENABLE_REQUEST_LOGS=true`
+- Main application state lives in CockroachDB/Postgres via `DATABASE_URL`
 - Both `${DATA_DIR}` and `~/.9router` resolve to the same location in a Docker container — the symlink `/root/.9router -> /app/data` is created at build time.
 
 </details>
@@ -1240,7 +1239,7 @@ Notes:
 - **Runtime**: Node.js 20+
 - **Framework**: Next.js 16
 - **UI**: React 19 + Tailwind CSS 4
-- **Database**: SQLite (better-sqlite3 / node:sqlite / sql.js fallback)
+- **Database**: CockroachDB / PostgreSQL via async `pg` adapter
 - **Streaming**: Server-Sent Events (SSE)
 - **Auth**: OAuth 2.0 (PKCE) + JWT + API Keys
 
