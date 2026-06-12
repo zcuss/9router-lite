@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-const envPath = path.join(process.cwd(), ".env");
-const rootEnvPath = path.join(process.cwd(), "../../.env");
+const envPath = process.env.ROUTER_LITE_ENV_LOADED_PATH || path.join(process.cwd(), ".env");
+const rootEnvPath = process.env.ROUTER_LITE_ENV_LOADED_PATH || path.join(process.cwd(), "../../.env");
 
 function encodeDatabaseUrlPassword(urlStr) {
   if (!urlStr) return urlStr;
