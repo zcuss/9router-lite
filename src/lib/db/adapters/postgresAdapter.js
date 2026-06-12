@@ -158,12 +158,23 @@ export async function createPostgresAdapter() {
     throw new Error("[DB] CockroachDB/Postgres mode requires dependency 'pg'. Run npm install after pulling this change.");
   }
 
+  // Strip sslmode from connection string to prevent pg-connection-string from overriding our custom ssl config object
+  let connectionString = url;
+  const hasSslQuery = url.includes("sslmode=");
+  if (hasSslQuery) {
+    connectionString = url.replace(/[\?&]sslmode=[^&]+/g, "");
+    // Ensure trailing question mark is cleaned up if it was a query param
+    if (connectionString.endsWith("?")) {
+      connectionString = connectionString.slice(0, -1);
+    }
+  }
+
   const pool = new Pool({
-    connectionString: url,
+    connectionString,
     max: 20,
     idleTimeoutMillis: 60000, // Increased from 30s for remote DB stability
     connectionTimeoutMillis: 30000, // Increased from 10s for remote DB reliability
-    ssl: url.includes("supabase") || url.includes("neon") || url.includes("render") ? { rejectUnauthorized: false } : undefined,
+    ssl: url.includes("supabase") || url.includes("neon") || url.includes("render") || hasSslQuery ? { rejectUnauthorized: false } : undefined,
   });
 
   // Graceful shutdown handler for SIGINT/SIGTERM/SIGHUP (signal 1)
