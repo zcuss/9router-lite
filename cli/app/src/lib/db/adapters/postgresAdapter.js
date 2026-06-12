@@ -184,7 +184,7 @@ export async function createPostgresAdapter() {
     max: 20,
     idleTimeoutMillis: 60000,
     connectionTimeoutMillis: 30000,
-    ssl: url.includes("supabase") || url.includes("neon") || url.includes("render") || hasSslQuery ? { rejectUnauthorized: false } : undefined,
+    ssl: url.includes("supabase") || url.includes("neon") || url.includes("render") || url.includes("cockroach") || url.includes("cockroachlabs") || hasSslQuery ? { rejectUnauthorized: false } : undefined,
   });
 
   // Graceful shutdown handler for SIGINT/SIGTERM/SIGHUP (signal 1)
