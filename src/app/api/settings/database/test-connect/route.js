@@ -42,7 +42,30 @@ export async function POST(request) {
     }
 
     const finalUrl = encodeDatabaseUrlPassword(DATABASE_URL);
-    const client = new Database({ connectionString: finalUrl });
+    // Clean sslmode parameter from connection string using URL object to avoid regex corruption
+    let connectionString = finalUrl;
+    let hasSslQuery = false;
+    try {
+      const parsedUrl = new URL(finalUrl);
+      if (parsedUrl.searchParams.has("sslmode")) {
+        hasSslQuery = true;
+        parsedUrl.searchParams.delete("sslmode");
+        connectionString = parsedUrl.toString();
+      }
+    } catch (e) {
+      if (finalUrl.includes("sslmode=")) {
+        hasSslQuery = true;
+        connectionString = finalUrl.replace(/[\?&]sslmode=[^&]+/g, "");
+        if (connectionString.endsWith("?")) {
+          connectionString = connectionString.slice(0, -1);
+        }
+      }
+    }
+
+    const client = new Database({ 
+      connectionString,
+      ssl: finalUrl.includes("supabase") || finalUrl.includes("neon") || finalUrl.includes("render") || hasSslQuery ? { rejectUnauthorized: false } : undefined
+    });
     await client.connect();
     await client.query("SELECT 1");
     await client.end();
