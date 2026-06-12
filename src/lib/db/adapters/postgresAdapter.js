@@ -163,6 +163,7 @@ export async function createPostgresAdapter() {
     max: 20,
     idleTimeoutMillis: 60000, // Increased from 30s for remote DB stability
     connectionTimeoutMillis: 30000, // Increased from 10s for remote DB reliability
+    ssl: url.includes("supabase") || url.includes("neon") || url.includes("render") ? { rejectUnauthorized: false } : undefined,
   });
 
   // Graceful shutdown handler for SIGINT/SIGTERM/SIGHUP (signal 1)
