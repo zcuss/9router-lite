@@ -56,7 +56,6 @@ function loadDotEnvFile(filePath) {
       const eq = s.indexOf("=");
       if (eq <= 0) continue;
       const key = s.slice(0, eq).trim();
-      if (!key || process.env[key] !== undefined) continue;
       let value = s.slice(eq + 1).trim();
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1);
