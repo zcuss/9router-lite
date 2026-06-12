@@ -810,6 +810,10 @@ function startServer(latestVersion) {
         try {
           await killProcessOnPort(port);
         } catch { /* best effort */ }
+        // Reload environment variables from the .env file before spawning server again
+        if (loadedEnvPath) {
+          loadDotEnvFile(loadedEnvPath);
+        }
         server = spawnServer();
         attachServerEvents();
         return;
