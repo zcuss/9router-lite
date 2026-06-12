@@ -64,7 +64,7 @@ export async function POST(request) {
 
     const client = new Database({ 
       connectionString,
-      ssl: finalUrl.includes("supabase") || finalUrl.includes("neon") || finalUrl.includes("render") || hasSslQuery ? { rejectUnauthorized: false } : undefined
+      ssl: finalUrl.includes("supabase") || finalUrl.includes("neon") || finalUrl.includes("render") || finalUrl.includes("cockroach") || hasSslQuery ? { rejectUnauthorized: false } : undefined
     });
     await client.connect();
     await client.query("SELECT 1");
