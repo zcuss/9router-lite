@@ -73,6 +73,9 @@ export async function POST(request) {
       try {
         await updateEnvFile(envPath, normalizedDriver, finalDatabaseUrl);
         if (envPath !== rootEnvPath) await updateEnvFile(rootEnvPath, normalizedDriver, finalDatabaseUrl);
+        
+        // Force process.exit(12) so that CLI wrapper knows database config changed and restarts
+        process.exit(12);
       } catch (e) {
         console.error("Delayed env write failed:", e);
       }
