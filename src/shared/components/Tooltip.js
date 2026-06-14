@@ -9,7 +9,7 @@ export default function Tooltip({ text, children, position = "top", color }) {
   }[position];
 
   const bgStyle = color ? { backgroundColor: color } : {};
-  const bgClass = color ? "" : "bg-gray-900";
+  const bgClass = color ? "" : "bg-slate-950/92 backdrop-blur-xl border border-white/10 shadow-[0_14px_36px_-24px_rgba(0,0,0,0.9)]";
 
   return (
     <div className="relative inline-flex group">

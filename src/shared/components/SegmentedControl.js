@@ -18,8 +18,8 @@ export default function SegmentedControl({
   return (
     <div
       className={cn(
-        "inline-flex items-center p-1 rounded-[10px] overflow-x-auto",
-        "bg-surface-2",
+        "inline-flex items-center p-1 rounded-xl overflow-x-auto border border-border-subtle",
+        "bg-surface/80 backdrop-blur-xl",
         className
       )}
     >
