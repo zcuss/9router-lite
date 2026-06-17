@@ -69,7 +69,8 @@ export async function deleteApiKey(id) {
 
 export async function validateApiKey(key) {
   const db = await getAdapter();
-  const row = await db.get(`SELECT isActive FROM apiKeys WHERE key = ?`, [key]);
+  const row = await db.get(`SELECT isActive FROM "apiKeys" WHERE key = ?`, [key]);
   if (!row) return false;
-  return row.isActive === 1 || row.isActive === true;
+  // pg/cockroach driver returns integers/booleans as strings; coerce before comparing
+  return row.isActive == 1 || row.isActive == true || row.isActive === "1" || row.isActive === "true";
 }

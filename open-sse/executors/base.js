@@ -27,13 +27,17 @@ export class BaseExecutor {
   buildUrl(model, stream, urlIndex = 0, credentials = null) {
     if (this.provider?.startsWith?.("openai-compatible-")) {
       const baseUrl = credentials?.providerSpecificData?.baseUrl || "https://api.openai.com/v1";
-      const normalized = baseUrl.replace(/\/$/, "");
+      // Strip trailing slash and any pre-existing path segments we'll re-append
+      let normalized = baseUrl.replace(/\/$/, "");
+      normalized = normalized.replace(/\/(chat\/completions|completions|responses|embeddings|audio\/speech)\/?$/i, "");
       const path = this.provider.includes("responses") ? "/responses" : "/chat/completions";
       return `${normalized}${path}`;
     }
     if (this.provider?.startsWith?.("anthropic-compatible-")) {
       const baseUrl = credentials?.providerSpecificData?.baseUrl || "https://api.anthropic.com/v1";
-      const normalized = baseUrl.replace(/\/$/, "");
+      // Strip trailing slash and any pre-existing /messages path
+      let normalized = baseUrl.replace(/\/$/, "");
+      normalized = normalized.replace(/\/messages\/?$/i, "");
       return `${normalized}/messages`;
     }
     const baseUrls = this.getBaseUrls();

@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = "force-dynamic";
 import { Card, Badge } from "@/shared/components";
 import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import {

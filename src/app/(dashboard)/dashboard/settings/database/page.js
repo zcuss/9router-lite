@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { Card, Button, Input, Select } from "@/shared/components";
 import { Toaster, toast } from "sonner";

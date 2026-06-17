@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = "force-dynamic";
 import { useState, useEffect, useCallback } from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";

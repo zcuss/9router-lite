@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = "force-dynamic";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Badge, Button, Card, CardSkeleton, Input, Modal, Toggle, ConfirmModal } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";

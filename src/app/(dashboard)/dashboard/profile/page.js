@@ -1,5 +1,7 @@
 "use client";
 
+
+export const dynamic = "force-dynamic";
 import { useState, useEffect, useRef } from "react";
 import { Card, Button, Toggle, Input } from "@/shared/components";
 import { useTheme } from "@/shared/hooks/useTheme";

@@ -8,30 +8,44 @@ import useSettingsStore from "@/store/settingsStore";
 
 const navGroups = [
   {
-    title: "General",
+    title: "Utama",
     items: [
-      { href: "/dashboard", label: "Overview", icon: "dashboard" },
-      { href: "/dashboard/usage", label: "Usage", icon: "bar_chart" },
-      { href: "/dashboard/analytics", label: "Analytics", icon: "query_stats" },
+      { href: "/dashboard", label: "Beranda", icon: "dashboard" },
+      { href: "/dashboard/usage", label: "Pemakaian", icon: "bar_chart" },
+      { href: "/dashboard/analytics", label: "Analitik", icon: "query_stats" },
     ],
   },
   {
-    title: "Setup",
+    title: "Akun & Saldo",
     items: [
-      { href: "/dashboard/providers", label: "Providers", icon: "dns" },
-      { href: "/dashboard/combos", label: "Aliases (Combos)", icon: "layers" },
+      { href: "/dashboard/topup", label: "Isi Saldo (Topup)", icon: "account_balance_wallet" },
+      { href: "/dashboard/profile", label: "Akun & API", icon: "person" },
     ],
   },
   {
-    title: "Management",
+    title: "Konfigurasi",
     items: [
-      { href: "/dashboard/quota", label: "API Keys & Quota", icon: "key" },
-      { href: "/dashboard/pricing", label: "Pricing", icon: "payments" },
-      { href: "/dashboard/user-management", label: "Users (Dev/Admin)", icon: "manage_accounts", adminOnly: true },
+      { href: "/dashboard/providers", label: "Provider", icon: "dns" },
+      { href: "/dashboard/combos", label: "Kombo Model", icon: "layers" },
     ],
   },
   {
-    title: "Advanced",
+    title: "Manajemen",
+    items: [
+      { href: "/dashboard/quota", label: "API Key & Kuota", icon: "key" },
+      { href: "/dashboard/pricing", label: "Tarif & Langganan", icon: "payments" },
+    ],
+  },
+  {
+    title: "Kontrol Admin",
+    items: [
+      { href: "/dashboard/user-management", label: "Pengguna (Dev/Admin)", icon: "manage_accounts", adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Voucher", icon: "confirmation_number", adminOnly: true },
+      { href: "/dashboard/admin/models", label: "Model Rilis", icon: "publish", adminOnly: true },
+    ],
+  },
+  {
+    title: "Lanjutan",
     items: [
       { href: "/dashboard/ai-tuning", label: "AI Tuning", icon: "psychology" },
       { href: "/dashboard/mitm", label: "MITM Proxy", icon: "security" },
@@ -40,12 +54,11 @@ const navGroups = [
     ],
   },
   {
-    title: "System",
+    title: "Sistem",
     items: [
       { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: "lan" },
-      { href: "/dashboard/console-log", label: "Console", icon: "terminal" },
-      { href: "/dashboard/settings/database", label: "Database", icon: "storage" },
-      { href: "/dashboard/profile", label: "Account", icon: "person" },
+      { href: "/dashboard/console-log", label: "Konsol", icon: "terminal" },
+      { href: "/dashboard/settings/database", label: "Basis Data", icon: "storage" },
     ],
   },
 ];
@@ -56,8 +69,25 @@ export default function Sidebar({ onClose }) {
   const userRole = settings?.userRole || "dev";
 
   const isActive = (href) => {
-    if (href === "/dashboard") return pathname === "/dashboard";
-    return pathname.startsWith(href);
+    try {
+      const url = new URL(href, "http://localhost");
+      const tabParam = url.searchParams.get("tab");
+      
+      if (typeof window !== "undefined") {
+        const activeTab = new URLSearchParams(window.location.search).get("tab");
+        if (tabParam) {
+          return pathname === url.pathname && activeTab === tabParam;
+        }
+        if (pathname === url.pathname && activeTab) {
+          return false;
+        }
+      }
+      
+      if (url.pathname === "/dashboard") return pathname === "/dashboard";
+      return pathname.startsWith(url.pathname);
+    } catch {
+      return pathname === href;
+    }
   };
 
   return (
@@ -124,7 +154,7 @@ export default function Sidebar({ onClose }) {
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-red-500/70 transition-all hover:bg-red-500/10 hover:text-red-500"
         >
           <span className="material-symbols-outlined text-[20px] transition-transform duration-500 group-hover:rotate-180">logout</span>
-          <span className="text-[13px] font-medium tracking-wide">Sign out</span>
+          <span className="text-[13px] font-medium tracking-wide">Keluar (Sign out)</span>
         </button>
       </div>
     </aside>
