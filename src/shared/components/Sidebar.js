@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
 import { APP_CONFIG } from "@/shared/constants/config";
 import useSettingsStore from "@/store/settingsStore";
+import { useEffectiveRole } from "@/store/roleStore";
 
 const navGroups = [
   {
@@ -13,13 +14,7 @@ const navGroups = [
       { href: "/dashboard", label: "Beranda", icon: "dashboard" },
       { href: "/dashboard/usage", label: "Pemakaian", icon: "bar_chart" },
       { href: "/dashboard/analytics", label: "Analitik", icon: "query_stats" },
-    ],
-  },
-  {
-    title: "Akun & Saldo",
-    items: [
-      { href: "/dashboard/topup", label: "Isi Saldo (Topup)", icon: "account_balance_wallet" },
-      { href: "/dashboard/profile", label: "Akun & API", icon: "person" },
+      { href: "/dashboard/topup", label: "Isi Saldo (Top Up)", icon: "add_card" },
     ],
   },
   {
@@ -27,6 +22,7 @@ const navGroups = [
     items: [
       { href: "/dashboard/providers", label: "Provider", icon: "dns" },
       { href: "/dashboard/combos", label: "Kombo Model", icon: "layers" },
+      { href: "/dashboard/endpoint", label: "Endpoint", icon: "api" },
     ],
   },
   {
@@ -34,14 +30,14 @@ const navGroups = [
     items: [
       { href: "/dashboard/quota", label: "API Key & Kuota", icon: "key" },
       { href: "/dashboard/pricing", label: "Tarif & Langganan", icon: "payments" },
+      { href: "/dashboard/user-management", label: "Pengguna (Dev/Admin)", icon: "manage_accounts", adminOnly: true },
     ],
   },
   {
     title: "Kontrol Admin",
     items: [
-      { href: "/dashboard/user-management", label: "Pengguna (Dev/Admin)", icon: "manage_accounts", adminOnly: true },
-      { href: "/dashboard/admin/vouchers", label: "Voucher", icon: "confirmation_number", adminOnly: true },
-      { href: "/dashboard/admin/models", label: "Model Rilis", icon: "publish", adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Kelola Voucher", icon: "confirmation_number", adminOnly: true },
+      { href: "/dashboard/admin/models", label: "Rilis & Tambah Model", icon: "publish", adminOnly: true },
     ],
   },
   {
@@ -59,6 +55,7 @@ const navGroups = [
       { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: "lan" },
       { href: "/dashboard/console-log", label: "Konsol", icon: "terminal" },
       { href: "/dashboard/settings/database", label: "Basis Data", icon: "storage" },
+      { href: "/dashboard/profile", label: "Akun", icon: "person" },
     ],
   },
 ];
@@ -66,13 +63,14 @@ const navGroups = [
 export default function Sidebar({ onClose }) {
   const pathname = usePathname();
   const { settings } = useSettingsStore();
-  const userRole = settings?.userRole || "dev";
+  const effectiveRole = useEffectiveRole();
+  const userRole = String(effectiveRole || settings?.userRole || "dev").toLowerCase();
 
   const isActive = (href) => {
     try {
       const url = new URL(href, "http://localhost");
       const tabParam = url.searchParams.get("tab");
-      
+
       if (typeof window !== "undefined") {
         const activeTab = new URLSearchParams(window.location.search).get("tab");
         if (tabParam) {
@@ -82,7 +80,7 @@ export default function Sidebar({ onClose }) {
           return false;
         }
       }
-      
+
       if (url.pathname === "/dashboard") return pathname === "/dashboard";
       return pathname.startsWith(url.pathname);
     } catch {
@@ -154,7 +152,7 @@ export default function Sidebar({ onClose }) {
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-red-500/70 transition-all hover:bg-red-500/10 hover:text-red-500"
         >
           <span className="material-symbols-outlined text-[20px] transition-transform duration-500 group-hover:rotate-180">logout</span>
-          <span className="text-[13px] font-medium tracking-wide">Keluar (Sign out)</span>
+          <span className="text-[13px] font-medium tracking-wide">Sign out</span>
         </button>
       </div>
     </aside>

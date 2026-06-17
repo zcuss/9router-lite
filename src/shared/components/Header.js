@@ -8,6 +8,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import HeaderMenu from "@/shared/components/HeaderMenu";
 import ThemeToggle from "@/shared/components/ThemeToggle";
 import DonateModal from "@/shared/components/DonateModal";
+import ViewAsSwitcher from "@/shared/components/ViewAsSwitcher";
 import { useHeaderSearchStore } from "@/store/headerSearchStore";
 import useSettingsStore from "@/store/settingsStore";
 import { OAUTH_PROVIDERS, APIKEY_PROVIDERS } from "@/shared/constants/config";
@@ -115,6 +116,7 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
       </div>
       <div className="flex items-center gap-1 shrink-0">
         {displayName && loginMethod === "OIDC" && (<div className="hidden sm:flex items-center max-w-[220px] px-3 py-1.5 rounded-full border border-border bg-surface/70 text-xs text-text-muted truncate"><span className="material-symbols-outlined text-[14px] mr-1.5 text-primary">person</span><span className="truncate">{displayName}</span><span className="ml-2 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">OIDC</span></div>)}
+        <ViewAsSwitcher />
         <HeaderSearch />
         <button type="button" onClick={async () => { const nextMode = uiMode === "expert" ? "lite" : "expert"; await patchSettings({ uiMode: nextMode }); await fetchSettings(); }} className={`flex items-center gap-1.5 px-3 h-9 rounded-xl border transition-colors text-sm font-medium ${uiMode === "expert" ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-surface/80 text-text-muted hover:border-primary/30 hover:bg-primary/5"}`} title={`Switch to ${uiMode === "expert" ? "Lite" : "Expert"} Mode`}><span className="material-symbols-outlined text-[18px]">{uiMode === "expert" ? "psychology" : "bolt"}</span><span className="hidden sm:inline capitalize">{uiMode}</span></button>
         <button onClick={() => setDonateOpen(true)} className="flex items-center gap-1.5 px-3 h-9 rounded-xl border border-pink-500/25 bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 transition-colors text-sm font-medium" aria-label="Donate"><span className="material-symbols-outlined text-[18px]">volunteer_activism</span><span className="hidden sm:inline">Donate</span></button>

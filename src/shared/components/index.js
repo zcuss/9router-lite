@@ -36,6 +36,9 @@ export { default as NoAuthProxyCard } from "./NoAuthProxyCard";
 export { default as SegmentedControl } from "./SegmentedControl";
 export { default as Tooltip } from "./Tooltip";
 export { default as ProviderInfoCard } from "./ProviderInfoCard";
+export { default as ViewAsSwitcher } from "./ViewAsSwitcher";
+export { default as RoleSync } from "./RoleSync";
+export { RoleProvider, useRole, isAdminLike } from "./RoleProvider";
 
 // Layouts
 export * from "./layouts";

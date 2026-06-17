@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import useRoleStore from "@/store/roleStore";
 
-const STATUS_ENDPOINT = "/api/auth/status";
+const STATUS_ENDPOINT = "/api/auth/me";
 const FETCH_COOLDOWN_MS = 5 * 60 * 1000; // 5 min between status fetches
 
 export default function RoleSync({ children }) {
@@ -25,10 +25,10 @@ export default function RoleSync({ children }) {
         }
         const data = await res.json();
         if (!alive) return;
-        if (data?.authenticated && data?.user) {
+        if (data && !data.error && data.id) {
           setRealUser({
-            role: data.user.role || "dev",
-            username: data.user.username || data.user.displayName || null,
+            role: data.role || "dev",
+            username: data.username || data.displayName || null,
           });
         } else {
           clear();
