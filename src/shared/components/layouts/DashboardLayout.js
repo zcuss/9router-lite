@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }) {
                   type="button"
                   onClick={() => removeNotification(n.id)}
                   className="opacity-70 hover:opacity-100"
-                  aria-label="Tutup notifikasi"
+                  aria-label="Dismiss notification"
                 >
                   <X className="size-3.5" strokeWidth={2.25} />
                 </button>

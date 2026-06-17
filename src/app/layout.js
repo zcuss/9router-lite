@@ -16,7 +16,7 @@ const inter = Inter({
 
 export const metadata = {
   title: "Zcus Router — Relay SaaS AI",
-  description: "Satu endpoint untuk semua provider AI Anda. Kelola API key, pantau pemakaian, dan atur Midtrans top-up dari satu dashboard.",
+  description: "One endpoint for every AI provider you use. Manage API keys, monitor usage, and handle Midtrans top-ups from a single dashboard.",
   icons: {
     icon: "/favicon.svg",
   },

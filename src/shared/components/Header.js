@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import PropTypes from "prop-types";
-import { Menu, Search, X, LogOut, User, ChevronRight, Zap, Brain, Heart, Moon, Sun, Monitor, Settings as SettingsIcon } from "lucide-react";
+import { Menu, Search, X, LogOut, User, ChevronRight, Zap, Brain, Heart } from "lucide-react";
 import HeaderMenu from "@/shared/components/HeaderMenu";
 import ThemeToggle from "@/shared/components/ThemeToggle";
 import useSettingsStore from "@/store/settingsStore";
@@ -12,22 +12,22 @@ import { translate } from "@/i18n/runtime";
 import { useHeaderSearchStore } from "@/store/headerSearchStore";
 
 const getPageInfo = (pathname) => {
-  if (!pathname) return { title: "", description: "", breadcrumbs: [] };
-  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Provider", description: "Kelola koneksi provider AI Anda", icon: "server" };
-  if (pathname.includes("/combos")) return { title: "Kombo Model", description: "Kombo model dengan fallback otomatis", icon: "layers" };
-  if (pathname.includes("/usage")) return { title: "Pemakaian", description: "Pantau penggunaan API, token, dan log request", icon: "bar" };
-  if (pathname.includes("/quota")) return { title: "API Key & Kuota", description: "Kelola API key dan batas kuota", icon: "key" };
-  if (pathname.includes("/ai-tuning")) return { title: "AI Tuning", description: "Atur nama, personality, dan perilaku asisten", icon: "brain" };
-  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intercept trafik CLI tool lewat proxy", icon: "shield" };
-  if (pathname.includes("/cli-tools")) return { title: "CLI Tools", description: "Konfigurasi CLI tools", icon: "term" };
-  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pools", description: "Kelola konfigurasi proxy pool", icon: "net" };
-  if (pathname.includes("/skills")) return { title: "Skills", description: "Salin link dan paste ke AI Anda", icon: "puzzle" };
-  if (pathname.includes("/endpoint")) return { title: "Endpoint", description: "Konfigurasi API endpoint", icon: "code" };
-  if (pathname.includes("/profile")) return { title: "Akun", description: "Kelola preferensi Anda", icon: "user" };
-  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug alur translasi antar format", icon: "trans" };
-  if (pathname.includes("/console-log")) return { title: "Konsol", description: "Output konsol server real-time", icon: "term" };
-  if (pathname === "/dashboard") return { title: "Beranda", description: "Ringkasan infrastruktur AI Anda", icon: "home" };
-  return { title: "", description: "", breadcrumbs: [] };
+  if (!pathname) return { title: "", description: "" };
+  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Providers", description: "Manage your AI provider connections" };
+  if (pathname.includes("/combos")) return { title: "Model Combos", description: "Build combos with automatic fallback routing" };
+  if (pathname.includes("/usage")) return { title: "Usage", description: "Monitor API usage, tokens, and request logs" };
+  if (pathname.includes("/quota")) return { title: "API Keys & Quota", description: "Manage your API keys and quota limits" };
+  if (pathname.includes("/ai-tuning")) return { title: "AI Tuning", description: "Tune assistant name, personality, and system prompt" };
+  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intercept CLI tool traffic through the proxy" };
+  if (pathname.includes("/cli-tools")) return { title: "CLI Tools", description: "Configure CLI tools" };
+  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pools", description: "Manage your proxy pool configurations" };
+  if (pathname.includes("/skills")) return { title: "Skills", description: "Copy a link and paste it into your AI assistant" };
+  if (pathname.includes("/endpoint")) return { title: "Endpoint", description: "API endpoint configuration" };
+  if (pathname.includes("/profile")) return { title: "Account", description: "Manage your preferences" };
+  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug translation between formats" };
+  if (pathname.includes("/console-log")) return { title: "Console", description: "Live server console output" };
+  if (pathname === "/dashboard") return { title: "Home", description: "Overview of your AI infrastructure" };
+  return { title: "", description: "" };
 };
 
 export default function Header({ onMenuClick, showMenuButton = true }) {
@@ -76,7 +76,7 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
           <button
             onClick={onMenuClick}
             className="grid size-9 place-items-center rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-main)]"
-            aria-label="Buka menu"
+            aria-label="Open menu"
           >
             <Menu className="size-4" strokeWidth={2} />
           </button>
@@ -119,18 +119,18 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
               ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-accent-fg)]"
               : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-text-subtle)] hover:text-[var(--color-text-main)]"
           }`}
-          title={`Beralih ke mode ${uiMode === "expert" ? "Lite" : "Expert"}`}
+          title={`Switch to ${uiMode === "expert" ? "Lite" : "Expert"} mode`}
         >
           {uiMode === "expert" ? <Brain className="size-3.5" strokeWidth={2} /> : <Zap className="size-3.5" strokeWidth={2} />}
           <span className="hidden capitalize sm:inline">{uiMode}</span>
         </button>
         <button
-          onClick={() => alert("Terima kasih!")}
+          onClick={() => alert("Thanks for the support!")}
           className="hidden h-9 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-text-subtle)] hover:text-[var(--color-text-main)] sm:inline-flex"
-          aria-label="Donasi"
+          aria-label="Donate"
         >
           <Heart className="size-3.5" strokeWidth={2} />
-          <span>Donasi</span>
+          <span>Donate</span>
         </button>
         <ThemeToggle />
         <HeaderMenu onLogout={handleLogout} />
@@ -152,7 +152,7 @@ function HeaderSearch() {
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={placeholder || "Cari..."}
+        placeholder={placeholder || "Search..."}
         className="h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-8 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30"
       />
       {query && (
@@ -160,7 +160,7 @@ function HeaderSearch() {
           type="button"
           onClick={() => setQuery("")}
           className="absolute right-2 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-[var(--color-text-subtle)] hover:text-[var(--color-text-main)]"
-          aria-label="Hapus pencarian"
+          aria-label="Clear search"
         >
           <X className="size-3" strokeWidth={2.25} />
         </button>

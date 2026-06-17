@@ -31,39 +31,39 @@ import { useEffectiveRole } from "@/store/roleStore";
 
 const navGroups = [
   {
-    title: "Utama",
+    title: "Main",
     items: [
-      { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
-      { href: "/dashboard/usage", label: "Pemakaian", icon: BarChart3 },
-      { href: "/dashboard/analytics", label: "Analitik", icon: PieChart },
-      { href: "/dashboard/topup", label: "Isi Saldo", icon: Wallet },
+      { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+      { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
+      { href: "/dashboard/analytics", label: "Analytics", icon: PieChart },
+      { href: "/dashboard/topup", label: "Top Up", icon: Wallet },
     ],
   },
   {
-    title: "Konfigurasi",
+    title: "Configuration",
     items: [
-      { href: "/dashboard/providers", label: "Provider", icon: Server },
-      { href: "/dashboard/combos", label: "Kombo Model", icon: Layers },
+      { href: "/dashboard/providers", label: "Providers", icon: Server },
+      { href: "/dashboard/combos", label: "Model Combos", icon: Layers },
       { href: "/dashboard/endpoint", label: "Endpoint", icon: Code2 },
     ],
   },
   {
-    title: "Manajemen",
+    title: "Management",
     items: [
-      { href: "/dashboard/quota", label: "API Key & Kuota", icon: KeyRound },
-      { href: "/dashboard/pricing", label: "Tarif & Langganan", icon: CreditCard },
-      { href: "/dashboard/user-management", label: "Pengguna", icon: Users, adminOnly: true },
+      { href: "/dashboard/quota", label: "API Keys & Quota", icon: KeyRound },
+      { href: "/dashboard/pricing", label: "Pricing & Plans", icon: CreditCard },
+      { href: "/dashboard/user-management", label: "Users", icon: Users, adminOnly: true },
     ],
   },
   {
-    title: "Kontrol Admin",
+    title: "Admin",
     items: [
-      { href: "/dashboard/admin/vouchers", label: "Voucher", icon: Ticket, adminOnly: true },
-      { href: "/dashboard/admin/models", label: "Rilis Model", icon: Upload, adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Vouchers", icon: Ticket, adminOnly: true },
+      { href: "/dashboard/admin/models", label: "Model Releases", icon: Upload, adminOnly: true },
     ],
   },
   {
-    title: "Lanjutan",
+    title: "Advanced",
     items: [
       { href: "/dashboard/ai-tuning", label: "AI Tuning", icon: Brain },
       { href: "/dashboard/mitm", label: "MITM Proxy", icon: Shield },
@@ -72,12 +72,12 @@ const navGroups = [
     ],
   },
   {
-    title: "Sistem",
+    title: "System",
     items: [
       { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: Network },
-      { href: "/dashboard/console-log", label: "Konsol", icon: Terminal },
-      { href: "/dashboard/settings/database", label: "Basis Data", icon: Cog },
-      { href: "/dashboard/profile", label: "Akun", icon: CircleUserRound },
+      { href: "/dashboard/console-log", label: "Console", icon: Terminal },
+      { href: "/dashboard/settings/database", label: "Database", icon: Cog },
+      { href: "/dashboard/profile", label: "Account", icon: CircleUserRound },
     ],
   },
 ];
@@ -185,7 +185,7 @@ export default function Sidebar({ onClose }) {
           className="group flex h-9 w-full items-center gap-2.5 rounded-md px-3 text-[13px] font-medium text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-danger)]"
         >
           <LogOut className="size-4" strokeWidth={2} />
-          <span>Keluar</span>
+          <span>Sign out</span>
         </button>
       </div>
     </aside>

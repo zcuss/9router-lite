@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Hexagon, Loader2, ArrowRight, KeyRound, User as UserIcon, Mail, Lock, AtSign } from "lucide-react";
 
-const OAUTH_META = {  google: { label: "Google", mark: "G" },
+const OAUTH_META = {
+  google: { label: "Google", mark: "G" },
   github: { label: "GitHub", mark: "GH" },
   discord: { label: "Discord", mark: "D" },
 };
 
-const OAUTH_BTN_CLS = "flex h-10 w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-surface-2)]";
+const OAUTH_BTN_CLS = "h-10 w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-surface-2)]";
 
 export default function LoginPage() {
   const [tab, setTab] = useState("login");
@@ -50,16 +51,16 @@ export default function LoginPage() {
       if (res.ok && data.success) {
         if (tab === "register") {
           setTab("login");
-          setInfo("Pendaftaran berhasil. Silakan masuk.");
+          setInfo("Registration successful. Please sign in.");
         } else {
           router.push("/dashboard");
           router.refresh();
         }
       } else {
-        setError(data.error || "Autentikasi gagal");
+        setError(data.error || "Authentication failed");
       }
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
@@ -78,12 +79,12 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setInfo("Tautan login telah dikirim. Cek inbox atau spam Anda.");
+        setInfo("Magic link sent. Check your inbox or spam folder.");
       } else {
-        setError(data.error || "Gagal mengirim magic link");
+        setError(data.error || "Failed to send magic link");
       }
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
@@ -95,15 +96,15 @@ export default function LoginPage() {
 
   const enabledOauth = config.oauth.filter((p) => p.enabled);
   const tabs = [
-    { id: "login", label: "Masuk" },
-    { id: "register", label: "Daftar" },
+    { id: "login", label: "Sign in" },
+    { id: "register", label: "Sign up" },
     ...(config.magicLink?.enabled ? [{ id: "magic", label: "Magic Link" }] : []),
   ];
 
   const heading = {
-    login: { title: "Selamat datang kembali", sub: "Masuk untuk kelola infrastruktur AI Anda." },
-    register: { title: "Buat akun baru", sub: "Daftarkan akun Anda untuk mulai mengelola." },
-    magic: { title: "Login via email", sub: "Kami kirim tautan login ke email Anda." },
+    login: { title: "Welcome back", sub: "Sign in to manage your AI infrastructure." },
+    register: { title: "Create your account", sub: "Register to get started with the dashboard." },
+    magic: { title: "Sign in via email", sub: "We'll send a magic link to your inbox." },
   }[tab];
 
   return (
@@ -124,18 +125,18 @@ export default function LoginPage() {
 
           <div className="hidden lg:block">
             <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text-main)]">
-              Satu endpoint untuk semua provider AI Anda.
+              One endpoint for every AI provider you use.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--color-text-muted)]">
-              Kelola API key, pantau pemakaian, route model combo, dan atur Midtrans top-up
-              semuanya dari satu dashboard yang ringan.
+              Manage API keys, monitor usage, route model combos, and handle Midtrans top-ups
+              from a single lightweight dashboard.
             </p>
             <ul className="mt-8 space-y-2.5">
               {[
                 "Multi-provider OAuth & magic link",
-                "Midtrans top-up & wallet otomatis",
-                "Combo model dengan fallback",
-                "Pemakaian & log real-time",
+                "Midtrans top-up & automatic wallet",
+                "Model combos with fallback routing",
+                "Real-time usage & request logs",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-text-muted)]">
                   <span className="mt-1.5 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
@@ -146,7 +147,7 @@ export default function LoginPage() {
           </div>
 
           <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-            <span>Relay SaaS AI</span>
+            <span>Relay SaaS for AI</span>
           </div>
         </div>
 
@@ -187,14 +188,14 @@ export default function LoginPage() {
                       <span className="grid size-5 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[10px] font-bold text-[var(--color-text-muted)]">
                         {meta.mark}
                       </span>
-                      <span>Lanjut dengan {meta.label}</span>
+                      <span>Continue with {meta.label}</span>
                     </button>
                   );
                 })}
                 <div className="my-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-                    atau
+                    or
                   </span>
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                 </div>
@@ -203,12 +204,12 @@ export default function LoginPage() {
 
             {tab === "magic" ? (
               <form onSubmit={handleMagicLink} className="space-y-4">
-                <Field label="Email" type="email" placeholder="kamu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
+                <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
                 <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" strokeWidth={2} />}
-                  <span>Kirim tautan</span>
+                  <span>Send magic link</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>
@@ -216,18 +217,18 @@ export default function LoginPage() {
               <form onSubmit={handleAuthSubmit} className="space-y-4">
                 {tab === "register" ? (
                   <>
-                    <Field label="Nama Pengguna" type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus icon={AtSign} />
-                    <Field label="Email" type="email" placeholder="kamu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
+                    <Field label="Username" type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus icon={AtSign} />
+                    <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
                   </>
                 ) : (
-                  <Field label="Nama Pengguna atau Email" type="text" placeholder="username atau email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
+                  <Field label="Username or email" type="text" placeholder="username or email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
                 )}
-                <Field label="Kata Sandi" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
+                <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
                 <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                  <span>{tab === "register" ? "Daftar" : "Masuk"}</span>
+                  <span>{tab === "register" ? "Create account" : "Sign in"}</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>
