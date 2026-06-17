@@ -4,62 +4,29 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import PropTypes from "prop-types";
-import ProviderIcon from "@/shared/components/ProviderIcon";
+import { Menu, Search, X, LogOut, User, ChevronRight, Zap, Brain, Heart, Moon, Sun, Monitor, Settings as SettingsIcon } from "lucide-react";
 import HeaderMenu from "@/shared/components/HeaderMenu";
 import ThemeToggle from "@/shared/components/ThemeToggle";
-import DonateModal from "@/shared/components/DonateModal";
-import ViewAsSwitcher from "@/shared/components/ViewAsSwitcher";
-import { useHeaderSearchStore } from "@/store/headerSearchStore";
 import useSettingsStore from "@/store/settingsStore";
-import { OAUTH_PROVIDERS, APIKEY_PROVIDERS } from "@/shared/constants/config";
-import { MEDIA_PROVIDER_KINDS, AI_PROVIDERS } from "@/shared/constants/providers";
 import { translate } from "@/i18n/runtime";
+import { useHeaderSearchStore } from "@/store/headerSearchStore";
 
 const getPageInfo = (pathname) => {
   if (!pathname) return { title: "", description: "", breadcrumbs: [] };
-  const mediaDetailMatch = pathname.match(/\/media-providers\/([^/]+)\/([^/]+)$/);
-  if (mediaDetailMatch) {
-    const kindId = mediaDetailMatch[1];
-    const providerId = mediaDetailMatch[2];
-    const kindConfig = MEDIA_PROVIDER_KINDS.find((k) => k.id === kindId);
-    const provider = AI_PROVIDERS[providerId];
-    return {
-      title: provider?.name || providerId,
-      description: "",
-      breadcrumbs: [
-        { label: "Media Providers", href: `/dashboard/media-providers/${kindId}` },
-        { label: kindConfig?.label || kindId, href: `/dashboard/media-providers/${kindId}` },
-        { label: provider?.name || providerId, image: `/providers/${providerId}.png` },
-      ],
-    };
-  }
-  const mediaKindMatch = pathname.match(/\/media-providers\/([^/]+)$/);
-  if (mediaKindMatch) {
-    const kindId = mediaKindMatch[1];
-    const kindConfig = MEDIA_PROVIDER_KINDS.find((k) => k.id === kindId);
-    return { title: kindConfig?.label || kindId, description: `Manage your ${kindConfig?.label || kindId} providers`, icon: kindConfig?.icon || "perm_media", breadcrumbs: [] };
-  }
-  const providerMatch = pathname.match(/\/providers\/([^/]+)$/);
-  if (providerMatch) {
-    const providerId = providerMatch[1];
-    const providerInfo = OAUTH_PROVIDERS[providerId] || APIKEY_PROVIDERS[providerId];
-    if (providerInfo) return { title: providerInfo.name, description: "", breadcrumbs: [{ label: "Providers", href: "/dashboard/providers" }, { label: providerInfo.name, image: `/providers/${providerInfo.id}.png` }] };
-  }
-  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Providers", description: "Manage your AI provider connections", icon: "dns", breadcrumbs: [] };
-  if (pathname.includes("/combos")) return { title: "Combos", description: "Model combos with fallback", icon: "layers", breadcrumbs: [] };
-  if (pathname.includes("/usage")) return { title: "Usage & Analytics", description: "Monitor your API usage, token consumption, and request logs", icon: "bar_chart", breadcrumbs: [] };
-  if (pathname.includes("/auth-files")) return { title: "Auth Files", description: "Map provider credentials stored in the local database", icon: "vpn_key", breadcrumbs: [] };
-  if (pathname.includes("/quota")) return { title: "Quota Tracker", description: "Track and manage your API quota limits", icon: "data_usage", breadcrumbs: [] };
-  if (pathname.includes("/ai-tuning")) return { title: "AI Tuning", description: "Tune assistant name, personality, behavior, and system prompt", icon: "psychology", breadcrumbs: [] };
-  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intercept CLI tool traffic and route through 9Router", icon: "security", breadcrumbs: [] };
-  if (pathname.includes("/cli-tools")) return { title: "CLI Tools", description: "Configure CLI tools", icon: "terminal", breadcrumbs: [] };
-  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pools", description: "Manage your proxy pool configurations", icon: "lan", breadcrumbs: [] };
-  if (pathname.includes("/skills")) return { title: "Agent Skills", description: "Copy a link and paste to your AI to use 9Router — no install needed", icon: "extension", breadcrumbs: [] };
-  if (pathname.includes("/endpoint")) return { title: "Endpoint", description: "API endpoint configuration", icon: "api", breadcrumbs: [] };
-  if (pathname.includes("/profile")) return { title: "Settings", description: "Manage your preferences", icon: "settings", breadcrumbs: [] };
-  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug translation flow between formats", icon: "translate", breadcrumbs: [] };
-  if (pathname.includes("/console-log")) return { title: "Console Log", description: "Live server console output", icon: "monitor", breadcrumbs: [] };
-  if (pathname === "/dashboard") return { title: "Endpoint", description: "API endpoint configuration", icon: "api", breadcrumbs: [] };
+  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Provider", description: "Kelola koneksi provider AI Anda", icon: "server" };
+  if (pathname.includes("/combos")) return { title: "Kombo Model", description: "Kombo model dengan fallback otomatis", icon: "layers" };
+  if (pathname.includes("/usage")) return { title: "Pemakaian", description: "Pantau penggunaan API, token, dan log request", icon: "bar" };
+  if (pathname.includes("/quota")) return { title: "API Key & Kuota", description: "Kelola API key dan batas kuota", icon: "key" };
+  if (pathname.includes("/ai-tuning")) return { title: "AI Tuning", description: "Atur nama, personality, dan perilaku asisten", icon: "brain" };
+  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intercept trafik CLI tool lewat proxy", icon: "shield" };
+  if (pathname.includes("/cli-tools")) return { title: "CLI Tools", description: "Konfigurasi CLI tools", icon: "term" };
+  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pools", description: "Kelola konfigurasi proxy pool", icon: "net" };
+  if (pathname.includes("/skills")) return { title: "Skills", description: "Salin link dan paste ke AI Anda", icon: "puzzle" };
+  if (pathname.includes("/endpoint")) return { title: "Endpoint", description: "Konfigurasi API endpoint", icon: "code" };
+  if (pathname.includes("/profile")) return { title: "Akun", description: "Kelola preferensi Anda", icon: "user" };
+  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug alur translasi antar format", icon: "trans" };
+  if (pathname.includes("/console-log")) return { title: "Konsol", description: "Output konsol server real-time", icon: "term" };
+  if (pathname === "/dashboard") return { title: "Beranda", description: "Ringkasan infrastruktur AI Anda", icon: "home" };
   return { title: "", description: "", breadcrumbs: [] };
 };
 
@@ -68,11 +35,10 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [loginMethod, setLoginMethod] = useState("");
-  const [donateOpen, setDonateOpen] = useState(false);
   const { settings, fetchSettings, patchSettings } = useSettingsStore();
   const uiMode = settings?.uiMode || "expert";
   const pageInfo = useMemo(() => getPageInfo(pathname), [pathname]);
-  const { title, description, icon, breadcrumbs } = pageInfo;
+  const { title, description } = pageInfo;
 
   useEffect(() => { fetchSettings(); }, []);
   useEffect(() => {
@@ -86,12 +52,7 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
           setDisplayName(data?.displayName || data?.oidcName || data?.oidcEmail || "");
           setLoginMethod(data?.loginMethod || "");
         }
-      } catch {
-        if (!cancelled) {
-          setDisplayName("");
-          setLoginMethod("");
-        }
-      }
+      } catch {}
     })();
     return () => { cancelled = true; };
   }, []);
@@ -109,21 +70,71 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
   };
 
   return (
-    <header className="shrink-0 flex items-center justify-between gap-3 px-4 lg:px-8 py-3 border-b border-border-subtle bg-surface/72 backdrop-blur-2xl z-20 shadow-[0_12px_38px_-34px_rgba(15,23,42,0.45)]">
-      <div className="flex items-center gap-3 lg:hidden shrink-0">{showMenuButton && (<button onClick={onMenuClick} className="grid size-9 place-items-center rounded-xl border border-border bg-surface/80 text-text-main hover:text-primary transition-colors"><span className="material-symbols-outlined">menu</span></button>)}</div>
-      <div className="flex flex-col min-w-0 flex-1">
-        {breadcrumbs.length > 0 ? (<div className="flex items-center gap-2">{breadcrumbs.map((crumb, index) => (<div key={`${crumb.label}-${crumb.href || "current"}`} className="flex items-center gap-2 min-w-0">{index > 0 && <span className="material-symbols-outlined text-text-muted text-base">chevron_right</span>}{crumb.href ? (<Link href={crumb.href} className="text-text-muted hover:text-primary transition-colors truncate">{crumb.label}</Link>) : (<div className="flex items-center gap-2 min-w-0">{crumb.image && (<ProviderIcon src={crumb.image} alt={crumb.label} size={28} className="object-contain rounded max-w-[28px] max-h-[28px]" fallbackText={crumb.label.slice(0, 2).toUpperCase()} />)}<h1 className="text-base lg:text-2xl font-semibold text-text-main tracking-tight truncate">{translate(crumb.label)}</h1></div>)}</div>))}</div>) : title ? (<div><div className="flex items-center gap-2">{icon && <span className="material-symbols-outlined grid size-9 place-items-center rounded-xl bg-primary/10 text-primary text-xl lg:text-2xl">{icon}</span>}<h1 className="text-base lg:text-2xl font-semibold tracking-tight truncate">{translate(title)}</h1></div>{description && <p className="hidden lg:block text-sm text-text-muted truncate mt-0.5">{translate(description)}</p>}</div>) : null}
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 lg:px-8">
+      <div className="flex items-center gap-3 lg:hidden">
+        {showMenuButton && (
+          <button
+            onClick={onMenuClick}
+            className="grid size-9 place-items-center rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-main)]"
+            aria-label="Buka menu"
+          >
+            <Menu className="size-4" strokeWidth={2} />
+          </button>
+        )}
       </div>
-      <div className="flex items-center gap-1 shrink-0">
-        {displayName && loginMethod === "OIDC" && (<div className="hidden sm:flex items-center max-w-[220px] px-3 py-1.5 rounded-full border border-border bg-surface/70 text-xs text-text-muted truncate"><span className="material-symbols-outlined text-[14px] mr-1.5 text-primary">person</span><span className="truncate">{displayName}</span><span className="ml-2 shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">OIDC</span></div>)}
-        <ViewAsSwitcher />
+      <div className="flex min-w-0 flex-1 flex-col">
+        {title ? (
+          <div>
+            <h1 className="truncate text-base font-semibold tracking-tight text-[var(--color-text-main)] lg:text-lg">
+              {translate(title)}
+            </h1>
+            {description && (
+              <p className="hidden truncate text-xs text-[var(--color-text-muted)] lg:block">
+                {translate(description)}
+              </p>
+            )}
+          </div>
+        ) : null}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {displayName && loginMethod === "OIDC" && (
+          <div className="hidden items-center gap-1.5 truncate rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text-muted)] sm:flex max-w-[200px]">
+            <User className="size-3.5 shrink-0" strokeWidth={2} />
+            <span className="truncate">{displayName}</span>
+            <span className="ml-1 rounded bg-[var(--color-surface-2)] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+              OIDC
+            </span>
+          </div>
+        )}
         <HeaderSearch />
-        <button type="button" onClick={async () => { const nextMode = uiMode === "expert" ? "lite" : "expert"; await patchSettings({ uiMode: nextMode }); await fetchSettings(); }} className={`flex items-center gap-1.5 px-3 h-9 rounded-xl border transition-colors text-sm font-medium ${uiMode === "expert" ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-surface/80 text-text-muted hover:border-primary/30 hover:bg-primary/5"}`} title={`Switch to ${uiMode === "expert" ? "Lite" : "Expert"} Mode`}><span className="material-symbols-outlined text-[18px]">{uiMode === "expert" ? "psychology" : "bolt"}</span><span className="hidden sm:inline capitalize">{uiMode}</span></button>
-        <button onClick={() => setDonateOpen(true)} className="flex items-center gap-1.5 px-3 h-9 rounded-xl border border-pink-500/25 bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 transition-colors text-sm font-medium" aria-label="Donate"><span className="material-symbols-outlined text-[18px]">volunteer_activism</span><span className="hidden sm:inline">Donate</span></button>
+        <button
+          type="button"
+          onClick={async () => {
+            const nextMode = uiMode === "expert" ? "lite" : "expert";
+            await patchSettings({ uiMode: nextMode });
+            await fetchSettings();
+          }}
+          className={`inline-flex h-9 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition-colors ${
+            uiMode === "expert"
+              ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-accent-fg)]"
+              : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-text-subtle)] hover:text-[var(--color-text-main)]"
+          }`}
+          title={`Beralih ke mode ${uiMode === "expert" ? "Lite" : "Expert"}`}
+        >
+          {uiMode === "expert" ? <Brain className="size-3.5" strokeWidth={2} /> : <Zap className="size-3.5" strokeWidth={2} />}
+          <span className="hidden capitalize sm:inline">{uiMode}</span>
+        </button>
+        <button
+          onClick={() => alert("Terima kasih!")}
+          className="hidden h-9 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-text-subtle)] hover:text-[var(--color-text-main)] sm:inline-flex"
+          aria-label="Donasi"
+        >
+          <Heart className="size-3.5" strokeWidth={2} />
+          <span>Donasi</span>
+        </button>
         <ThemeToggle />
         <HeaderMenu onLogout={handleLogout} />
       </div>
-      <DonateModal isOpen={donateOpen} onClose={() => setDonateOpen(false)} />
     </header>
   );
 }
@@ -134,7 +145,28 @@ function HeaderSearch() {
   const placeholder = useHeaderSearchStore((s) => s.placeholder);
   const setQuery = useHeaderSearchStore((s) => s.setQuery);
   if (!visible) return null;
-  return (<div className="relative w-[160px] sm:w-[220px]"><span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px] pointer-events-none">search</span><input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={placeholder} className="w-full h-9 pl-8 pr-8 rounded-xl border border-border bg-surface/80 text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-colors" />{query && (<button type="button" onClick={() => setQuery("")} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-main p-0.5 rounded" aria-label="Clear search"><span className="material-symbols-outlined text-[16px]">close</span></button>)}</div>);
+  return (
+    <div className="relative w-[160px] sm:w-[240px]">
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--color-text-subtle)]" strokeWidth={2} />
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={placeholder || "Cari..."}
+        className="h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] pl-8 pr-8 text-sm text-[var(--color-text-main)] placeholder:text-[var(--color-text-subtle)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30"
+      />
+      {query && (
+        <button
+          type="button"
+          onClick={() => setQuery("")}
+          className="absolute right-2 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded text-[var(--color-text-subtle)] hover:text-[var(--color-text-main)]"
+          aria-label="Hapus pencarian"
+        >
+          <X className="size-3" strokeWidth={2.25} />
+        </button>
+      )}
+    </div>
+  );
 }
 
 Header.propTypes = { onMenuClick: PropTypes.func, showMenuButton: PropTypes.bool };

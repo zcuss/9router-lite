@@ -1,5 +1,4 @@
 import { Inter } from "next/font/google";
-import "material-symbols/outlined.css";
 import "./globals.css";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import "@/lib/network/initOutboundProxy"; // Auto-initialize outbound proxy env
@@ -16,8 +15,8 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "9Router - AI Infrastructure Management",
-  description: "One endpoint for all your AI providers. Manage keys, monitor usage, and scale effortlessly.",
+  title: "Zcus Router — Relay SaaS AI",
+  description: "Satu endpoint untuk semua provider AI Anda. Kelola API key, pantau pemakaian, dan atur Midtrans top-up dari satu dashboard.",
   icons: {
     icon: "/favicon.svg",
   },

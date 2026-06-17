@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Button, Input } from "@/shared/components";
 import { useRouter } from "next/navigation";
+import { Hexagon, Loader2, ArrowRight, KeyRound, User as UserIcon, Mail, Lock, AtSign } from "lucide-react";
 
-const OAUTH_COLORS = {
-  google: { bg: "bg-white hover:bg-gray-50 text-gray-800 border border-gray-200", logo: "G" },
-  github: { bg: "bg-[#24292e] hover:bg-[#1b1f23] text-white border border-[#24292e]", logo: "GH" },
-  discord: { bg: "bg-[#5865F2] hover:bg-[#4752c4] text-white border border-[#5865F2]", logo: "D" },
+const OAUTH_META = {  google: { label: "Google", mark: "G" },
+  github: { label: "GitHub", mark: "GH" },
+  discord: { label: "Discord", mark: "D" },
 };
 
+const OAUTH_BTN_CLS = "flex h-10 w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-surface-2)]";
+
 export default function LoginPage() {
-  const [tab, setTab] = useState("login"); // "login" | "register" | "magic"
+  const [tab, setTab] = useState("login");
   const [identifier, setIdentifier] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +50,7 @@ export default function LoginPage() {
       if (res.ok && data.success) {
         if (tab === "register") {
           setTab("login");
-          setInfo("Pendaftaran berhasil! Silakan login.");
+          setInfo("Pendaftaran berhasil. Silakan masuk.");
         } else {
           router.push("/dashboard");
           router.refresh();
@@ -57,8 +58,8 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Autentikasi gagal");
       }
-    } catch (err) {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } catch {
+      setError("Terjadi kesalahan. Coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -77,12 +78,12 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        setInfo("Tautan login telah dikirim ke email Anda. Silakan cek inbox/spam.");
+        setInfo("Tautan login telah dikirim. Cek inbox atau spam Anda.");
       } else {
         setError(data.error || "Gagal mengirim magic link");
       }
-    } catch (err) {
-      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } catch {
+      setError("Terjadi kesalahan. Coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -99,154 +100,177 @@ export default function LoginPage() {
     ...(config.magicLink?.enabled ? [{ id: "magic", label: "Magic Link" }] : []),
   ];
 
+  const heading = {
+    login: { title: "Selamat datang kembali", sub: "Masuk untuk kelola infrastruktur AI Anda." },
+    register: { title: "Buat akun baru", sub: "Daftarkan akun Anda untuk mulai mengelola." },
+    magic: { title: "Login via email", sub: "Kami kirim tautan login ke email Anda." },
+  }[tab];
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg p-4 relative overflow-hidden">
-      <div className="landing-grid absolute inset-0 pointer-events-none" aria-hidden="true" />
-      <div className="relative z-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Zcus Router</h1>
-          <p className="text-text-muted">
-            {tab === "register"
-              ? "Buat akun untuk mulai kelola infrastruktur AI Anda"
-              : tab === "magic"
-              ? "Masuk instan lewat tautan ke email Anda"
-              : "Masuk untuk kelola infrastruktur AI Anda"}
-          </p>
+    <div className="min-h-screen bg-[var(--color-bg)]">
+      <div className="grid min-h-screen lg:grid-cols-2">
+        <div className="flex flex-col justify-between border-b border-[var(--color-border)] p-8 lg:border-b-0 lg:border-r lg:p-12">
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-8 place-items-center rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)]">
+              <Hexagon className="size-4.5" strokeWidth={2.25} />
+            </span>
+            <span className="text-sm font-semibold tracking-tight text-[var(--color-text-main)]">
+              Zcus Router
+            </span>
+            <span className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+              Lite
+            </span>
+          </div>
+
+          <div className="hidden lg:block">
+            <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text-main)]">
+              Satu endpoint untuk semua provider AI Anda.
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--color-text-muted)]">
+              Kelola API key, pantau pemakaian, route model combo, dan atur Midtrans top-up
+              semuanya dari satu dashboard yang ringan.
+            </p>
+            <ul className="mt-8 space-y-2.5">
+              {[
+                "Multi-provider OAuth & magic link",
+                "Midtrans top-up & wallet otomatis",
+                "Combo model dengan fallback",
+                "Pemakaian & log real-time",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-text-muted)]">
+                  <span className="mt-1.5 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+            <span>Relay SaaS AI</span>
+          </div>
         </div>
 
-        <Card>
-          {enabledOauth.length > 0 && (
-            <div className="flex flex-col gap-2 mb-5">
-              {enabledOauth.map((p) => {
-                const style = OAUTH_COLORS[p.id] || { bg: "bg-surface-2 hover:bg-surface-2/80 text-text-main border border-border-subtle", logo: p.id[0]?.toUpperCase() };
-                return (
+        <div className="flex items-center justify-center p-6 lg:p-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text-main)]">
+                {heading.title}
+              </h1>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">{heading.sub}</p>
+            </div>
+
+            {tabs.length > 1 && (
+              <div className="mb-5 flex gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5">
+                {tabs.map((t) => (
                   <button
-                    key={p.id}
+                    key={t.id}
                     type="button"
-                    onClick={() => handleOAuth(p.id)}
-                    className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${style.bg}`}
+                    onClick={() => { setTab(t.id); setError(""); setInfo(""); }}
+                    className={`flex-1 rounded-[6px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                      tab === t.id
+                        ? "bg-[var(--color-text-main)] text-[var(--color-bg)]"
+                        : "text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
+                    }`}
                   >
-                    <span className="inline-flex size-5 items-center justify-center rounded-full bg-black/10 text-[11px] font-bold">
-                      {style.logo}
-                    </span>
-                    Lanjut dengan {p.label}
+                    {t.label}
                   </button>
-                );
-              })}
-            </div>
-          )}
-
-          {enabledOauth.length > 0 && (
-            <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-wider text-text-subtle">
-              <div className="h-px flex-1 bg-border-subtle" />
-              <span>atau</span>
-              <div className="h-px flex-1 bg-border-subtle" />
-            </div>
-          )}
-
-          {tabs.length > 1 && (
-            <div className="flex gap-1 rounded-lg bg-surface-2 p-1 mb-4">
-              {tabs.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => {
-                    setTab(t.id);
-                    setError("");
-                    setInfo("");
-                  }}
-                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                    tab === t.id
-                      ? "bg-bg text-text-main shadow-sm"
-                      : "text-text-muted hover:text-text-main"
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {tab === "magic" ? (
-            <form onSubmit={handleMagicLink} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-text-main">Email</label>
-                <Input
-                  type="email"
-                  placeholder="kamu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoFocus
-                />
+                ))}
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
-              {info && <p className="text-xs text-green-500">{info}</p>}
-              <Button type="submit" variant="primary" className="w-full" loading={loading}>
-                Kirim Tautan Login
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-              {tab === "register" ? (
-                <>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-text-main">Nama Pengguna</label>
-                    <Input
-                      type="text"
-                      placeholder="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-text-main">Email</label>
-                    <Input
-                      type="email"
-                      placeholder="kamu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-text-main">Nama Pengguna atau Email</label>
-                  <Input
-                    type="text"
-                    placeholder="username atau email"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    required
-                    autoFocus
-                  />
+            )}
+
+            {enabledOauth.length > 0 && (
+              <div className="mb-5 space-y-2">
+                {enabledOauth.map((p) => {
+                  const meta = OAUTH_META[p.id] || { label: p.label, mark: p.id[0]?.toUpperCase() };
+                  return (
+                    <button key={p.id} type="button" onClick={() => handleOAuth(p.id)} className={OAUTH_BTN_CLS}>
+                      <span className="grid size-5 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[10px] font-bold text-[var(--color-text-muted)]">
+                        {meta.mark}
+                      </span>
+                      <span>Lanjut dengan {meta.label}</span>
+                    </button>
+                  );
+                })}
+                <div className="my-4 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-[var(--color-border)]" />
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+                    atau
+                  </span>
+                  <div className="h-px flex-1 bg-[var(--color-border)]" />
                 </div>
-              )}
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-text-main">Kata Sandi</label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
-              {info && <p className="text-xs text-green-500">{info}</p>}
-              <Button type="submit" variant="primary" className="w-full" loading={loading}>
-                {tab === "register" ? "Daftar" : "Masuk"}
-              </Button>
-            </form>
-          )}
-        </Card>
-        <p className="text-center text-[11px] text-text-subtle mt-6">
-          Zcus Router Lite — Relay SaaS AI Anda
-        </p>
+            )}
+
+            {tab === "magic" ? (
+              <form onSubmit={handleMagicLink} className="space-y-4">
+                <Field label="Email" type="email" placeholder="kamu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
+                <Alert type="error" message={error} />
+                <Alert type="info" message={info} />
+                <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" strokeWidth={2} />}
+                  <span>Kirim tautan</span>
+                  {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleAuthSubmit} className="space-y-4">
+                {tab === "register" ? (
+                  <>
+                    <Field label="Nama Pengguna" type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus icon={AtSign} />
+                    <Field label="Email" type="email" placeholder="kamu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
+                  </>
+                ) : (
+                  <Field label="Nama Pengguna atau Email" type="text" placeholder="username atau email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
+                )}
+                <Field label="Kata Sandi" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
+                <Alert type="error" message={error} />
+                <Alert type="info" message={info} />
+                <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
+                  {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+                  <span>{tab === "register" ? "Daftar" : "Masuk"}</span>
+                  {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
+                </button>
+              </form>
+            )}
+
+            <p className="mt-8 text-center font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+              © Zcus Router Lite
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function Field({ label, type = "text", placeholder, value, onChange, required, autoFocus, icon: Icon }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-xs font-medium text-[var(--color-text-muted)]">{label}</label>
+      <div className="relative">
+        {Icon && (
+          <Icon className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-[var(--color-text-subtle)]" strokeWidth={2} />
+        )}
+        <input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          required={required}
+          autoFocus={autoFocus}
+          className="input-base pl-9"
+        />
+      </div>
+    </div>
+  );
+}
+
+function Alert({ type, message }) {
+  if (!message) return null;
+  const styles = {
+    error: "border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 text-[var(--color-danger)]",
+    info: "border-[var(--color-info)]/30 bg-[var(--color-info)]/10 text-[var(--color-info)]",
+    success: "border-[var(--color-success)]/30 bg-[var(--color-success)]/10 text-[var(--color-success)]",
+  };
+  return <p className={`rounded-md border px-3 py-2 text-xs ${styles[type]}`}>{message}</p>;
 }

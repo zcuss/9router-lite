@@ -2,8 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  BarChart3,
+  PieChart,
+  Wallet,
+  Server,
+  Layers,
+  Code2,
+  KeyRound,
+  CreditCard,
+  Users,
+  Ticket,
+  Upload,
+  Brain,
+  Shield,
+  Terminal,
+  Puzzle,
+  Network,
+  Cog,
+  CircleUserRound,
+  LogOut,
+  Hexagon,
+} from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { APP_CONFIG } from "@/shared/constants/config";
 import useSettingsStore from "@/store/settingsStore";
 import { useEffectiveRole } from "@/store/roleStore";
 
@@ -11,51 +33,51 @@ const navGroups = [
   {
     title: "Utama",
     items: [
-      { href: "/dashboard", label: "Beranda", icon: "dashboard" },
-      { href: "/dashboard/usage", label: "Pemakaian", icon: "bar_chart" },
-      { href: "/dashboard/analytics", label: "Analitik", icon: "query_stats" },
-      { href: "/dashboard/topup", label: "Isi Saldo (Top Up)", icon: "add_card" },
+      { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
+      { href: "/dashboard/usage", label: "Pemakaian", icon: BarChart3 },
+      { href: "/dashboard/analytics", label: "Analitik", icon: PieChart },
+      { href: "/dashboard/topup", label: "Isi Saldo", icon: Wallet },
     ],
   },
   {
     title: "Konfigurasi",
     items: [
-      { href: "/dashboard/providers", label: "Provider", icon: "dns" },
-      { href: "/dashboard/combos", label: "Kombo Model", icon: "layers" },
-      { href: "/dashboard/endpoint", label: "Endpoint", icon: "api" },
+      { href: "/dashboard/providers", label: "Provider", icon: Server },
+      { href: "/dashboard/combos", label: "Kombo Model", icon: Layers },
+      { href: "/dashboard/endpoint", label: "Endpoint", icon: Code2 },
     ],
   },
   {
     title: "Manajemen",
     items: [
-      { href: "/dashboard/quota", label: "API Key & Kuota", icon: "key" },
-      { href: "/dashboard/pricing", label: "Tarif & Langganan", icon: "payments" },
-      { href: "/dashboard/user-management", label: "Pengguna (Dev/Admin)", icon: "manage_accounts", adminOnly: true },
+      { href: "/dashboard/quota", label: "API Key & Kuota", icon: KeyRound },
+      { href: "/dashboard/pricing", label: "Tarif & Langganan", icon: CreditCard },
+      { href: "/dashboard/user-management", label: "Pengguna", icon: Users, adminOnly: true },
     ],
   },
   {
     title: "Kontrol Admin",
     items: [
-      { href: "/dashboard/admin/vouchers", label: "Kelola Voucher", icon: "confirmation_number", adminOnly: true },
-      { href: "/dashboard/admin/models", label: "Rilis & Tambah Model", icon: "publish", adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Voucher", icon: Ticket, adminOnly: true },
+      { href: "/dashboard/admin/models", label: "Rilis Model", icon: Upload, adminOnly: true },
     ],
   },
   {
     title: "Lanjutan",
     items: [
-      { href: "/dashboard/ai-tuning", label: "AI Tuning", icon: "psychology" },
-      { href: "/dashboard/mitm", label: "MITM Proxy", icon: "security" },
-      { href: "/dashboard/cli-tools", label: "CLI Tools", icon: "terminal" },
-      { href: "/dashboard/skills", label: "Skills", icon: "extension" },
+      { href: "/dashboard/ai-tuning", label: "AI Tuning", icon: Brain },
+      { href: "/dashboard/mitm", label: "MITM Proxy", icon: Shield },
+      { href: "/dashboard/cli-tools", label: "CLI Tools", icon: Terminal },
+      { href: "/dashboard/skills", label: "Skills", icon: Puzzle },
     ],
   },
   {
     title: "Sistem",
     items: [
-      { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: "lan" },
-      { href: "/dashboard/console-log", label: "Konsol", icon: "terminal" },
-      { href: "/dashboard/settings/database", label: "Basis Data", icon: "storage" },
-      { href: "/dashboard/profile", label: "Akun", icon: "person" },
+      { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: Network },
+      { href: "/dashboard/console-log", label: "Konsol", icon: Terminal },
+      { href: "/dashboard/settings/database", label: "Basis Data", icon: Cog },
+      { href: "/dashboard/profile", label: "Akun", icon: CircleUserRound },
     ],
   },
 ];
@@ -70,17 +92,11 @@ export default function Sidebar({ onClose }) {
     try {
       const url = new URL(href, "http://localhost");
       const tabParam = url.searchParams.get("tab");
-
       if (typeof window !== "undefined") {
         const activeTab = new URLSearchParams(window.location.search).get("tab");
-        if (tabParam) {
-          return pathname === url.pathname && activeTab === tabParam;
-        }
-        if (pathname === url.pathname && activeTab) {
-          return false;
-        }
+        if (tabParam) return pathname === url.pathname && activeTab === tabParam;
+        if (pathname === url.pathname && activeTab) return false;
       }
-
       if (url.pathname === "/dashboard") return pathname === "/dashboard";
       return pathname.startsWith(url.pathname);
     } catch {
@@ -89,46 +105,63 @@ export default function Sidebar({ onClose }) {
   };
 
   return (
-    <aside className="flex h-full min-h-0 w-64 flex-col overflow-hidden border-r border-border-subtle bg-sidebar/88 backdrop-blur-2xl transition-all duration-300 shadow-[12px_0_40px_-30px_rgba(15,23,42,0.45)]">
-      <div className="shrink-0 px-5 py-6">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="flex size-10 items-center justify-center rounded-2xl border border-brand-500/25 bg-gradient-to-br from-brand-500 to-cyan-400 text-white shadow-[0_14px_36px_-20px_rgba(6,182,212,0.9)] transition-all group-hover:scale-[1.03]">
-            <span className="material-symbols-outlined text-[21px] font-bold">hub</span>
-          </div>
-          <div className="flex min-w-0 flex-col">
-            <h1 className="truncate text-lg font-semibold tracking-tight text-text-main leading-tight">{APP_CONFIG.name}</h1>
-            <span className="text-[10px] text-text-muted font-mono tracking-[0.22em] uppercase">Lite Edition</span>
+    <aside className="flex h-full min-h-0 w-64 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-sidebar)]">
+      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[var(--color-border)] px-5">
+        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
+          <span className="grid size-8 place-items-center rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)]">
+            <Hexagon className="size-4.5" strokeWidth={2.25} />
+          </span>
+          <div className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate text-sm font-semibold tracking-tight text-[var(--color-text-main)]">
+              Zcus Router
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
+              Lite
+            </span>
           </div>
         </Link>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pb-8 custom-scrollbar">
+      <nav className="custom-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-4">
         {navGroups.map((group) => {
-          const visibleItems = group.items.filter((item) => !item.adminOnly || userRole === "admin" || userRole === "dev");
+          const visibleItems = group.items.filter(
+            (item) => !item.adminOnly || userRole === "admin" || userRole === "dev"
+          );
           if (visibleItems.length === 0) return null;
           return (
-            <div key={group.title} className="mb-4 space-y-1">
-              <h3 className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-text-subtle/80">{group.title}</h3>
+            <div key={group.title} className="mb-5">
+              <h3 className="mb-1.5 px-3 font-mono text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-subtle)]">
+                {group.title}
+              </h3>
               <div className="space-y-0.5">
                 {visibleItems.map((item) => {
                   const active = isActive(item.href);
+                  const Icon = item.icon;
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-150",
+                        "group flex h-9 items-center gap-2.5 rounded-md px-3 text-[13px] font-medium transition-colors",
                         active
-                          ? "bg-brand-500/12 text-brand-600 dark:text-brand-300 shadow-[inset_0_0_0_1px_rgba(6,182,212,0.16)]"
-                          : "text-text-muted hover:bg-surface-2/70 hover:text-text-main"
+                          ? "bg-[var(--color-surface-2)] text-[var(--color-text-main)]"
+                          : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-main)]"
                       )}
                     >
+                      <Icon
+                        className={cn(
+                          "size-4 shrink-0",
+                          active
+                            ? "text-[var(--color-accent)]"
+                            : "text-[var(--color-text-subtle)] group-hover:text-[var(--color-text-muted)]"
+                        )}
+                        strokeWidth={2}
+                      />
+                      <span className="min-w-0 truncate">{item.label}</span>
                       {active && (
-                        <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-brand-500 shadow-[0_0_12px_rgba(6,182,212,0.65)]" />
+                        <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
                       )}
-                      <span className={cn("material-symbols-outlined text-[20px] transition-transform", active ? "fill-1" : "group-hover:scale-105")}>{item.icon}</span>
-                      <span className="min-w-0 truncate text-[13px] font-medium tracking-wide">{item.label}</span>
                     </Link>
                   );
                 })}
@@ -138,7 +171,7 @@ export default function Sidebar({ onClose }) {
         })}
       </nav>
 
-      <div className="shrink-0 border-t border-border-subtle p-3">
+      <div className="shrink-0 border-t border-[var(--color-border)] p-3">
         <button
           type="button"
           onClick={async () => {
@@ -149,10 +182,10 @@ export default function Sidebar({ onClose }) {
               console.error("Failed to logout:", err);
             }
           }}
-          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-red-500/70 transition-all hover:bg-red-500/10 hover:text-red-500"
+          className="group flex h-9 w-full items-center gap-2.5 rounded-md px-3 text-[13px] font-medium text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-danger)]"
         >
-          <span className="material-symbols-outlined text-[20px] transition-transform duration-500 group-hover:rotate-180">logout</span>
-          <span className="text-[13px] font-medium tracking-wide">Sign out</span>
+          <LogOut className="size-4" strokeWidth={2} />
+          <span>Keluar</span>
         </button>
       </div>
     </aside>
