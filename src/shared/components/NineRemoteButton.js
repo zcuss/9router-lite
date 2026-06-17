@@ -10,7 +10,7 @@ export default function NineRemoteButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5"
+        className="relative flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)]"
         title="9Remote"
       >
         <span className="material-symbols-outlined text-[18px]">computer</span>

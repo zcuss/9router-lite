@@ -33,12 +33,12 @@ function sumRows(rows, predicate) {
 
 function MetricBlock({ title, data }) {
   return (
-    <div className="rounded-xl border border-border-subtle bg-black/20 p-3 min-w-[140px]">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-text-muted/60 mb-2">{title}</div>
+    <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 p-3 min-w-[140px]">
+      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]/60 mb-2">{title}</div>
       <div className="grid grid-cols-3 gap-2 text-xs">
-        <div><div className="text-text-muted">Req</div><div className="font-mono text-text-main">{fmt(data.requests)}</div></div>
-        <div><div className="text-text-muted">Tok</div><div className="font-mono text-text-main">{fmt(data.promptTokens + data.completionTokens)}</div></div>
-        <div><div className="text-text-muted">Cost</div><div className="font-mono text-brand-500">{money(data.cost)}</div></div>
+        <div><div className="text-[var(--color-text-muted)]">Req</div><div className="font-mono text-[var(--color-text-main)]">{fmt(data.requests)}</div></div>
+        <div><div className="text-[var(--color-text-muted)]">Tok</div><div className="font-mono text-[var(--color-text-main)]">{fmt(data.promptTokens + data.completionTokens)}</div></div>
+        <div><div className="text-[var(--color-text-muted)]">Cost</div><div className="font-mono text-[var(--color-accent)]">{money(data.cost)}</div></div>
       </div>
     </div>
   );
@@ -81,30 +81,30 @@ export default function QuotaPage() {
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-text-main">API Keys</h1>
-          <p className="text-sm text-text-muted mt-1">Keys, free tier status, usage metrics per key.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-[var(--color-text-main)]">API Keys</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Keys, free tier status, usage metrics per key.</p>
         </div>
-        <div className="rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-mono text-brand-500">
+        <div className="rounded-full border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-3 py-1 text-xs font-mono text-[var(--color-accent)]">
           Keys ({rows.length})
         </div>
       </div>
 
-      {error && <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">{error}</div>}
+      {error && <div className="rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 p-4 text-sm text-[var(--color-danger)]">{error}</div>}
 
-      <div className="rounded-2xl border border-border-subtle bg-surface/70 backdrop-blur-xl overflow-hidden">
-        <div className="divide-y divide-border-subtle">
+      <div className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)]/70 backdrop-blur-xl overflow-hidden">
+        <div className="divide-y divide-[var(--color-border-subtle)]">
           {rows.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">No API keys yet.</div>
+            <div className="p-8 text-center text-[var(--color-text-muted)]">No API keys yet.</div>
           ) : rows.map((key) => (
-            <div key={key.id || key.keyVal} className="p-5 space-y-4 hover:bg-white/[0.02]">
+            <div key={key.id || key.keyVal} className="p-5 space-y-4 hover:bg-[var(--color-surface)]/[0.02]">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm text-text-main">{key.name || key.keyVal}</span>
-                    <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-[10px] font-semibold text-green-400 border border-green-500/20">active</span>
-                    <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[10px] font-semibold text-brand-500 border border-brand-500/20">Free Tier</span>
+                    <span className="font-mono text-sm text-[var(--color-text-main)]">{key.name || key.keyVal}</span>
+                    <span className="rounded-full bg-[var(--color-success)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--color-success)] border border-[var(--color-success)]/20">active</span>
+                    <span className="rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-semibold text-[var(--color-accent)] border border-[var(--color-accent)]/20">Free Tier</span>
                   </div>
-                  <div className="font-mono text-xs text-text-muted mt-1 truncate max-w-[640px]">{key.keyVal}</div>
+                  <div className="font-mono text-xs text-[var(--color-text-muted)] mt-1 truncate max-w-[640px]">{key.keyVal}</div>
                 </div>
               </div>
 

@@ -68,7 +68,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 size={32} strokeWidth={1.8} className="animate-spin text-text-muted" />
+        <Loader2 size={32} strokeWidth={1.8} className="animate-spin text-[var(--color-text-muted)]" />
       </div>
     );
   }
@@ -88,16 +88,16 @@ export default function SubscriptionPage() {
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
       <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold text-text-main">Choose Your Plan</h1>
-        <p className="text-text-muted max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-[var(--color-text-main)]">Choose Your Plan</h1>
+        <p className="text-[var(--color-text-muted)] max-w-2xl mx-auto">
           Flexible pricing for every type of user. Cancel anytime, switch plans anytime.
         </p>
         {user && (
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border-subtle text-xs">
-            <span className="text-text-muted">Signed in as</span>
-            <span className="font-mono font-semibold text-text-main">{user.username}</span>
-            <span className="text-text-muted">·</span>
-            <span className="px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 font-semibold uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-xs">
+            <span className="text-[var(--color-text-muted)]">Signed in as</span>
+            <span className="font-mono font-semibold text-[var(--color-text-main)]">{user.username}</span>
+            <span className="text-[var(--color-text-muted)]">·</span>
+            <span className="px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold uppercase">
               {userPlanId}
             </span>
           </div>
@@ -113,23 +113,23 @@ export default function SubscriptionPage() {
           return (
             <div
               key={plan.id}
-              className={`relative rounded-2xl border bg-surface overflow-hidden transition-all ${
+              className={`relative rounded-2xl border bg-[var(--color-surface)] overflow-hidden transition-all ${
                 isCurrent
-                  ? "border-brand-500 ring-2 ring-brand-500/30"
+                  ? "border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/30"
                   : isPopular || isBest
-                  ? "border-brand-500/40"
-                  : "border-border-subtle"
+                  ? "border-[var(--color-accent)]/40"
+                  : "border-[var(--color-border-subtle)]"
               }`}
             >
               {(isPopular || isBest || isTop) && (
-                <div className="absolute top-0 left-0 right-0 px-3 py-1 bg-gradient-to-r from-brand-500 to-purple-500 text-white text-[10px] font-bold uppercase text-center tracking-wider">
+                <div className="absolute top-0 left-0 right-0 px-3 py-1 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)] text-[var(--color-text-main)] text-[10px] font-bold uppercase text-center tracking-wider">
                   {isTop ? "Best Value" : isBest ? "Popular" : "Recommended"}
                 </div>
               )}
 
               <div className={`p-5 space-y-4 ${isPopular || isBest || isTop ? "pt-9" : ""}`}>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-text-main">
+                  <div className="flex items-center gap-2 text-[var(--color-text-main)]">
                     {planIcon(plan.id)}
                     <h3 className="text-xl font-bold">{plan.name}</h3>
                   </div>
@@ -137,27 +137,27 @@ export default function SubscriptionPage() {
 
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-text-main">${plan.discountPrice.toFixed(2)}</span>
-                    <span className="text-text-muted text-sm">/ mo</span>
+                    <span className="text-3xl font-bold text-[var(--color-text-main)]">${plan.discountPrice.toFixed(2)}</span>
+                    <span className="text-[var(--color-text-muted)] text-sm">/ mo</span>
                   </div>
-                  <div className="text-xs text-text-muted mt-1">
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">
                     <span className="line-through">${plan.price.toFixed(2)}</span>
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-semibold">12% OFF</span>
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-[var(--color-success)]/10 text-[var(--color-success)] text-[10px] font-semibold">12% OFF</span>
                   </div>
                 </div>
 
-                <div className="py-3 border-y border-border-subtle">
-                  <div className="text-2xl font-bold text-text-main">{plan.creditsText}</div>
-                  <div className="text-xs text-text-muted">Credits monthly</div>
+                <div className="py-3 border-y border-[var(--color-border-subtle)]">
+                  <div className="text-2xl font-bold text-[var(--color-text-main)]">{plan.creditsText}</div>
+                  <div className="text-xs text-[var(--color-text-muted)]">Credits monthly</div>
                   {plan.multiplierText && (
-                    <div className="text-xs text-brand-400 mt-1 font-semibold">{plan.multiplierText}</div>
+                    <div className="text-xs text-[var(--color-accent)] mt-1 font-semibold">{plan.multiplierText}</div>
                   )}
                 </div>
 
-                <ul className="space-y-2 text-xs text-text-muted min-h-[180px]">
+                <ul className="space-y-2 text-xs text-[var(--color-text-muted)] min-h-[180px]">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <Check size={14} strokeWidth={2.4} className="text-emerald-400 mt-0.5 shrink-0" />
+                      <Check size={14} strokeWidth={2.4} className="text-[var(--color-success)] mt-0.5 shrink-0" />
                       <span className="leading-relaxed">{feature}</span>
                     </li>
                   ))}
@@ -168,10 +168,10 @@ export default function SubscriptionPage() {
                   onClick={() => handleSubscribe(plan.id)}
                   className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-colors ${
                     isCurrent
-                      ? "bg-emerald-500/10 text-emerald-400 cursor-default"
+                      ? "bg-[var(--color-success)]/10 text-[var(--color-success)] cursor-default"
                       : isPopular || isBest || isTop
-                      ? "bg-brand-500 hover:bg-brand-500/90 text-white"
-                      : "bg-white/5 hover:bg-white/10 text-text-main border border-border-subtle"
+                      ? "bg-[var(--color-accent)] hover:bg-[var(--color-accent)]/90 text-[var(--color-text-main)]"
+                      : "bg-[var(--color-surface)]/5 hover:bg-[var(--color-surface)]/10 text-[var(--color-text-main)] border border-[var(--color-border-subtle)]"
                   } disabled:opacity-60`}
                 >
                   {subscribingPlan === plan.id ? (
@@ -186,7 +186,7 @@ export default function SubscriptionPage() {
                   )}
                 </button>
 
-                <div className="text-[10px] text-text-muted text-center">
+                <div className="text-[10px] text-[var(--color-text-muted)] text-center">
                   Renews at ${plan.price.toFixed(2)}/mo. Cancel anytime.
                 </div>
               </div>
@@ -195,7 +195,7 @@ export default function SubscriptionPage() {
         })}
       </div>
 
-      <div className="text-center text-xs text-text-muted">
+      <div className="text-center text-xs text-[var(--color-text-muted)]">
         All plans work with popular coding tools like OpenClaw, Claude Code, OpenCode, and KiloCode.
       </div>
     </div>

@@ -3,12 +3,12 @@
 import { cn } from "@/shared/utils/cn";
 
 const variants = {
-  default: "bg-surface/85 text-text-muted border-border-subtle",
-  primary: "bg-brand-500/10 text-brand-600 dark:text-brand-300 border-brand-500/18",
-  success: "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/18",
-  warning: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/18",
-  error: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/18",
-  info: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/18",
+  default: "bg-[var(--color-surface)]/85 text-[var(--color-text-muted)] border-[var(--color-border-subtle)]",
+  primary: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent)] border-[var(--color-accent)]/18",
+  success: "bg-[var(--color-success)]/10 text-[var(--color-success)] dark:text-[var(--color-success)] border-[var(--color-success)]/18",
+  warning: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent)] border-[var(--color-accent)]/18",
+  error: "bg-[var(--color-danger)]/10 text-[var(--color-danger)] dark:text-[var(--color-danger)] border-[var(--color-danger)]/18",
+  info: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent)] border-[var(--color-accent)]/18",
 };
 
 const sizes = {
@@ -28,7 +28,7 @@ export default function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-semibold border border-border-subtle",
+        "inline-flex items-center gap-1.5 rounded-full font-semibold border border-[var(--color-border-subtle)]",
         variants[variant],
         sizes[size],
         className
@@ -38,12 +38,12 @@ export default function Badge({
         <span
           className={cn(
             "size-1.5 rounded-full",
-            variant === "success" && "bg-green-500",
-            variant === "warning" && "bg-yellow-500",
-            variant === "error" && "bg-red-500",
-            variant === "info" && "bg-blue-500",
-            variant === "primary" && "bg-brand-500",
-            variant === "default" && "bg-gray-500"
+            variant === "success" && "bg-[var(--color-success)]",
+            variant === "warning" && "bg-[var(--color-accent)]",
+            variant === "error" && "bg-[var(--color-danger)]",
+            variant === "info" && "bg-[var(--color-accent)]",
+            variant === "primary" && "bg-[var(--color-accent)]",
+            variant === "default" && "bg-[var(--color-text-muted)]"
           )}
         />
       )}

@@ -18,8 +18,8 @@ export default function SegmentedControl({
   return (
     <div
       className={cn(
-        "inline-flex items-center p-1 rounded-xl overflow-x-auto border border-border-subtle",
-        "bg-surface/80 backdrop-blur-xl",
+        "inline-flex items-center p-1 rounded-xl overflow-x-auto border border-[var(--color-border-subtle)]",
+        "bg-[var(--color-surface)]/80 backdrop-blur-xl",
         className
       )}
     >
@@ -31,8 +31,8 @@ export default function SegmentedControl({
             "shrink-0 px-4 rounded-[8px] font-medium transition-all",
             sizes[size],
             value === option.value
-              ? "bg-surface text-text-main shadow-sm"
-              : "text-text-muted hover:text-text-main"
+              ? "bg-[var(--color-surface)] text-[var(--color-text-main)] shadow-sm"
+              : "text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
           )}
         >
           {option.icon && (

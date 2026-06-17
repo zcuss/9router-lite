@@ -21,7 +21,7 @@ export default function ProviderIcon({
     const text = fallbackText !== "?" ? fallbackText : (providerId ? providerId.substring(0, 2).toUpperCase() : "?");
     return (
       <span
-        className={`inline-flex items-center justify-center font-bold rounded-lg bg-white/5 border border-white/10 ${className}`.trim()}
+        className={`inline-flex items-center justify-center font-bold rounded-lg bg-[var(--color-surface)]/5 border border-[var(--color-border-subtle)]/10 ${className}`.trim()}
         style={{
           width: size,
           height: size,

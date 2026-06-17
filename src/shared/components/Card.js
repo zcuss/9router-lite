@@ -25,9 +25,9 @@ export default function Card({
   return (
     <div
       className={cn(
-        "bg-surface/88 border border-border-subtle backdrop-blur-xl",
+        "bg-[var(--color-surface)]/88 border border-[var(--color-border-subtle)] backdrop-blur-xl",
         elev ? "rounded-2xl shadow-[var(--shadow-elev)]" : "rounded-2xl shadow-[var(--shadow-soft)]",
-        hover && "hover:-translate-y-0.5 hover:shadow-[var(--shadow-warm)] hover:border-brand-500/30 transition-all cursor-pointer",
+        hover && "hover:-translate-y-0.5 hover:shadow-[var(--shadow-warm)] hover:border-[var(--color-accent)]/30 transition-all cursor-pointer",
         paddings[padding],
         className
       )}
@@ -37,16 +37,16 @@ export default function Card({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             {icon && (
-              <div className="p-2 rounded-xl bg-primary/10 text-primary">
+              <div className="p-2 rounded-xl bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]">
                 <span className="material-symbols-outlined text-[20px]">{icon}</span>
               </div>
             )}
             <div>
               {title && (
-                <h3 className="text-text-main font-semibold">{title}</h3>
+                <h3 className="text-[var(--color-text-main)] font-semibold">{title}</h3>
               )}
               {subtitle && (
-                <p className="text-sm text-text-muted">{subtitle}</p>
+                <p className="text-sm text-[var(--color-text-muted)]">{subtitle}</p>
               )}
             </div>
           </div>
@@ -63,7 +63,7 @@ Card.Section = function CardSection({ children, className, ...props }) {
     <div
       className={cn(
         "p-4 rounded-xl",
-        "bg-bg/70 border border-border-subtle",
+        "bg-bg/70 border border-[var(--color-border-subtle)]",
         className
       )}
       {...props}
@@ -78,8 +78,8 @@ Card.Row = function CardRow({ children, className, ...props }) {
     <div
       className={cn(
         "p-3 -mx-3 px-3 transition-colors",
-        "border-b border-border-subtle last:border-b-0",
-        "hover:bg-surface-2/50",
+        "border-b border-[var(--color-border-subtle)] last:border-b-0",
+        "hover:bg-[var(--color-surface-2)]/50",
         className
       )}
       {...props}
@@ -99,8 +99,8 @@ Card.ListItem = function CardListItem({
     <div
       className={cn(
         "group flex items-center justify-between p-3 -mx-3 px-3",
-        "border-b border-border-subtle last:border-b-0",
-        "hover:bg-surface-2/50 transition-colors",
+        "border-b border-[var(--color-border-subtle)] last:border-b-0",
+        "hover:bg-[var(--color-surface-2)]/50 transition-colors",
         className
       )}
       {...props}

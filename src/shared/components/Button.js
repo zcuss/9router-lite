@@ -3,12 +3,13 @@
 import { cn } from "@/shared/utils/cn";
 
 const variants = {
-  primary: "bg-gradient-to-r from-brand-500 to-cyan-500 hover:from-brand-600 hover:to-cyan-600 text-white shadow-[0_12px_28px_-18px_rgba(6,182,212,0.9)] disabled:bg-surface-3 disabled:text-text-muted",
-  secondary: "bg-surface/90 hover:bg-surface-2 text-text-main border border-border disabled:opacity-50",
-  outline: "border border-border text-text-main hover:bg-surface-2 hover:border-brand-500/40",
-  ghost: "text-text-muted hover:bg-surface-2 hover:text-text-main",
-  danger: "bg-red-500 hover:bg-red-600 text-white shadow-sm disabled:bg-surface-3 disabled:text-text-muted",
-  success: "bg-green-600 hover:bg-green-700 text-white shadow-sm disabled:bg-surface-3 disabled:text-text-muted",
+  primary: "bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-accent-fg)] shadow-[0_12px_28px_-18px_rgba(250,204,21,0.7)] disabled:bg-[var(--color-surface-3)] disabled:text-[var(--color-text-muted)]",
+  secondary: "bg-[var(--color-surface)]/90 hover:bg-[var(--color-surface-2)] text-[var(--color-text-main)] border border-[var(--color-border)] disabled:opacity-50",
+  outline: "border border-[var(--color-border)] text-[var(--color-text-main)] hover:bg-[var(--color-surface-2)] hover:border-[var(--color-accent)]/40",
+  ghost: "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text-main)]",
+  danger: "bg-[var(--color-danger)] hover:opacity-90 text-white shadow-sm disabled:bg-[var(--color-surface-3)] disabled:text-[var(--color-text-muted)]",
+  "danger-soft": "border border-[var(--color-danger)]/30 text-[var(--color-danger)] bg-transparent hover:bg-[var(--color-danger)]/10 disabled:opacity-50",
+  success: "bg-[var(--color-success)] hover:opacity-90 text-white shadow-sm disabled:bg-[var(--color-surface-3)] disabled:text-[var(--color-text-muted)]",
 };
 
 const sizes = {

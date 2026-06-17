@@ -3,18 +3,49 @@ import { getModelAliases, setModelAlias } from "@/models";
 import { getDisabledModels } from "@/lib/disabledModelsDb";
 import { AI_MODELS } from "@/shared/constants/config";
 import { getProviderAlias } from "@/shared/constants/providers";
+import { getCurrentDashboardUser, canManageUsers } from "@/lib/auth/currentUser";
+import { getAdapter } from "@/lib/db/driver";
+
+export const dynamic = "force-dynamic";
+
+async function getPublishedModelIds() {
+  try {
+    const db = await getAdapter();
+    const rows = await db.all(`SELECT model_id, enabled FROM model_publish WHERE enabled = 1`);
+    return new Set(rows.map((r) => r.model_id));
+  } catch {
+    return null; // table missing or DB down → fall through (admin sees all)
+  }
+}
 
 // GET /api/models - Get models with aliases
+// Admin/dev: sees all non-disabled models
+// User: only sees models explicitly published in `model_publish`
 export async function GET() {
   try {
+    const user = await getCurrentDashboardUser();
+    const isPrivileged = canManageUsers(user);
+
     const modelAliases = await getModelAliases();
     const disabled = await getDisabledModels();
+
+    let publishedSet = null;
+    if (!isPrivileged) {
+      publishedSet = await getPublishedModelIds();
+      // If no published set exists yet (table empty), users see nothing
+      if (!publishedSet) publishedSet = new Set();
+    }
 
     const models = AI_MODELS
       .filter((m) => {
         const alias = getProviderAlias(m.provider) || m.provider;
         const list = disabled[alias] || disabled[m.provider] || [];
-        return !list.includes(m.model);
+        if (list.includes(m.model)) return false;
+        if (!isPrivileged) {
+          const fullModel = `${m.provider}/${m.model}`;
+          if (!publishedSet.has(fullModel)) return false;
+        }
+        return true;
       })
       .map((m) => {
         const fullModel = `${m.provider}/${m.model}`;

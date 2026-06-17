@@ -42,15 +42,15 @@ export default function RequestLogger() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Request Logs</h2>
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-text-muted flex items-center gap-2 cursor-pointer">
+          <label className="text-sm font-medium text-[var(--color-text-muted)] flex items-center gap-2 cursor-pointer">
             <span>Auto Refresh (3s)</span>
             <div
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${autoRefresh ? "bg-primary" : "bg-bg-subtle border border-border"
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${autoRefresh ? "bg-[var(--color-text-main)]" : "bg-[var(--color-surface)] border border-[var(--color-border)]"
                 }`}
             >
               <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${autoRefresh ? "translate-x-5" : "translate-x-1"
+                className={`inline-block h-3 w-3 transform rounded-full bg-[var(--color-surface)] transition-transform ${autoRefresh ? "translate-x-5" : "translate-x-1"
                   }`}
               />
             </div>
@@ -58,26 +58,26 @@ export default function RequestLogger() {
         </div>
       </div>
 
-      <Card className="overflow-hidden bg-black/5 dark:bg-black/20">
+      <Card className="overflow-hidden bg-[var(--color-surface-2)] dark:bg-[var(--color-surface-2)]/20">
         <div className="p-0 overflow-x-auto max-h-[600px] overflow-y-auto font-mono text-xs">
           {loading && logs.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">Loading logs...</div>
+            <div className="p-8 text-center text-[var(--color-text-muted)]">Loading logs...</div>
           ) : logs.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">No logs recorded yet.</div>
+            <div className="p-8 text-center text-[var(--color-text-muted)]">No logs recorded yet.</div>
           ) : (
             <table className="w-full text-left border-collapse whitespace-nowrap">
-              <thead className="sticky top-0 bg-bg-subtle border-b border-border z-10">
+              <thead className="sticky top-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] z-10">
                 <tr>
-                  <th className="px-3 py-2 border-r border-border">DateTime</th>
-                  <th className="px-3 py-2 border-r border-border">Model</th>
-                  <th className="px-3 py-2 border-r border-border">Provider</th>
-                  <th className="px-3 py-2 border-r border-border">Account</th>
-                  <th className="px-3 py-2 border-r border-border">In</th>
-                  <th className="px-3 py-2 border-r border-border">Out</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">DateTime</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">Model</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">Provider</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">Account</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">In</th>
+                  <th className="px-3 py-2 border-r border-[var(--color-border)]">Out</th>
                   <th className="px-3 py-2">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/50">
+              <tbody className="divide-y divide-[var(--color-border)]/50">
                 {logs.map((log, i) => {
                   const parts = log.split(" | ");
                   if (parts.length < 7) return null;
@@ -88,20 +88,20 @@ export default function RequestLogger() {
                   const isSuccess = status.includes("OK");
 
                   return (
-                    <tr key={i} className={`hover:bg-primary/5 transition-colors ${isPending ? 'bg-primary/5' : ''}`}>
-                      <td className="px-3 py-1.5 border-r border-border text-text-muted">{parts[0]}</td>
-                      <td className="px-3 py-1.5 border-r border-border font-medium">{parts[1]}</td>
-                      <td className="px-3 py-1.5 border-r border-border">
-                        <span className="px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-[10px] uppercase font-bold">
+                    <tr key={i} className={`hover:bg-[var(--color-text-main)]/5 transition-colors ${isPending ? 'bg-[var(--color-text-main)]/5' : ''}`}>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)] text-[var(--color-text-muted)]">{parts[0]}</td>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)] font-medium">{parts[1]}</td>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)]">
+                        <span className="px-1.5 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] uppercase font-bold">
                           {parts[2]}
                         </span>
                       </td>
-                      <td className="px-3 py-1.5 border-r border-border truncate max-w-[150px]" title={parts[3]}>{parts[3]}</td>
-                      <td className="px-3 py-1.5 border-r border-border text-right text-primary">{parts[4]}</td>
-                      <td className="px-3 py-1.5 border-r border-border text-right text-success">{parts[5]}</td>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)] truncate max-w-[150px]" title={parts[3]}>{parts[3]}</td>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)] text-right text-[var(--color-text-main)]">{parts[4]}</td>
+                      <td className="px-3 py-1.5 border-r border-[var(--color-border)] text-right text-success">{parts[5]}</td>
                       <td className={`px-3 py-1.5 font-bold ${isSuccess ? 'text-success' :
                           isFailed ? 'text-error' :
-                            'text-primary animate-pulse'
+                            'text-[var(--color-text-main)] animate-pulse'
                         }`}>
                         {status}
                       </td>
@@ -113,7 +113,7 @@ export default function RequestLogger() {
           )}
         </div>
       </Card>
-      <div className="text-[10px] text-text-muted italic">
+      <div className="text-[10px] text-[var(--color-text-muted)] italic">
         Logs are loaded from the request history database.
       </div>
     </div>

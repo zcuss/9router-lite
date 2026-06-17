@@ -5,16 +5,12 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BarChart3,
-  PieChart,
   Wallet,
   Server,
   Layers,
   Code2,
   KeyRound,
-  CreditCard,
-  Users,
   Ticket,
-  Upload,
   Brain,
   Shield,
   Terminal,
@@ -31,53 +27,64 @@ import { useEffectiveRole } from "@/store/roleStore";
 
 const navGroups = [
   {
-    title: "Main",
+    title: "Utama",
     items: [
-      { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-      { href: "/dashboard/usage", label: "Usage", icon: BarChart3 },
-      { href: "/dashboard/analytics", label: "Analytics", icon: PieChart },
+      { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
+      { href: "/dashboard/usage", label: "Pemakaian", icon: BarChart3 },
+    ],
+  },
+  {
+    title: "Akses",
+    items: [
+      { href: "/dashboard/endpoint", label: "Endpoint & Kunci API", icon: Code2 },
+      { href: "/dashboard/quota", label: "Kunci API", icon: KeyRound },
+    ],
+  },
+  {
+    title: "Saldo",
+    items: [
       { href: "/dashboard/topup", label: "Top Up", icon: Wallet },
+      { href: "/dashboard/vouchers", label: "Tukar Voucher", icon: Ticket },
+      { href: "/dashboard/pricing", label: "Harga & Paket", icon: Layers, userHidden: true },
     ],
   },
   {
-    title: "Configuration",
+    title: "Akun",
     items: [
-      { href: "/dashboard/providers", label: "Providers", icon: Server },
-      { href: "/dashboard/combos", label: "Model Combos", icon: Layers },
-      { href: "/dashboard/endpoint", label: "Endpoint", icon: Code2 },
+      { href: "/dashboard/profile", label: "Profil", icon: CircleUserRound },
     ],
   },
   {
-    title: "Management",
+    title: "Manajemen",
     items: [
-      { href: "/dashboard/quota", label: "API Keys & Quota", icon: KeyRound },
-      { href: "/dashboard/pricing", label: "Pricing & Plans", icon: CreditCard },
-      { href: "/dashboard/user-management", label: "Users", icon: Users, adminOnly: true },
+      { href: "/dashboard/providers", label: "Provider", icon: Server, adminOnly: true },
+      { href: "/dashboard/combos", label: "Kombo Model", icon: Layers, adminOnly: true },
+      { href: "/dashboard/pricing", label: "Harga & Paket", icon: Layers, adminOnly: true },
+      { href: "/dashboard/user-management", label: "Manajemen User", icon: CircleUserRound, adminOnly: true },
     ],
   },
   {
-    title: "Admin",
+    title: "Rilis & Admin",
     items: [
-      { href: "/dashboard/admin/vouchers", label: "Vouchers", icon: Ticket, adminOnly: true },
-      { href: "/dashboard/admin/models", label: "Model Releases", icon: Upload, adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Voucher & Top Up", icon: Ticket, adminOnly: true },
+      { href: "/dashboard/admin/models", label: "Rilis Model", icon: Layers, adminOnly: true },
     ],
   },
   {
-    title: "Advanced",
+    title: "Lanjutan",
     items: [
-      { href: "/dashboard/ai-tuning", label: "AI Tuning", icon: Brain },
-      { href: "/dashboard/mitm", label: "MITM Proxy", icon: Shield },
-      { href: "/dashboard/cli-tools", label: "CLI Tools", icon: Terminal },
-      { href: "/dashboard/skills", label: "Skills", icon: Puzzle },
+      { href: "/dashboard/ai-tuning", label: "Tuning AI", icon: Brain, adminOnly: true },
+      { href: "/dashboard/mitm", label: "MITM Proxy", icon: Shield, adminOnly: true },
+      { href: "/dashboard/cli-tools", label: "Alat CLI", icon: Terminal, adminOnly: true },
+      { href: "/dashboard/skills", label: "Skills", icon: Puzzle, adminOnly: true },
     ],
   },
   {
-    title: "System",
+    title: "Sistem",
     items: [
-      { href: "/dashboard/proxy-pools", label: "Proxy Pools", icon: Network },
-      { href: "/dashboard/console-log", label: "Console", icon: Terminal },
-      { href: "/dashboard/settings/database", label: "Database", icon: Cog },
-      { href: "/dashboard/profile", label: "Account", icon: CircleUserRound },
+      { href: "/dashboard/proxy-pools", label: "Proxy Pool", icon: Network, adminOnly: true },
+      { href: "/dashboard/console-log", label: "Console", icon: Terminal, adminOnly: true },
+      { href: "/dashboard/settings/database", label: "Database", icon: Cog, adminOnly: true },
     ],
   },
 ];
@@ -86,7 +93,8 @@ export default function Sidebar({ onClose }) {
   const pathname = usePathname();
   const { settings } = useSettingsStore();
   const effectiveRole = useEffectiveRole();
-  const userRole = String(effectiveRole || settings?.userRole || "dev").toLowerCase();
+  const userRole = String(effectiveRole || settings?.userRole || "user").toLowerCase();
+  const isPrivileged = userRole === "admin" || userRole === "dev";
 
   const isActive = (href) => {
     try {
@@ -124,9 +132,11 @@ export default function Sidebar({ onClose }) {
 
       <nav className="custom-scrollbar flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 py-4">
         {navGroups.map((group) => {
-          const visibleItems = group.items.filter(
-            (item) => !item.adminOnly || userRole === "admin" || userRole === "dev"
-          );
+          const visibleItems = group.items.filter((item) => {
+            if (item.adminOnly) return isPrivileged;
+            if (item.userHidden) return isPrivileged;
+            return true;
+          });
           if (visibleItems.length === 0) return null;
           return (
             <div key={group.title} className="mb-5">
@@ -139,7 +149,7 @@ export default function Sidebar({ onClose }) {
                   const Icon = item.icon;
                   return (
                     <Link
-                      key={item.href}
+                      key={`${group.title}-${item.href}`}
                       href={item.href}
                       onClick={onClose}
                       className={cn(
@@ -185,7 +195,7 @@ export default function Sidebar({ onClose }) {
           className="group flex h-9 w-full items-center gap-2.5 rounded-md px-3 text-[13px] font-medium text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-2)] hover:text-[var(--color-danger)]"
         >
           <LogOut className="size-4" strokeWidth={2} />
-          <span>Sign out</span>
+          <span>Keluar</span>
         </button>
       </div>
     </aside>

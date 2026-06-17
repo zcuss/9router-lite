@@ -379,15 +379,15 @@ export default function ModelSelectModal({
       footer={null}
     >
       {/* Info bar */}
-      <div className="flex items-center gap-2 mb-3 px-2.5 py-2 bg-primary/8 border border-primary/20 rounded-lg text-xs text-text-muted">
-        <span className="material-symbols-outlined text-primary shrink-0" style={{ fontSize: "14px" }}>info</span>
+      <div className="flex items-center gap-2 mb-3 px-2.5 py-2 bg-[var(--color-text-main)]/8 border border-[var(--color-text-main)]/20 rounded-lg text-xs text-[var(--color-text-muted)]">
+        <span className="material-symbols-outlined text-[var(--color-text-main)] shrink-0" style={{ fontSize: "14px" }}>info</span>
         <span>Click to add, click again to remove. Changes are saved automatically.</span>
       </div>
 
       {/* Search - compact */}
       <div className="mb-3">
         <div className="relative">
-          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted text-[16px]">
+          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] text-[16px]">
             search
           </span>
           <input
@@ -395,7 +395,7 @@ export default function ModelSelectModal({
             placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 bg-surface border border-border rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+            className="w-full pl-8 pr-3 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
         </div>
       </div>
@@ -405,10 +405,10 @@ export default function ModelSelectModal({
         {/* Combos section - always first */}
         {filteredCombos.length > 0 && (
           <div>
-            <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 bg-surface py-0.5">
-              <span className="material-symbols-outlined text-primary text-[14px]">layers</span>
-              <span className="text-xs font-medium text-primary">Combos</span>
-              <span className="text-[10px] text-text-muted">({filteredCombos.length})</span>
+            <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 bg-[var(--color-surface)] py-0.5">
+              <span className="material-symbols-outlined text-[var(--color-text-main)] text-[14px]">layers</span>
+              <span className="text-xs font-medium text-[var(--color-text-main)]">Combos</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">({filteredCombos.length})</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {filteredCombos.map((combo) => {
@@ -420,10 +420,10 @@ export default function ModelSelectModal({
                     className={`
                       px-2 py-1 rounded-xl text-xs font-medium transition-all border hover:cursor-pointer flex items-center gap-1
                       ${isSelected
-                        ? "bg-primary text-white border-primary"
+                        ? "bg-[var(--color-text-main)] text-[var(--color-text-main)] border-[var(--color-text-main)]"
                         : addedModelValues.includes(combo.name)
-                          ? "bg-primary border-primary text-white hover:bg-primary-hover"
-                          : "bg-surface border-border text-text-main hover:border-primary/50 hover:bg-primary/5"
+                          ? "bg-[var(--color-text-main)] border-[var(--color-text-main)] text-[var(--color-text-main)] hover:bg-[var(--color-text-main)]-hover"
+                          : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/50 hover:bg-[var(--color-text-main)]/5"
                       }
                     `}
                   >
@@ -442,7 +442,7 @@ export default function ModelSelectModal({
         {Object.entries(filteredGroups).map(([providerId, group]) => (
           <div key={providerId}>
             {/* Provider header */}
-            <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 bg-surface py-0.5">
+            <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 bg-[var(--color-surface)] py-0.5">
               <ProviderIcon
                 src={`/providers/${providerId}.png`}
                 alt={group.name}
@@ -450,10 +450,10 @@ export default function ModelSelectModal({
                 fallbackText={(group.name || providerId).slice(0, 2).toUpperCase()}
                 fallbackColor={group.color}
               />
-              <span className="text-xs font-medium text-primary">
+              <span className="text-xs font-medium text-[var(--color-text-main)]">
                 {group.name}
               </span>
-              <span className="text-[10px] text-text-muted">
+              <span className="text-[10px] text-[var(--color-text-muted)]">
                 ({group.models.length})
               </span>
             </div>
@@ -470,12 +470,12 @@ export default function ModelSelectModal({
                     className={`
                       px-2 py-1 rounded-xl text-xs font-medium transition-all border hover:cursor-pointer
                       ${isPlaceholder
-                        ? "border-dashed border-border text-text-muted hover:border-primary/50 hover:text-primary bg-surface italic"
+                        ? "border-dashed border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-main)]/50 hover:text-[var(--color-text-main)] bg-[var(--color-surface)] italic"
                         : isSelected
-                          ? "bg-primary text-white border-primary"
+                          ? "bg-[var(--color-text-main)] text-[var(--color-text-main)] border-[var(--color-text-main)]"
                           : addedModelValues.includes(model.value)
-                            ? "bg-primary border-primary text-white hover:bg-primary-hover"
-                            : "bg-surface border-border text-text-main hover:border-primary/50 hover:bg-primary/5"
+                            ? "bg-[var(--color-text-main)] border-[var(--color-text-main)] text-[var(--color-text-main)] hover:bg-[var(--color-text-main)]-hover"
+                            : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/50 hover:bg-[var(--color-text-main)]/5"
                       }
                     `}
                   >
@@ -505,7 +505,7 @@ export default function ModelSelectModal({
         ))}
 
         {Object.keys(filteredGroups).length === 0 && filteredCombos.length === 0 && (
-          <div className="text-center py-4 text-text-muted">
+          <div className="text-center py-4 text-[var(--color-text-muted)]">
             <span className="material-symbols-outlined text-2xl mb-1 block">
               search_off
             </span>

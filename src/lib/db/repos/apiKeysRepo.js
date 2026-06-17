@@ -8,6 +8,7 @@ function rowToKey(row) {
     key: row.key,
     name: row.name,
     machineId: row.machineId,
+    userId: row.user_id || row.userId || null,
     isActive: row.isActive === 1 || row.isActive === true,
     createdAt: row.createdAt,
   };
@@ -25,7 +26,7 @@ export async function getApiKeyById(id) {
   return rowToKey(row);
 }
 
-export async function createApiKey(name, machineId) {
+export async function createApiKey(name, machineId, userId = null) {
   if (!machineId) throw new Error("machineId is required");
   const db = await getAdapter();
   const { generateApiKeyWithMachine } = await import("@/shared/utils/apiKey");
@@ -35,12 +36,13 @@ export async function createApiKey(name, machineId) {
     name,
     key: result.key,
     machineId,
+    userId,
     isActive: true,
     createdAt: new Date().toISOString(),
   };
   await db.run(
-    `INSERT INTO apiKeys(id, key, name, machineId, isActive, createdAt) VALUES(?, ?, ?, ?, ?, ?)`,
-    [apiKey.id, apiKey.key, apiKey.name, apiKey.machineId, 1, apiKey.createdAt]
+    `INSERT INTO apiKeys(id, key, name, machineId, user_id, isActive, createdAt) VALUES(?, ?, ?, ?, ?, ?, ?)`,
+    [apiKey.id, apiKey.key, apiKey.name, apiKey.machineId, apiKey.userId, 1, apiKey.createdAt]
   );
   return apiKey;
 }
@@ -53,8 +55,8 @@ export async function updateApiKey(id, data) {
     if (!row) return;
     const merged = { ...rowToKey(row), ...data };
     await db.run(
-      `UPDATE apiKeys SET key = ?, name = ?, machineId = ?, isActive = ? WHERE id = ?`,
-      [merged.key, merged.name, merged.machineId, merged.isActive ? 1 : 0, id]
+      `UPDATE apiKeys SET key = ?, name = ?, machineId = ?, user_id = ?, isActive = ? WHERE id = ?`,
+      [merged.key, merged.name, merged.machineId, merged.userId, merged.isActive ? 1 : 0, id]
     );
     result = merged;
   });

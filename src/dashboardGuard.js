@@ -28,6 +28,11 @@ const PUBLIC_API_PATHS = [
   "/api/auth/logout",
   "/api/auth/status",
   "/api/auth/oidc",
+  // Pre-login auth flows: must be reachable without a session so the login
+  // page can show OAuth buttons, request magic links, and consume them.
+  "/api/auth/config",
+  "/api/auth/magic-link",
+  "/api/auth/oauth",
   "/api/version",
   "/api/settings/require-login",
 ];
@@ -227,6 +232,15 @@ export async function proxy(request) {
   }
 
   if (isPublicLlmApi(pathname)) {
+    // Rewrite /v1/... to /api/v1/... (canonical handlers are under /api/v1)
+    if (pathname === "/v1" || pathname.startsWith("/v1/")) {
+      const rewritten = pathname.replace(/^\/v1(\/|$)/, "/api/v1$1");
+      return NextResponse.rewrite(new URL(rewritten, request.url));
+    }
+    if (pathname === "/v1beta" || pathname.startsWith("/v1beta/")) {
+      const rewritten = pathname.replace(/^\/v1beta(\/|$)/, "/api/v1beta$1");
+      return NextResponse.rewrite(new URL(rewritten, request.url));
+    }
     if (await canAccessPublicLlmApi(request)) return NextResponse.next();
     return NextResponse.json({ error: "API key required for remote API access" }, { status: 401 });
   }

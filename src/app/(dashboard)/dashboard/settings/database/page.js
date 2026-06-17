@@ -3,8 +3,11 @@
 
 export const dynamic = "force-dynamic";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, Button, Input, Select } from "@/shared/components";
 import { Toaster, toast } from "sonner";
+import useRoleStore, { useEffectiveRole } from "@/store/roleStore";
+import { ShieldOff } from "lucide-react";
 
 const LOCAL_DRIVER_VALUE = "local";
 const REMOTE_DRIVER_VALUES = new Set(["postgres", "cockroach"]);
@@ -13,7 +16,49 @@ const FOOTER_COPY = {
   dirty: "Perubahan belum disimpan.",
 };
 
+function AccessDenied() {
+  return (
+    <div className="px-4 sm:px-6 py-12 max-w-2xl mx-auto">
+      <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-8 text-center space-y-3">
+        <ShieldOff className="size-8 mx-auto text-[var(--color-text-subtle)]" />
+        <h2 className="text-lg font-semibold">Akses Ditolak</h2>
+        <p className="text-[13px] text-[var(--color-text-muted)]">Hanya admin/dev yang dapat mengubah konfigurasi database.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function DatabaseSettings() {
+  const effectiveRole = useEffectiveRole();
+  const realRole = useRoleStore((s) => s.realRole);
+  const viewAs = useRoleStore((s) => s.viewAs);
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Server-side guard via JWT cookie: deny user even if they bypass client checks
+  useEffect(() => {
+    if (!mounted) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/status", { cache: "no-store" });
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          const role = String(data?.role || "").toLowerCase();
+          if (role !== "admin" && role !== "dev") {
+            // Non-admin: redirect to home, do not render
+            router.replace("/dashboard");
+          }
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [mounted, router]);
+
+  const canAccess = mounted && (realRole === "admin" || realRole === "dev") && !viewAs;
+
   const [dbDriver, setDbDriver] = useState(LOCAL_DRIVER_VALUE);
   const [databaseUrl, setDatabaseUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,14 +72,18 @@ export default function DatabaseSettings() {
 
   const hasRemoteConfig = normalizedDriver !== LOCAL_DRIVER_VALUE;
 
+  if (mounted && !canAccess) {
+    return <AccessDenied />;
+  }
+
   useEffect(() => {
-    let mounted = true;
+    let alive = true;
 
     async function loadConfig() {
       try {
         const response = await fetch("/api/settings/database/config", { cache: "no-store" });
         const result = await response.json();
-        if (!mounted) return;
+        if (!alive) return;
 
         if (result.success) {
           const nextDriver = REMOTE_DRIVER_VALUES.has((result.DB_DRIVER || "").toLowerCase()) ? result.DB_DRIVER.toLowerCase() : LOCAL_DRIVER_VALUE;
@@ -46,14 +95,14 @@ export default function DatabaseSettings() {
           toast.error(result.error || "Gagal membaca konfigurasi database");
         }
       } catch (error) {
-        if (mounted) toast.error("Gagal membaca konfigurasi database: " + error.message);
+        if (alive) toast.error("Gagal membaca konfigurasi database: " + error.message);
       } finally {
-        if (mounted) setInitialLoading(false);
+        if (alive) setInitialLoading(false);
       }
     }
 
     loadConfig();
-    return () => { mounted = false; };
+    return () => { alive = false; };
   }, []);
 
   const refreshConfig = async () => {
@@ -137,19 +186,19 @@ export default function DatabaseSettings() {
     <div className="p-6 max-w-2xl space-y-6">
       <Toaster richColors />
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-[10px] bg-surface border border-border-subtle text-text-muted">
+        <div className="p-2 rounded-[10px] bg-[var(--color-surface)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
           <span className="material-symbols-outlined text-[24px]">storage</span>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-text-main">Pengaturan Database</h1>
-          <p className="text-sm text-text-muted">Konfigurasi penyimpanan data aplikasi</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-main)]">Pengaturan Database</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">Konfigurasi penyimpanan data aplikasi</p>
         </div>
       </div>
 
       <Card title="Konfigurasi Database" icon="dns">
         <div className="space-y-4">
           {initialLoading && (
-            <div className="text-sm text-text-muted">Membaca konfigurasi database dari env...</div>
+            <div className="text-sm text-[var(--color-text-muted)]">Membaca konfigurasi database dari env...</div>
           )}
 
           <Select
@@ -187,10 +236,10 @@ export default function DatabaseSettings() {
             </Button>
           </div>
 
-          <div className="text-xs text-text-muted border-t border-border-subtle pt-4 mt-4 space-y-1">
+          <div className="text-xs text-[var(--color-text-muted)] border-t border-[var(--color-border-subtle)] pt-4 mt-4 space-y-1">
             <p><strong>Catatan:</strong> Nilai driver dan URL di halaman ini langsung dibaca dari env runtime.</p>
             <p>{FOOTER_COPY.idle}</p>
-            {isDirty && <p className="text-amber-500">{FOOTER_COPY.dirty}</p>}
+            {isDirty && <p className="text-[var(--color-accent)]">{FOOTER_COPY.dirty}</p>}
           </div>
         </div>
       </Card>

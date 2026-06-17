@@ -15,7 +15,7 @@ export default function EndpointRoleRouter({ machineId }) {
   const showFull = mounted && (realRole === "dev" || realRole === "admin") && !viewAs;
 
   if (!mounted) {
-    return <div className="p-8 text-text-muted text-sm">Loading…</div>;
+    return <div className="p-8 text-[var(--color-text-muted)] text-sm">Loading…</div>;
   }
   if (showFull) {
     return <EndpointPageClient machineId={machineId} />;

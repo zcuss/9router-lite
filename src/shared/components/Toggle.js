@@ -38,16 +38,16 @@ export default function Toggle({
         className={cn(
           "relative inline-flex shrink-0 cursor-pointer rounded-full",
           "transition-colors duration-200 ease-in-out",
-          "focus:outline-none focus:ring-2 focus:ring-brand-500/30",
-          "border border-border-subtle shadow-inner",
-          checked ? "bg-gradient-to-r from-brand-500 to-cyan-500 border-brand-500/30" : "bg-surface-3",
+          "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/30",
+          "border border-[var(--color-border-subtle)] shadow-inner",
+          checked ? "bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)] border-[var(--color-accent)]/30" : "bg-[var(--color-surface-2)]",
           sizes[size].track,
           disabled && "cursor-not-allowed"
         )}
       >
         <span
           className={cn(
-            "pointer-events-none inline-block rounded-full bg-white shadow-sm",
+            "pointer-events-none inline-block rounded-full bg-[var(--color-surface)] shadow-sm",
             "transform transition duration-200 ease-in-out",
             checked ? sizes[size].translate : "translate-x-0.5",
             sizes[size].thumb,
@@ -58,10 +58,10 @@ export default function Toggle({
       {(label || description) && (
         <div className="flex flex-col">
           {label && (
-            <span className="text-sm font-medium text-text-main">{label}</span>
+            <span className="text-sm font-medium text-[var(--color-text-main)]">{label}</span>
           )}
           {description && (
-            <span className="text-xs text-text-muted">{description}</span>
+            <span className="text-xs text-[var(--color-text-muted)]">{description}</span>
           )}
         </div>
       )}

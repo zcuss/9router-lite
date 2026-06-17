@@ -524,15 +524,15 @@ export default function ProfilePage() {
         <Card>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="size-10 sm:size-12 rounded-lg bg-green-500/10 text-green-500 flex items-center justify-center shrink-0">
+              <div className="size-10 sm:size-12 rounded-lg bg-[var(--color-success)]/10 text-[var(--color-success)] flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-xl sm:text-2xl">computer</span>
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-semibold">Local Mode</h2>
-                <p className="text-sm text-text-muted">Running on your machine</p>
+                <p className="text-sm text-[var(--color-text-muted)]">Running on your machine</p>
               </div>
             </div>
-            <div className="inline-flex p-1 rounded-lg bg-black/5 dark:bg-white/5 w-full sm:w-auto">
+            <div className="inline-flex p-1 rounded-lg bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 w-full sm:w-auto">
               {["light", "dark", "system"].map((option) => (
                 <button
                   key={option}
@@ -541,8 +541,8 @@ export default function ProfilePage() {
                   className={cn(
                     "flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-md font-medium transition-all flex-1 sm:flex-initial",
                     theme === option
-                      ? "bg-white dark:bg-white/10 text-text-main shadow-sm"
-                      : "text-text-muted hover:text-text-main"
+                      ? "bg-[var(--color-surface)] dark:bg-[var(--color-surface)]/10 text-[var(--color-text-main)] shadow-sm"
+                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                   )}
                 >
                   <span className="material-symbols-outlined text-[18px]">
@@ -553,11 +553,11 @@ export default function ProfilePage() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-3 pt-4 border-t border-border">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg bg-bg border border-border gap-2">
+          <div className="flex flex-col gap-3 pt-4 border-t border-[var(--color-border)]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg bg-bg border border-[var(--color-border)] gap-2">
               <div>
                 <p className="font-medium text-sm sm:text-base">Database Location</p>
-                <p className="text-xs sm:text-sm text-text-muted font-mono break-all">CockroachDB / PostgreSQL via DATABASE_URL</p>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)] font-mono break-all">CockroachDB / PostgreSQL via DATABASE_URL</p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -588,7 +588,7 @@ export default function ProfilePage() {
               />
             </div>
             {dbStatus.message && (
-              <p className={`text-sm ${dbStatus.type === "error" ? "text-red-500" : "text-green-600 dark:text-green-400"}`}>
+              <p className={`text-sm ${dbStatus.type === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-success)] dark:text-[var(--color-success)]"}`}>
                 {dbStatus.message}
               </p>
             )}
@@ -598,7 +598,7 @@ export default function ProfilePage() {
         {/* Security */}
         <Card>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+            <div className="p-2 rounded-lg bg-[var(--color-text-main)]/10 text-[var(--color-text-main)] shrink-0">
               <span className="material-symbols-outlined text-[20px]">shield</span>
             </div>
             <h3 className="text-base sm:text-lg font-semibold">Security</h3>
@@ -607,7 +607,7 @@ export default function ProfilePage() {
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm sm:text-base">Require login</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                   When ON, dashboard requires password. When OFF, access without login.
                 </p>
               </div>
@@ -618,7 +618,7 @@ export default function ProfilePage() {
               />
             </div>
             {settings.requireLogin === true && (
-              <form onSubmit={handlePasswordChange} className="flex flex-col gap-4 pt-4 border-t border-border/50">
+              <form onSubmit={handlePasswordChange} className="flex flex-col gap-4 pt-4 border-t border-[var(--color-border)]/50">
                 {settings.hasPassword && (
                   <div className="flex flex-col gap-2">
                     <label className="text-xs sm:text-sm font-medium">Current Password</label>
@@ -632,9 +632,9 @@ export default function ProfilePage() {
                   </div>
                 )}
                 {/* {!settings.hasPassword && (
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
-                      Setting password for the first time. Leave current password empty or use default: <code className="bg-blue-500/20 px-1 rounded">123456</code>
+                  <div className="p-3 rounded-lg bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20">
+                    <p className="text-sm text-[var(--color-accent)] dark:text-[var(--color-accent)]">
+                      Setting password for the first time. Leave current password empty or use default: <code className="bg-[var(--color-accent)]/20 px-1 rounded">123456</code>
                     </p>
                   </div>
                 )} */}
@@ -662,7 +662,7 @@ export default function ProfilePage() {
                 </div>
 
                 {passStatus.message && (
-                  <p className={`text-xs sm:text-sm ${passStatus.type === "error" ? "text-red-500" : "text-green-500"}`}>
+                  <p className={`text-xs sm:text-sm ${passStatus.type === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-success)]"}`}>
                     {passStatus.message}
                   </p>
                 )}
@@ -684,22 +684,22 @@ export default function ProfilePage() {
             onClick={() => setOidcExpanded((v) => !v)}
             className="w-full flex items-center gap-3 text-left"
           >
-            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500 shrink-0">
+            <div className="p-2 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
               <span className="material-symbols-outlined text-[20px]">lock_open</span>
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-base sm:text-lg font-semibold">OIDC Dashboard Login</h3>
-              <p className="text-xs text-text-muted">
+              <p className="text-xs text-[var(--color-text-muted)]">
                 {settings.authMode === "oidc" ? "OIDC active" : settings.authMode === "both" ? "Password + OIDC active" : "Optional SSO via Authentik/Keycloak/Google"}
               </p>
             </div>
-            <span className="material-symbols-outlined text-text-muted shrink-0">
+            <span className="material-symbols-outlined text-[var(--color-text-muted)] shrink-0">
               {oidcExpanded ? "expand_less" : "expand_more"}
             </span>
           </button>
           {oidcExpanded && (
           <div className="flex flex-col gap-4 mt-4">
-            <p className="text-xs sm:text-sm text-text-muted">
+            <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
               Use Authentik or any OIDC provider to sign in to the dashboard. You can enable password-only, OIDC-only, or both for the dashboard; model API access still uses API keys.
             </p>
 
@@ -732,13 +732,13 @@ export default function ProfilePage() {
                       className={cn(
                         "text-left rounded-lg border p-3 transition-colors",
                         active
-                          ? "border-primary bg-primary/5"
-                          : "border-border bg-bg hover:bg-black/5 dark:hover:bg-white/5"
+                          ? "border-[var(--color-text-main)] bg-[var(--color-text-main)]/5"
+                          : "border-[var(--color-border)] bg-bg hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)]"
                       )}
                       disabled={loading || oidcLoading}
                     >
                       <p className="font-medium text-sm sm:text-base">{option.title}</p>
-                      <p className="text-xs sm:text-sm text-text-muted mt-1">{option.desc}</p>
+                      <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">{option.desc}</p>
                     </button>
                   );
                 })}
@@ -775,7 +775,7 @@ export default function ProfilePage() {
                   onChange={(e) => setOidcClientSecret(e.target.value)}
                   disabled={loading || oidcLoading}
                 />
-                <p className="text-xs sm:text-sm text-text-muted">This value is write-only after saving.</p>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">This value is write-only after saving.</p>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -799,12 +799,12 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-bg p-3 text-xs sm:text-sm text-text-muted">
-              <p className="font-medium text-text-main mb-1">Redirect URI</p>
+            <div className="rounded-lg border border-[var(--color-border)] bg-bg p-3 text-xs sm:text-sm text-[var(--color-text-muted)]">
+              <p className="font-medium text-[var(--color-text-main)] mb-1">Redirect URI</p>
               <code className="block break-all font-mono">{oidcRedirectUri}</code>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-border/50">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[var(--color-border)]/50">
               <Button type="button" variant="primary" loading={oidcLoading} onClick={() => saveOidcSettings()} className="w-full sm:w-auto">
                 Save auth mode
               </Button>
@@ -814,25 +814,25 @@ export default function ProfilePage() {
             </div>
 
             {oidcTestStatus.message && (
-              <p className={`text-xs sm:text-sm ${oidcTestStatus.type === "error" ? "text-red-500" : "text-green-500"}`}>
+              <p className={`text-xs sm:text-sm ${oidcTestStatus.type === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-success)]"}`}>
                 {oidcTestStatus.message}
               </p>
             )}
 
             {oidcStatus.message && (
-              <p className={`text-xs sm:text-sm ${oidcStatus.type === "error" ? "text-red-500" : "text-green-500"}`}>
+              <p className={`text-xs sm:text-sm ${oidcStatus.type === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-success)]"}`}>
                 {oidcStatus.message}
               </p>
             )}
 
             {settings.authMode === "oidc" && (
-              <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+              <p className="text-xs sm:text-sm text-[var(--color-accent)] dark:text-[var(--color-accent)]">
                 OIDC login is currently active. Password login is disabled until you switch back.
               </p>
             )}
 
             {settings.authMode === "both" && (
-              <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+              <p className="text-xs sm:text-sm text-[var(--color-accent)] dark:text-[var(--color-accent)]">
                 Password and OIDC login are both active.
               </p>
             )}
@@ -843,7 +843,7 @@ export default function ProfilePage() {
         {/* Routing Preferences */}
         <Card>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
+            <div className="p-2 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
               <span className="material-symbols-outlined text-[20px]">route</span>
             </div>
             <h3 className="text-base sm:text-lg font-semibold">Routing Strategy</h3>
@@ -852,7 +852,7 @@ export default function ProfilePage() {
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm sm:text-base">Round Robin</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                   Cycle through accounts to distribute load
                 </p>
               </div>
@@ -865,10 +865,10 @@ export default function ProfilePage() {
 
             {/* Sticky Round Robin Limit */}
             {settings.fallbackStrategy === "round-robin" && (
-              <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-border/50">
+              <div className="flex items-start sm:items-center justify-between gap-4 pt-2 border-t border-[var(--color-border)]/50">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm sm:text-base">Sticky Limit</p>
-                  <p className="text-xs sm:text-sm text-text-muted">
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                     Calls per account before switching
                   </p>
                 </div>
@@ -885,10 +885,10 @@ export default function ProfilePage() {
             )}
 
             {/* Combo Round Robin */}
-            <div className="flex items-start sm:items-center justify-between gap-4 pt-4 border-t border-border/50">
+            <div className="flex items-start sm:items-center justify-between gap-4 pt-4 border-t border-[var(--color-border)]/50">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm sm:text-base">Combo Round Robin</p>
-                <p className="text-xs sm:text-sm text-text-muted">
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                   Cycle through providers in combos instead of always starting with first
                 </p>
               </div>
@@ -901,10 +901,10 @@ export default function ProfilePage() {
 
             {/* Combo Sticky Round Robin Limit */}
             {settings.comboStrategy === "round-robin" && (
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]/50">
                 <div>
                   <p className="font-medium">Combo Sticky Limit</p>
-                  <p className="text-sm text-text-muted">
+                  <p className="text-sm text-[var(--color-text-muted)]">
                     Calls per combo model before switching
                   </p>
                 </div>
@@ -920,7 +920,7 @@ export default function ProfilePage() {
               </div>
             )}
 
-            <p className="text-xs text-text-muted italic pt-2 border-t border-border/50">
+            <p className="text-xs text-[var(--color-text-muted)] italic pt-2 border-t border-[var(--color-border)]/50">
               {settings.fallbackStrategy === "round-robin"
                 ? `Currently distributing requests across all available accounts with ${settings.stickyRoundRobinLimit || 3} calls per account.`
                 : "Currently using accounts in priority order (Fill First)."}
@@ -934,7 +934,7 @@ export default function ProfilePage() {
         {/* Network */}
         <Card>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500 shrink-0">
+            <div className="p-2 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
               <span className="material-symbols-outlined text-[20px]">wifi</span>
             </div>
             <h3 className="text-base sm:text-lg font-semibold">Network</h3>
@@ -944,7 +944,7 @@ export default function ProfilePage() {
             <div className="flex items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm sm:text-base">Outbound Proxy</p>
-                <p className="text-xs sm:text-sm text-text-muted">Enable proxy for OAuth + provider outbound requests.</p>
+                <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">Enable proxy for OAuth + provider outbound requests.</p>
               </div>
               <Toggle
                 checked={settings.outboundProxyEnabled === true}
@@ -954,7 +954,7 @@ export default function ProfilePage() {
             </div>
 
             {settings.outboundProxyEnabled === true && (
-              <form onSubmit={updateOutboundProxy} className="flex flex-col gap-4 pt-2 border-t border-border/50">
+              <form onSubmit={updateOutboundProxy} className="flex flex-col gap-4 pt-2 border-t border-[var(--color-border)]/50">
                 <div className="flex flex-col gap-2">
                   <label className="font-medium text-sm sm:text-base">Proxy URL</label>
                   <Input
@@ -963,10 +963,10 @@ export default function ProfilePage() {
                     onChange={(e) => setProxyForm((prev) => ({ ...prev, outboundProxyUrl: e.target.value }))}
                     disabled={loading || proxyLoading}
                   />
-                  <p className="text-xs sm:text-sm text-text-muted">Leave empty to inherit existing env proxy (if any).</p>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">Leave empty to inherit existing env proxy (if any).</p>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-2 border-t border-border/50">
+                <div className="flex flex-col gap-2 pt-2 border-t border-[var(--color-border)]/50">
                   <label className="font-medium text-sm sm:text-base">No Proxy</label>
                   <Input
                     placeholder="localhost,127.0.0.1"
@@ -974,10 +974,10 @@ export default function ProfilePage() {
                     onChange={(e) => setProxyForm((prev) => ({ ...prev, outboundNoProxy: e.target.value }))}
                     disabled={loading || proxyLoading}
                   />
-                  <p className="text-xs sm:text-sm text-text-muted">Comma-separated hostnames/domains to bypass the proxy.</p>
+                  <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">Comma-separated hostnames/domains to bypass the proxy.</p>
                 </div>
 
-                <div className="pt-2 border-t border-border/50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="pt-2 border-t border-[var(--color-border)]/50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <Button
                     type="button"
                     variant="secondary"
@@ -996,7 +996,7 @@ export default function ProfilePage() {
             )}
 
             {proxyStatus.message && (
-              <p className={`text-xs sm:text-sm ${proxyStatus.type === "error" ? "text-red-500" : "text-green-500"} pt-2 border-t border-border/50`}>
+              <p className={`text-xs sm:text-sm ${proxyStatus.type === "error" ? "text-[var(--color-danger)]" : "text-[var(--color-success)]"} pt-2 border-t border-[var(--color-border)]/50`}>
                 {proxyStatus.message}
               </p>
             )}
@@ -1006,7 +1006,7 @@ export default function ProfilePage() {
         {/* Observability Settings */}
         <Card>
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-orange-500/10 text-orange-500 shrink-0">
+            <div className="p-2 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] shrink-0">
               <span className="material-symbols-outlined text-[20px]">monitoring</span>
             </div>
             <h3 className="text-base sm:text-lg font-semibold">Observability</h3>
@@ -1014,7 +1014,7 @@ export default function ProfilePage() {
           <div className="flex items-start sm:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sm sm:text-base">Enable Observability</p>
-              <p className="text-xs sm:text-sm text-text-muted">
+              <p className="text-xs sm:text-sm text-[var(--color-text-muted)]">
                 Record request details for inspection in the logs view
               </p>
             </div>
@@ -1027,7 +1027,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* App Info */}
-        <div className="text-center text-xs sm:text-sm text-text-muted py-4">
+        <div className="text-center text-xs sm:text-sm text-[var(--color-text-muted)] py-4">
           <p>{APP_CONFIG.name} v{APP_CONFIG.version}</p>
           <p className="mt-1">Local Mode - All data stored on your machine</p>
         </div>

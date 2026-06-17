@@ -7,26 +7,34 @@ import PropTypes from "prop-types";
 import { Menu, Search, X, LogOut, User, ChevronRight, Zap, Brain, Heart } from "lucide-react";
 import HeaderMenu from "@/shared/components/HeaderMenu";
 import ThemeToggle from "@/shared/components/ThemeToggle";
+import ViewAsSwitcher from "@/shared/components/ViewAsSwitcher";
 import useSettingsStore from "@/store/settingsStore";
 import { translate } from "@/i18n/runtime";
 import { useHeaderSearchStore } from "@/store/headerSearchStore";
 
 const getPageInfo = (pathname) => {
   if (!pathname) return { title: "", description: "" };
-  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Providers", description: "Manage your AI provider connections" };
-  if (pathname.includes("/combos")) return { title: "Model Combos", description: "Build combos with automatic fallback routing" };
-  if (pathname.includes("/usage")) return { title: "Usage", description: "Monitor API usage, tokens, and request logs" };
-  if (pathname.includes("/quota")) return { title: "API Keys & Quota", description: "Manage your API keys and quota limits" };
-  if (pathname.includes("/ai-tuning")) return { title: "AI Tuning", description: "Tune assistant name, personality, and system prompt" };
-  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intercept CLI tool traffic through the proxy" };
-  if (pathname.includes("/cli-tools")) return { title: "CLI Tools", description: "Configure CLI tools" };
-  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pools", description: "Manage your proxy pool configurations" };
-  if (pathname.includes("/skills")) return { title: "Skills", description: "Copy a link and paste it into your AI assistant" };
-  if (pathname.includes("/endpoint")) return { title: "Endpoint", description: "API endpoint configuration" };
-  if (pathname.includes("/profile")) return { title: "Account", description: "Manage your preferences" };
-  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug translation between formats" };
-  if (pathname.includes("/console-log")) return { title: "Console", description: "Live server console output" };
-  if (pathname === "/dashboard") return { title: "Home", description: "Overview of your AI infrastructure" };
+  if (pathname.includes("/providers") && !pathname.includes("/media-providers")) return { title: "Provider", description: "Kelola koneksi provider AI Anda" };
+  if (pathname.includes("/combos")) return { title: "Kombo Model", description: "Bangun kombo dengan routing fallback otomatis" };
+  if (pathname.includes("/usage")) return { title: "Pemakaian", description: "Pantau pemakaian API, token, dan log permintaan" };
+  if (pathname.includes("/quota")) return { title: "Kunci API & Kuota", description: "Kelola kunci API dan batas kuota Anda" };
+  if (pathname.includes("/ai-tuning")) return { title: "Tuning AI", description: "Atur nama, kepribadian, dan system prompt asisten" };
+  if (pathname.includes("/mitm")) return { title: "MITM Proxy", description: "Intersept traffic alat CLI melalui proxy" };
+  if (pathname.includes("/cli-tools")) return { title: "Alat CLI", description: "Konfigurasi alat CLI" };
+  if (pathname.includes("/proxy-pools")) return { title: "Proxy Pool", description: "Kelola konfigurasi proxy pool Anda" };
+  if (pathname.includes("/skills")) return { title: "Skills", description: "Salin link dan tempel ke asisten AI Anda" };
+  if (pathname.includes("/endpoint")) return { title: "Endpoint & Kunci API", description: "Konfigurasi endpoint API Anda" };
+  if (pathname.includes("/profile")) return { title: "Akun", description: "Kelola preferensi Anda" };
+  if (pathname.includes("/translator")) return { title: "Translator", description: "Debug translasi antar format" };
+  if (pathname.includes("/console-log")) return { title: "Console", description: "Output console server langsung" };
+  if (pathname.includes("/topup")) return { title: "Top Up", description: "Isi ulang saldo Anda" };
+  if (pathname.includes("/vouchers")) return { title: "Voucher", description: "Tukar voucher dan kelola saldo" };
+  if (pathname.includes("/admin/models")) return { title: "Rilis Model", description: "Publikasi model yang tersedia untuk user" };
+  if (pathname.includes("/admin/vouchers")) return { title: "Voucher & Top Up", description: "Kelola voucher dan approve top up user" };
+  if (pathname.includes("/user-management")) return { title: "Manajemen User", description: "Kelola user dan role" };
+  if (pathname.includes("/pricing")) return { title: "Harga & Paket", description: "Paket langganan dan harga" };
+  if (pathname.includes("/settings/database")) return { title: "Database", description: "Konfigurasi database" };
+  if (pathname === "/dashboard") return { title: "Beranda", description: "Ringkasan infrastruktur AI Anda" };
   return { title: "", description: "" };
 };
 
@@ -107,6 +115,7 @@ export default function Header({ onMenuClick, showMenuButton = true }) {
           </div>
         )}
         <HeaderSearch />
+        <ViewAsSwitcher />
         <button
           type="button"
           onClick={async () => {

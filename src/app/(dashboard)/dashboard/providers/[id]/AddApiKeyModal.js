@@ -168,15 +168,15 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
 
         {mode === "bulk" && (
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-text-muted">One key per line. Format: <code>name|apiKey</code> or just <code>apiKey</code> (auto-named by index).</p>
+            <p className="text-xs text-[var(--color-text-muted)]">One key per line. Format: <code>name|apiKey</code> or just <code>apiKey</code> (auto-named by index).</p>
             <textarea
-              className="w-full rounded border border-accent/30 bg-sidebar p-2 text-sm font-mono resize-y min-h-[140px] focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded border border-accent/30 bg-sidebar p-2 text-sm font-mono resize-y min-h-[140px] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
               placeholder={BULK_PLACEHOLDER}
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
             />
             {bulkResult && (
-              <div className={`text-sm font-medium ${bulkResult.failed > 0 ? "text-yellow-400" : "text-green-400"}`}>
+              <div className={`text-sm font-medium ${bulkResult.failed > 0 ? "text-[var(--color-accent)]" : "text-[var(--color-success)]"}`}>
                 ✓ {bulkResult.success} added{bulkResult.failed > 0 ? `, ✗ ${bulkResult.failed} failed` : ""}
               </div>
             )}
@@ -230,17 +230,17 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
           </div>
         )}
         {isXaiApiKey && (
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--color-text-muted)]">
             Use a direct xAI API key from console.x.ai. This is separate from Grok Build OAuth.
           </p>
         )}
         {isCookie && authHint && (
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--color-text-muted)]">
             {authHint}
             {website && (
               <>
                 {" "}
-                <a href={website} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                <a href={website} target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-main)] underline">
                   Open {website.replace(/^https?:\/\//, "")}
                 </a>
               </>
@@ -264,7 +264,7 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
           />
         )}
         {isOllamaLocal && (
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--color-text-muted)]">
             Leave blank to use <code>http://localhost:11434</code>. For remote Ollama, enter the full host URL (e.g. <code>http://192.168.1.10:11434</code>).
           </p>
         )}
@@ -274,10 +274,10 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
           </Badge>
         )}
         {error && (
-          <p className="text-xs text-red-500 break-words">{error}</p>
+          <p className="text-xs text-[var(--color-danger)] break-words">{error}</p>
         )}
         {isCompatible && (
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--color-text-muted)]">
             Enter the model ID exactly as your compatible endpoint expects it. This model will be saved as the connection default.
           </p>
         )}
@@ -290,8 +290,8 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
               onChange={(e) => setCloudflareData({ ...cloudflareData, accountId: e.target.value })}
               placeholder="abc123def456..."
             />
-            <p className="text-xs text-text-muted mt-2">
-              Find your Account ID in the right sidebar of <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">dash.cloudflare.com</a>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">
+              Find your Account ID in the right sidebar of <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" className="text-[var(--color-text-main)] underline">dash.cloudflare.com</a>
             </p>
           </div>
         )}
@@ -346,12 +346,12 @@ export default function AddApiKeyModal({ isOpen, provider, providerName, isCompa
         />
 
         {(proxyPools || []).length === 0 && (
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-[var(--color-text-muted)]">
             No active proxy pools available. Create one in Proxy Pools page first.
           </p>
         )}
 
-        <p className="text-xs text-text-muted">
+        <p className="text-xs text-[var(--color-text-muted)]">
           Legacy manual proxy fields are still accepted by API for backward compatibility.
         </p>
 

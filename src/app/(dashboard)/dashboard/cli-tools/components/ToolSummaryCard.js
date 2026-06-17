@@ -6,17 +6,17 @@ import { Card } from "@/shared/components";
 
 // Derive simple connected/configured/not-installed status from API payload
 function getStatus(status) {
-  if (!status) return { label: "Unknown", cls: "bg-gray-500/10 text-gray-500" };
-  if (!status.installed) return { label: "Not installed", cls: "bg-gray-500/10 text-gray-500" };
-  if (status.has9Router) return { label: "Connected", cls: "bg-green-500/10 text-green-600 dark:text-green-400" };
-  return { label: "Not configured", cls: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400" };
+  if (!status) return { label: "Unknown", cls: "bg-[var(--color-text-muted)]/10 text-[var(--color-text-muted)]" };
+  if (!status.installed) return { label: "Not installed", cls: "bg-[var(--color-text-muted)]/10 text-[var(--color-text-muted)]" };
+  if (status.has9Router) return { label: "Connected", cls: "bg-[var(--color-success)]/10 text-[var(--color-success)] dark:text-[var(--color-success)]" };
+  return { label: "Not configured", cls: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent)]" };
 }
 
 export default function ToolSummaryCard({ toolId, tool, status }) {
   const s = getStatus(status);
   return (
     <Link href={`/dashboard/cli-tools/${toolId}`} className="block">
-      <Card padding="sm" className="h-full overflow-hidden hover:border-primary/50 transition-colors cursor-pointer">
+      <Card padding="sm" className="h-full overflow-hidden hover:border-[var(--color-text-main)]/50 transition-colors cursor-pointer">
         <div className="flex h-full flex-col gap-2">
           <div className="flex items-center gap-3">
             <div className="size-8 flex items-center justify-center shrink-0">
@@ -30,7 +30,7 @@ export default function ToolSummaryCard({ toolId, tool, status }) {
               <h3 className="font-medium text-sm truncate">{tool.name}</h3>
               <span className={`inline-block mt-1 px-1.5 py-0.5 text-[10px] font-medium rounded-full ${s.cls}`}>{s.label}</span>
             </div>
-            <span className="material-symbols-outlined text-text-muted text-[18px] shrink-0">chevron_right</span>
+            <span className="material-symbols-outlined text-[var(--color-text-muted)] text-[18px] shrink-0">chevron_right</span>
           </div>
         </div>
       </Card>

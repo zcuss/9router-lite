@@ -79,12 +79,14 @@ export async function POST(request) {
     if (action === "create-voucher") {
       const amountCents = parseInt(body?.amountCents || 0, 10);
       const maxRedemptions = parseInt(body?.maxRedemptions || 1, 10);
+      const perUserLimit = parseInt(body?.perUserLimit ?? 1, 10);
       if (!Number.isFinite(amountCents) || amountCents <= 0) {
         return NextResponse.json({ error: "amountCents must be > 0" }, { status: 400 });
       }
       const voucher = await createVoucher({
         amountCents,
         maxRedemptions: maxRedemptions > 0 ? maxRedemptions : 1,
+        perUserLimit: perUserLimit >= 0 ? perUserLimit : 1,
         expiresAt: body?.expiresAt || null,
         note: body?.note || null,
         customCode: body?.customCode || null,

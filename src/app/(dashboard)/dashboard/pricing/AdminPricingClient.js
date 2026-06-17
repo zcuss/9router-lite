@@ -120,7 +120,7 @@ export default function PricingSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 size={32} strokeWidth={1.8} className="animate-spin text-text-muted" />
+        <Loader2 size={32} strokeWidth={1.8} className="animate-spin text-[var(--color-text-muted)]" />
       </div>
     );
   }
@@ -129,24 +129,24 @@ export default function PricingSettingsPage() {
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-text-main">Tabel Tarif Model</h1>
-          <p className="text-sm text-text-muted mt-1">
+          <h1 className="text-3xl font-bold text-[var(--color-text-main)]">Tabel Tarif Model</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">
             Atur tarif per-juta-token untuk setiap model. Format: $/1M token.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {dirty && <span className="text-xs text-amber-400">Perubahan belum disimpan</span>}
+          {dirty && <span className="text-xs text-[var(--color-accent)]">Perubahan belum disimpan</span>}
           <button
             onClick={handleReset}
             disabled={saving}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded border border-red-500/30 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 rounded border border-[var(--color-danger)]/30 transition-colors"
           >
             <RotateCcw size={14} strokeWidth={1.8} /> Reset Default
           </button>
           <button
             onClick={handleSave}
             disabled={saving || !dirty}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-primary text-white rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-[var(--color-accent)] text-[var(--color-accent-fg)] rounded hover:bg-[var(--color-text-main)]/90 transition-colors disabled:opacity-50"
           >
             <Save size={14} strokeWidth={1.8} /> {saving ? "Menyimpan..." : "Simpan"}
           </button>
@@ -154,34 +154,34 @@ export default function PricingSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-border-subtle bg-black/20 p-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-text-muted/60 mb-1">Total Model</div>
-          <div className="text-2xl font-bold text-text-main">{getModelCount()}</div>
+        <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 p-3">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]/60 mb-1">Total Model</div>
+          <div className="text-2xl font-bold text-[var(--color-text-main)]">{getModelCount()}</div>
         </div>
-        <div className="rounded-xl border border-border-subtle bg-black/20 p-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-text-muted/60 mb-1">Provider</div>
-          <div className="text-2xl font-bold text-text-main">{allProviders.length}</div>
+        <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 p-3">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]/60 mb-1">Provider</div>
+          <div className="text-2xl font-bold text-[var(--color-text-main)]">{allProviders.length}</div>
         </div>
-        <div className="rounded-xl border border-border-subtle bg-black/20 p-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-text-muted/60 mb-1">Status</div>
-          <div className="text-2xl font-bold text-emerald-400">Aktif</div>
+        <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 p-3">
+          <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--color-text-muted)]/60 mb-1">Status</div>
+          <div className="text-2xl font-bold text-[var(--color-success)]">Aktif</div>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama model..."
-            className="w-full pl-9 pr-3 py-2 bg-surface border border-border-subtle rounded-lg text-sm focus:outline-none focus:border-primary"
+            className="w-full pl-9 pr-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-text-main)]"
           />
         </div>
         <select
           value={activeProvider}
           onChange={(e) => setActiveProvider(e.target.value)}
-          className="px-3 py-2 bg-surface border border-border-subtle rounded-lg text-sm focus:outline-none focus:border-primary"
+          className="px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-text-main)]"
         >
           <option value="all">Semua Provider ({allProviders.length})</option>
           {allProviders.map((p) => (
@@ -192,7 +192,7 @@ export default function PricingSettingsPage() {
 
       <div className="space-y-4">
         {filteredProviders.length === 0 ? (
-          <div className="rounded-xl border border-border-subtle bg-black/20 p-8 text-center text-text-muted">
+          <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 p-8 text-center text-[var(--color-text-muted)]">
             Tidak ada data tarif.
           </div>
         ) : (
@@ -202,14 +202,14 @@ export default function PricingSettingsPage() {
               .sort();
             if (models.length === 0) return null;
             return (
-              <div key={provider} className="rounded-xl border border-border-subtle bg-surface/70 backdrop-blur-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-border-subtle bg-black/20 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-text-main uppercase tracking-wider">{provider}</span>
-                  <span className="text-xs text-text-muted">{models.length} model</span>
+              <div key={provider} className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)]/70 backdrop-blur-xl overflow-hidden">
+                <div className="px-4 py-2 border-b border-[var(--color-border-subtle)] bg-[var(--color-surface-2)]/20 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[var(--color-text-main)] uppercase tracking-wider">{provider}</span>
+                  <span className="text-xs text-[var(--color-text-muted)]">{models.length} model</span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-black/30 text-text-muted uppercase text-[10px] tracking-wider">
+                    <thead className="bg-[var(--color-surface-2)]/30 text-[var(--color-text-muted)] uppercase text-[10px] tracking-wider">
                       <tr>
                         <th className="px-4 py-2 text-left">Model</th>
                         {pricingFields.map((f) => (
@@ -222,10 +222,10 @@ export default function PricingSettingsPage() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border-subtle">
+                    <tbody className="divide-y divide-[var(--color-border-subtle)]">
                       {models.map((model) => (
-                        <tr key={model} className="hover:bg-white/[0.02]">
-                          <td className="px-4 py-2 font-mono text-xs text-text-main">{model}</td>
+                        <tr key={model} className="hover:bg-[var(--color-surface)]/[0.02]">
+                          <td className="px-4 py-2 font-mono text-xs text-[var(--color-text-main)]">{model}</td>
                           {pricingFields.map((field) => (
                             <td key={field} className="px-3 py-1.5">
                               <input
@@ -234,7 +234,7 @@ export default function PricingSettingsPage() {
                                 min="0"
                                 value={pricingData[provider][model][field] ?? 0}
                                 onChange={(e) => handlePricingChange(provider, model, field, e.target.value)}
-                                className="w-20 px-2 py-1 text-right bg-bg-base border border-border-subtle rounded text-xs font-mono focus:outline-none focus:border-primary"
+                                className="w-20 px-2 py-1 text-right bg-[var(--color-surface)] border border-[var(--color-border-subtle)] rounded text-xs font-mono focus:outline-none focus:border-[var(--color-text-main)]"
                               />
                             </td>
                           ))}

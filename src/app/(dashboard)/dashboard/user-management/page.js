@@ -8,18 +8,18 @@ const roles = ["user", "premium", "dev", "admin"];
 const statuses = ["pending", "approved", "blocked", "active", "suspended"];
 
 const statusTone = {
-  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  blocked: "bg-red-500/10 text-red-400 border-red-500/20",
-  suspended: "bg-red-500/10 text-red-400 border-red-500/20",
+  pending: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-[var(--color-accent)]/20",
+  approved: "bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20",
+  active: "bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/20",
+  blocked: "bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20",
+  suspended: "bg-[var(--color-danger)]/10 text-[var(--color-danger)] border-[var(--color-danger)]/20",
 };
 
 const roleTone = {
-  admin: "bg-purple-500/10 text-purple-300 border-purple-500/20",
-  dev: "bg-sky-500/10 text-sky-300 border-sky-500/20",
-  premium: "bg-brand-500/10 text-brand-400 border-brand-500/20",
-  user: "bg-white/5 text-text-muted border-white/10",
+  admin: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-[var(--color-accent)]/20",
+  dev: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-[var(--color-accent)]/20",
+  premium: "bg-[var(--color-accent)]/10 text-[var(--color-accent)] border-[var(--color-accent)]/20",
+  user: "bg-[var(--color-surface)]/5 text-[var(--color-text-muted)] border-[var(--color-border-subtle)]/10",
 };
 
 export default function UserManagementPage() {
@@ -58,38 +58,38 @@ export default function UserManagementPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-text-main">User Management</h1>
-        <p className="text-sm text-text-muted mt-1">Dev/Admin role manager, approval status, account login control.</p>
+        <h1 className="text-3xl font-bold text-[var(--color-text-main)]">User Management</h1>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">Dev/Admin role manager, approval status, account login control.</p>
       </div>
 
-      <div className="rounded-2xl border border-border-subtle bg-surface/70 backdrop-blur-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between">
+      <div className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)]/70 backdrop-blur-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
           <div>
-            <h2 className="font-semibold text-text-main">Users</h2>
-            <p className="text-xs text-text-muted">Login accounts, not provider API accounts.</p>
+            <h2 className="font-semibold text-[var(--color-text-main)]">Users</h2>
+            <p className="text-xs text-[var(--color-text-muted)]">Login accounts, not provider API accounts.</p>
           </div>
-          <button onClick={load} className="px-3 py-1.5 rounded-lg bg-brand-500/10 text-brand-500 text-xs font-semibold hover:bg-brand-500/20">
+          <button onClick={load} className="px-3 py-1.5 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-semibold hover:bg-[var(--color-accent)]/20">
             Refresh
           </button>
         </div>
 
         {loading ? (
-          <div className="p-6 text-sm text-text-muted">Loading...</div>
+          <div className="p-6 text-sm text-[var(--color-text-muted)]">Loading...</div>
         ) : error ? (
-          <div className="p-6 text-sm text-red-400">{error}</div>
+          <div className="p-6 text-sm text-[var(--color-danger)]">{error}</div>
         ) : (
-          <div className="divide-y divide-border-subtle">
+          <div className="divide-y divide-[var(--color-border-subtle)]">
             {users.map((user) => (
-              <div key={user.id} className="p-5 grid grid-cols-1 md:grid-cols-[1fr_180px_180px_120px] gap-4 items-center hover:bg-white/[0.02]">
+              <div key={user.id} className="p-5 grid grid-cols-1 md:grid-cols-[1fr_180px_180px_120px] gap-4 items-center hover:bg-[var(--color-surface)]/[0.02]">
                 <div>
-                  <div className="font-mono text-sm text-text-main">{user.username}</div>
-                  <div className="text-xs text-text-muted mt-1">{user.id} · {user.created_at || "no timestamp"}</div>
+                  <div className="font-mono text-sm text-[var(--color-text-main)]">{user.username}</div>
+                  <div className="text-xs text-[var(--color-text-muted)] mt-1">{user.id} · {user.created_at || "no timestamp"}</div>
                 </div>
                 <div className="space-y-2">
                   <span className={`inline-flex px-2 py-0.5 rounded-full border text-[11px] font-semibold uppercase ${roleTone[user.role] || roleTone.user}`}>
                     {user.role || "user"}
                   </span>
-                  <select value={user.role || "user"} onChange={(e) => update(user, { role: e.target.value })} className="w-full bg-black/30 border border-border rounded-lg px-3 py-2 text-sm">
+                  <select value={user.role || "user"} onChange={(e) => update(user, { role: e.target.value })} className="w-full bg-[var(--color-surface-2)]/30 border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm">
                     {roles.map((role) => <option key={role} value={role}>{role}</option>)}
                   </select>
                 </div>
@@ -97,23 +97,23 @@ export default function UserManagementPage() {
                   <span className={`inline-flex px-2 py-0.5 rounded-full border text-[11px] font-semibold uppercase ${statusTone[user.status] || statusTone.pending}`}>
                     {user.status || "pending"}
                   </span>
-                  <select value={user.status || "pending"} onChange={(e) => update(user, { status: e.target.value })} className="w-full bg-black/30 border border-border rounded-lg px-3 py-2 text-sm">
+                  <select value={user.status || "pending"} onChange={(e) => update(user, { status: e.target.value })} className="w-full bg-[var(--color-surface-2)]/30 border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm">
                     {statuses.map((status) => <option key={status} value={status}>{status}</option>)}
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
                   {user.status === "pending" && (
-                    <button onClick={() => update(user, { status: "approved" })} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20">
+                    <button onClick={() => update(user, { status: "approved" })} className="px-3 py-1.5 rounded-lg bg-[var(--color-success)]/10 text-[var(--color-success)] text-xs font-semibold hover:bg-[var(--color-success)]/20">
                       Approve
                     </button>
                   )}
                   {(user.status === "approved" || user.status === "active") && (
-                    <button onClick={() => update(user, { status: "blocked" })} className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 text-xs font-semibold hover:bg-red-500/20">
+                    <button onClick={() => update(user, { status: "blocked" })} className="px-3 py-1.5 rounded-lg bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-xs font-semibold hover:bg-[var(--color-danger)]/20">
                       Block
                     </button>
                   )}
                   {(user.status === "blocked" || user.status === "suspended") && (
-                    <button onClick={() => update(user, { status: "approved" })} className="px-3 py-1.5 rounded-lg bg-brand-500/10 text-brand-400 text-xs font-semibold hover:bg-brand-500/20">
+                    <button onClick={() => update(user, { status: "approved" })} className="px-3 py-1.5 rounded-lg bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs font-semibold hover:bg-[var(--color-accent)]/20">
                       Restore
                     </button>
                   )}

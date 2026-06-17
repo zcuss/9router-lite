@@ -74,7 +74,7 @@ export default function ProviderLimitCard({
           </div>
 
           <div>
-            <h3 className="font-semibold text-text-primary">
+            <h3 className="font-semibold text-[var(--color-text-main)]">
               {name || provider}
             </h3>
             {plan && (
@@ -92,11 +92,11 @@ export default function ProviderLimitCard({
         <button
           onClick={handleRefresh}
           disabled={refreshing || loading}
-          className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           title="Refresh quota"
         >
           <span
-            className={`material-symbols-outlined text-[20px] text-text-muted ${
+            className={`material-symbols-outlined text-[20px] text-[var(--color-text-muted)] ${
               refreshing || loading ? "animate-spin" : ""
             }`}
           >
@@ -109,36 +109,36 @@ export default function ProviderLimitCard({
       {loading && (
         <div className="space-y-4">
           <div className="space-y-2">
-            <div className="h-4 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
-            <div className="h-2 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
+            <div className="h-4 bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 rounded animate-pulse" />
+            <div className="h-2 bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 rounded animate-pulse" />
           </div>
           <div className="space-y-2">
-            <div className="h-4 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
-            <div className="h-2 bg-black/5 dark:bg-white/5 rounded animate-pulse" />
+            <div className="h-4 bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 rounded animate-pulse" />
+            <div className="h-2 bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 rounded animate-pulse" />
           </div>
         </div>
       )}
 
       {/* Error State */}
       {!loading && error && (
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+        <div className="p-4 rounded-lg bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-red-500 text-[20px]">
+            <span className="material-symbols-outlined text-[var(--color-danger)] text-[20px]">
               error
             </span>
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-[var(--color-danger)] dark:text-[var(--color-danger)]">{error}</p>
           </div>
         </div>
       )}
 
       {/* Info Message (for providers without API) */}
       {!loading && !error && message && (
-        <div className="p-4 rounded-lg bg-black/5 dark:bg-white/5 border border-border">
+        <div className="p-4 rounded-lg bg-[var(--color-surface-2)] dark:bg-[var(--color-surface)]/5 border border-[var(--color-border)]">
           <div className="flex items-start gap-2">
-            <span className="material-symbols-outlined text-text-muted text-[20px]">
+            <span className="material-symbols-outlined text-[var(--color-text-muted)] text-[20px]">
               info
             </span>
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-[var(--color-text-muted)]">
               {message}
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function ProviderLimitCard({
 
       {/* Empty State */}
       {!loading && !error && !message && quotas?.length === 0 && (
-        <div className="text-center py-8 text-text-muted">
+        <div className="text-center py-8 text-[var(--color-text-muted)]">
           <span className="material-symbols-outlined text-[48px] opacity-20">
             data_usage
           </span>

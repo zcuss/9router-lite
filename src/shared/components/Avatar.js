@@ -32,25 +32,25 @@ export default function Avatar({
 
   // Generate color from name
   const getColorFromName = (name) => {
-    if (!name) return "bg-primary";
+    if (!name) return "bg-[var(--color-text-main)]";
     const colors = [
-      "bg-red-500",
-      "bg-orange-500",
-      "bg-amber-500",
-      "bg-yellow-500",
+      "bg-[var(--color-danger)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
       "bg-lime-500",
-      "bg-green-500",
-      "bg-emerald-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-sky-500",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-violet-500",
-      "bg-purple-500",
-      "bg-fuchsia-500",
-      "bg-pink-500",
-      "bg-rose-500",
+      "bg-[var(--color-success)]",
+      "bg-[var(--color-success)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-accent)]",
+      "bg-[var(--color-danger)]",
     ];
     const index = name.charCodeAt(0) % colors.length;
     return colors[index];
@@ -61,7 +61,7 @@ export default function Avatar({
       <div
         className={cn(
           "rounded-full bg-cover bg-center bg-no-repeat",
-          "ring-2 ring-white dark:ring-surface-dark shadow-sm",
+          "ring-2 ring-[var(--color-border-subtle)] dark:ring-surface-dark shadow-sm",
           sizes[size],
           className
         )}
@@ -75,8 +75,8 @@ export default function Avatar({
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center font-semibold text-white",
-        "ring-2 ring-white dark:ring-surface-dark shadow-sm",
+        "rounded-full flex items-center justify-center font-semibold text-[var(--color-text-main)]",
+        "ring-2 ring-[var(--color-border-subtle)] dark:ring-surface-dark shadow-sm",
         sizes[size],
         getColorFromName(name),
         className

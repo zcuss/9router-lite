@@ -18,7 +18,7 @@ import { GOOGLE_TTS_LANGUAGES } from "open-sse/config/googleTtsLanguages.js";
 function Row({ label, children }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
-      <span className="w-full text-xs font-medium text-text-muted sm:w-20 sm:shrink-0">{label}</span>
+      <span className="w-full text-xs font-medium text-[var(--color-text-muted)] sm:w-20 sm:shrink-0">{label}</span>
       <div className="w-full min-w-0 flex-1">{children}</div>
     </div>
   );
@@ -228,13 +228,13 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               placeholder="e.g. voyage-3, embed-english-v3.0, text-embedding-3-small"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
             />
           ) : (
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               {embeddingModels.map((m) => (
                 <option key={m.id} value={m.id}>{m.name || m.id}</option>
@@ -249,7 +249,7 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
             <input
               value={endpoint}
               onChange={(e) => useTunnel ? setTunnelEndpoint(e.target.value) : setLocalEndpoint(e.target.value)}
-              className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+              className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
               placeholder="http://localhost:3000"
             />
             {/* Tunnel toggle — only show if tunnel URL is available */}
@@ -258,7 +258,7 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
                 onClick={() => setUseTunnel((v) => !v)}
                 title={useTunnel ? "Using tunnel" : "Using local"}
                 className={`flex items-center gap-1 text-xs px-2 py-1.5 rounded-lg border shrink-0 transition-colors ${
-                  useTunnel ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-text-muted hover:text-primary"
+                  useTunnel ? "border-[var(--color-text-main)]/40 bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                 }`}
               >
                 <span className="material-symbols-outlined text-[14px]">wifi_tethering</span>
@@ -275,7 +275,7 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-..."
-            className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+            className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
           />
         </Row>
 
@@ -285,13 +285,13 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             />
             {input && (
               <button
                 type="button"
                 onClick={() => setInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">close</span>
               </button>
@@ -307,18 +307,18 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
             value={dimensions}
             onChange={(e) => setDimensions(e.target.value)}
             placeholder="optional, e.g. 512, 1024 (leave empty for default)"
-            className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+            className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
           />
         </Row>
 
         {/* Curl + Run */}
         <div className="mt-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Request</span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Request</span>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
               <button
                 onClick={() => copyCurl(curlSnippet)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedCurl ? "check" : "content_copy"}</span>
                 {copiedCurl ? "Copied" : "Copy"}
@@ -326,7 +326,7 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
               <button
                 onClick={handleRun}
                 disabled={running || !input.trim() || !modelFull}
-                className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-xs font-medium hover:bg-[var(--color-text-main)]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[14px]" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
                   play_arrow
@@ -335,29 +335,29 @@ function EmbeddingExampleCard({ providerId, customAlias }) {
               </button>
             </div>
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
         </div>
 
         {/* Error */}
-        {error && <p className="text-xs text-red-500 break-words">{error}</p>}
+        {error && <p className="text-xs text-[var(--color-danger)] break-words">{error}</p>}
 
         {/* Response — default example or real result */}
         <div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
               Response {result && <span className="font-normal normal-case">&#9889; {result.latencyMs}ms</span>}
             </span>
             {result && (
               <button
                 onClick={() => copyRes(resultJson)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedRes ? "check" : "content_copy"}</span>
                 {copiedRes ? "Copied" : "Copy"}
               </button>
             )}
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all opacity-70">
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all opacity-70">
             {formatResultJson(result?.data)}
           </pre>
         </div>
@@ -590,7 +590,7 @@ function TtsExampleCard({ providerId }) {
           {/* Endpoint + API Key as read-only text */}
           <Row label="Endpoint">
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-              <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate">
+              <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate">
                 {endpoint}/v1/audio/speech
               </span>
               {tunnelEndpoint && (
@@ -598,7 +598,7 @@ function TtsExampleCard({ providerId }) {
                   onClick={() => setUseTunnel((v) => !v)}
                   title={useTunnel ? "Using tunnel" : "Using local"}
                   className={`flex items-center gap-1 text-xs px-2 py-1.5 rounded-lg border shrink-0 transition-colors ${
-                    useTunnel ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-text-muted hover:text-primary"
+                    useTunnel ? "border-[var(--color-text-main)]/40 bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                   }`}
                 >
                   <span className="material-symbols-outlined text-[14px]">wifi_tethering</span>
@@ -608,8 +608,8 @@ function TtsExampleCard({ providerId }) {
             </div>
           </Row>
           <Row label="API Key">
-            <span className="px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate block">
-              {apiKey ? `${apiKey.slice(0, 8)}${"•".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-text-muted italic">No key configured</span>}
+            <span className="px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate block">
+              {apiKey ? `${apiKey.slice(0, 8)}${"•".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-[var(--color-text-muted)] italic">No key configured</span>}
             </span>
           </Row>
 
@@ -619,7 +619,7 @@ function TtsExampleCard({ providerId }) {
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               >
                 {((AI_PROVIDERS[providerId]?.ttsConfig?.models?.length
                   ? AI_PROVIDERS[providerId].ttsConfig.models
@@ -636,7 +636,7 @@ function TtsExampleCard({ providerId }) {
               <select
                 value={languageHint}
                 onChange={(e) => setLanguageHint(e.target.value)}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               >
                 <option value="">Auto-detect</option>
                 {GOOGLE_TTS_LANGUAGES.map((l) => (
@@ -652,15 +652,15 @@ function TtsExampleCard({ providerId }) {
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                 <button
                   onClick={openModal}
-                  className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm border border-border rounded-lg bg-background font-mono truncate text-left hover:border-primary/40 transition-colors"
+                  className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background font-mono truncate text-left hover:border-[var(--color-text-main)]/40 transition-colors"
                 >
                   {selectedLang
-                    ? <span className="text-text-main">{languages.find((l) => l.code === selectedLang)?.name || selectedLang}</span>
-                    : <span className="text-text-muted">No language selected</span>}
+                    ? <span className="text-[var(--color-text-main)]">{languages.find((l) => l.code === selectedLang)?.name || selectedLang}</span>
+                    : <span className="text-[var(--color-text-muted)]">No language selected</span>}
                 </button>
                 <button
                   onClick={openModal}
-                  className="flex w-full items-center justify-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-border text-text-muted hover:text-primary hover:border-primary/40 transition-colors sm:w-auto sm:shrink-0"
+                  className="flex w-full items-center justify-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/40 transition-colors sm:w-auto sm:shrink-0"
                 >
                   <span className="material-symbols-outlined text-[14px]">language</span>
                   Select language
@@ -683,16 +683,16 @@ function TtsExampleCard({ providerId }) {
                     }}
                     className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                       selectedVoice === v.id
-                        ? "bg-primary/15 border-primary/40 text-primary font-medium"
-                        : "border-border text-text-muted hover:text-primary hover:border-primary/40"
+                        ? "bg-[var(--color-text-main)]/15 border-[var(--color-text-main)]/40 text-[var(--color-text-main)] font-medium"
+                        : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/40"
                     }`}
                   >
                     {v.name}{v.gender ? ` · ${v.gender[0].toUpperCase()}` : ""}
                     {v.free_users_allowed === true && (
-                      <span className="ml-1.5 px-1 py-0.5 text-[9px] font-semibold rounded bg-green-500/15 text-green-600 border border-green-500/20">Free</span>
+                      <span className="ml-1.5 px-1 py-0.5 text-[9px] font-semibold rounded bg-[var(--color-success)]/15 text-[var(--color-success)] border border-[var(--color-success)]/20">Free</span>
                     )}
                     {v.free_users_allowed === false && (
-                      <span className="ml-1.5 px-1 py-0.5 text-[9px] font-semibold rounded bg-amber-500/15 text-amber-600 border border-amber-500/20">Paid</span>
+                      <span className="ml-1.5 px-1 py-0.5 text-[9px] font-semibold rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)] border border-[var(--color-accent)]/20">Paid</span>
                     )}
                   </button>
                 ))}
@@ -712,13 +712,13 @@ function TtsExampleCard({ providerId }) {
                       setSelectedVoice(e.target.value);
                     }}
                     placeholder="e.g. CwhRBWXzGAHq8TQ4Fs17"
-                    className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+                    className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
                   />
                   {voiceId && (
                     <button
                       type="button"
                       onClick={() => { setVoiceId(""); setSelectedVoice(""); }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                     >
                       <span className="material-symbols-outlined text-[14px]">close</span>
                     </button>
@@ -738,7 +738,7 @@ function TtsExampleCard({ providerId }) {
                   setSelectedVoice(e.target.value);
                   setSelectedVoiceName(m?.name || e.target.value);
                 }}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               >
                 {getModelsByProviderId(providerId).filter((m) => m.type === "tts").map((m) => (
                   <option key={m.id} value={m.id}>{m.name || m.id}</option>
@@ -753,13 +753,13 @@ function TtsExampleCard({ providerId }) {
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               />
               {input && (
                 <button
                   type="button"
                   onClick={() => setInput("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                 >
                   <span className="material-symbols-outlined text-[14px]">close</span>
                 </button>
@@ -772,7 +772,7 @@ function TtsExampleCard({ providerId }) {
             <select
               value={responseFormat}
               onChange={(e) => setResponseFormat(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               <option value="mp3">MP3 (Binary)</option>
               <option value="json">JSON (Base64)</option>
@@ -782,11 +782,11 @@ function TtsExampleCard({ providerId }) {
           {/* Curl + Run */}
           <div className="mt-1">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-              <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Request</span>
+              <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Request</span>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                 <button
                   onClick={() => copyCurl(curlSnippet)}
-                  className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                 >
                   <span className="material-symbols-outlined text-[14px]">{copiedCurl ? "check" : "content_copy"}</span>
                   {copiedCurl ? "Copied" : "Copy"}
@@ -794,7 +794,7 @@ function TtsExampleCard({ providerId }) {
                 <button
                   onClick={handleRun}
                   disabled={running || !input.trim() || !modelFull}
-                  className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-xs font-medium hover:bg-[var(--color-text-main)]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-[14px]" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
                     play_arrow
@@ -803,19 +803,19 @@ function TtsExampleCard({ providerId }) {
                 </button>
               </div>
             </div>
-            <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
+            <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
           </div>
 
-          {error && <p className="text-xs text-red-500 break-words">{error}</p>}
+          {error && <p className="text-xs text-[var(--color-danger)] break-words">{error}</p>}
 
           {/* Audio player */}
           {audioUrl ? (
             <div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-                <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
                   Response {latency && <span className="font-normal normal-case">&#9889; {latency}ms</span>}
                 </span>
-                <a href={audioUrl} download="speech.mp3" className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors">
+                <a href={audioUrl} download="speech.mp3" className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
                   <span className="material-symbols-outlined text-[14px]">download</span>
                   Download
                 </a>
@@ -826,9 +826,9 @@ function TtsExampleCard({ providerId }) {
               {jsonResponse && (
                 <div className="mt-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-                    <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">JSON Response</span>
+                    <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">JSON Response</span>
                   </div>
-                  <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all">
+                  <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all">
                     {JSON.stringify({
                       format: jsonResponse.format,
                       audio: jsonResponse.audio ? `${jsonResponse.audio.substring(0, 100)}...` : ""
@@ -839,8 +839,8 @@ function TtsExampleCard({ providerId }) {
             </div>
           ) : (
             <div>
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Response</span>
-            <pre className="mt-1.5 bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all opacity-50">{DEFAULT_TTS_RESPONSE_EXAMPLE}</pre>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Response</span>
+            <pre className="mt-1.5 bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all opacity-50">{DEFAULT_TTS_RESPONSE_EXAMPLE}</pre>
           </div>
           )}
         </div>
@@ -854,34 +854,34 @@ function TtsExampleCard({ providerId }) {
           onClick={() => setModalOpen(false)}
         >
           <div
-            className="border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[80vh]"
+            className="border border-[var(--color-border)] rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[80vh]"
             style={{ backgroundColor: "var(--color-bg)", isolation: "isolate" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0 rounded-t-xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)] shrink-0 rounded-t-xl">
               <h3 className="text-sm font-semibold">Select Language</h3>
-              <button onClick={() => setModalOpen(false)} className="text-text-muted hover:text-primary transition-colors">
+              <button onClick={() => setModalOpen(false)} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors">
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
             {/* Search */}
-            <div className="px-4 py-2.5 border-b border-border shrink-0">
+            <div className="px-4 py-2.5 border-b border-[var(--color-border)] shrink-0">
               <input
                 autoFocus
                 value={modalSearch}
                 onChange={(e) => setModalSearch(e.target.value)}
                 placeholder="Search language..."
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               />
             </div>
 
             {/* Language list */}
             <div className="overflow-y-auto flex-1 p-2">
-              {modalError && <p className="text-xs text-red-500 px-2 py-1">{modalError}</p>}
+              {modalError && <p className="text-xs text-[var(--color-danger)] px-2 py-1">{modalError}</p>}
               {modalLoading ? (
-                <p className="text-xs text-text-muted px-2 py-3">Loading...</p>
+                <p className="text-xs text-[var(--color-text-muted)] px-2 py-3">Loading...</p>
               ) : (
                 <div className="flex flex-col gap-0.5">
                   {filteredLanguages.map((c) => (
@@ -889,20 +889,20 @@ function TtsExampleCard({ providerId }) {
                       key={c.code}
                       onClick={() => handlePickLanguage(c)}
                       className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-left hover:bg-sidebar transition-colors ${
-                        selectedLang === c.code ? "bg-primary/10 text-primary" : ""
+                        selectedLang === c.code ? "bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]" : ""
                       }`}
                     >
                       <span className="text-sm">{c.name}</span>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs text-text-muted">{c.voices.length} voices</span>
+                        <span className="text-xs text-[var(--color-text-muted)]">{c.voices.length} voices</span>
                         {selectedLang === c.code && (
-                          <span className="material-symbols-outlined text-[16px] text-primary">check</span>
+                          <span className="material-symbols-outlined text-[16px] text-[var(--color-text-main)]">check</span>
                         )}
                       </div>
                     </button>
                   ))}
                   {filteredLanguages.length === 0 && (
-                    <p className="text-xs text-text-muted px-2 py-3">No languages found.</p>
+                    <p className="text-xs text-[var(--color-text-muted)] px-2 py-3">No languages found.</p>
                   )}
                 </div>
               )}
@@ -1120,7 +1120,7 @@ function GenericExampleCard({ providerId, kind }) {
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               {kindModels.map((m) => (
                 <option key={m.id} value={m.id}>{m.name || m.id}</option>
@@ -1133,7 +1133,7 @@ function GenericExampleCard({ providerId, kind }) {
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               placeholder="Enter model id (provider-specific)"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
             />
           </Row>
         ) : null}
@@ -1141,7 +1141,7 @@ function GenericExampleCard({ providerId, kind }) {
         {/* Endpoint */}
         <Row label="Endpoint">
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate">
+            <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate">
               {endpoint}{apiPath}
             </span>
             {tunnelEndpoint && (
@@ -1149,7 +1149,7 @@ function GenericExampleCard({ providerId, kind }) {
                 onClick={() => setUseTunnel((v) => !v)}
                 title={useTunnel ? "Using tunnel" : "Using local"}
                 className={`flex items-center gap-1 text-xs px-2 py-1.5 rounded-lg border shrink-0 transition-colors ${
-                  useTunnel ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-text-muted hover:text-primary"
+                  useTunnel ? "border-[var(--color-text-main)]/40 bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                 }`}
               >
                 <span className="material-symbols-outlined text-[14px]">wifi_tethering</span>
@@ -1161,8 +1161,8 @@ function GenericExampleCard({ providerId, kind }) {
 
         {/* API Key */}
         <Row label="API Key">
-          <span className="px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate block">
-            {apiKey ? `${apiKey.slice(0, 8)}${"\u2022".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-text-muted italic">No key configured</span>}
+          <span className="px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate block">
+            {apiKey ? `${apiKey.slice(0, 8)}${"\u2022".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-[var(--color-text-muted)] italic">No key configured</span>}
           </span>
         </Row>
 
@@ -1172,7 +1172,7 @@ function GenericExampleCard({ providerId, kind }) {
             <select
               value={pinnedConnectionId}
               onChange={(e) => setPinnedConnectionId(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               <option value="">Auto (by priority)</option>
               {connections.map((c) => {
@@ -1195,13 +1195,13 @@ function GenericExampleCard({ providerId, kind }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={exConfig.inputPlaceholder}
-              className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             />
             {input && (
               <button
                 type="button"
                 onClick={() => setInput("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">close</span>
               </button>
@@ -1218,13 +1218,13 @@ function GenericExampleCard({ providerId, kind }) {
                   value={refImage}
                   onChange={(e) => setRefImage(e.target.value)}
                   placeholder={imageEditDefaults.image || "https://example.com/source.png"}
-                  className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
                 />
                 {refImage && (
                   <button
                     type="button"
                     onClick={() => setRefImage("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                   >
                     <span className="material-symbols-outlined text-[14px]">close</span>
                   </button>
@@ -1234,7 +1234,7 @@ function GenericExampleCard({ providerId, kind }) {
                 <img
                   src={refImagePreviewSrc}
                   alt="Reference"
-                  className="max-h-40 rounded-lg border border-border object-contain bg-sidebar"
+                  className="max-h-40 rounded-lg border border-[var(--color-border)] object-contain bg-sidebar"
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                   onLoad={(e) => { e.currentTarget.style.display = "block"; }}
                 />
@@ -1251,13 +1251,13 @@ function GenericExampleCard({ providerId, kind }) {
                   value={maskImage}
                   onChange={(e) => setMaskImage(e.target.value)}
                   placeholder={imageEditDefaults.mask_image || "https://example.com/mask.png"}
-                  className="w-full px-3 py-1.5 pr-7 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-1.5 pr-7 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
                 />
                 {maskImage && (
                   <button
                     type="button"
                     onClick={() => setMaskImage("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                   >
                     <span className="material-symbols-outlined text-[14px]">close</span>
                   </button>
@@ -1267,7 +1267,7 @@ function GenericExampleCard({ providerId, kind }) {
                 <img
                   src={maskImagePreviewSrc}
                   alt="Mask"
-                  className="max-h-40 rounded-lg border border-border object-contain bg-sidebar"
+                  className="max-h-40 rounded-lg border border-[var(--color-border)] object-contain bg-sidebar"
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                   onLoad={(e) => { e.currentTarget.style.display = "block"; }}
                 />
@@ -1285,7 +1285,7 @@ function GenericExampleCard({ providerId, kind }) {
               <select
                 value={extraValues[f.key] ?? ""}
                 onChange={(e) => setExtraValues((s) => ({ ...s, [f.key]: e.target.value }))}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               >
                 {(f.options || []).map((opt) => (
                   <option key={opt} value={opt}>{opt === "" ? "(default)" : opt}</option>
@@ -1297,7 +1297,7 @@ function GenericExampleCard({ providerId, kind }) {
                 value={extraValues[f.key] ?? ""}
                 placeholder={f.placeholder}
                 onChange={(e) => setExtraValues((s) => ({ ...s, [f.key]: e.target.value }))}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               />
             ) : (
               <input
@@ -1306,7 +1306,7 @@ function GenericExampleCard({ providerId, kind }) {
                 min={f.min}
                 max={f.max}
                 onChange={(e) => setExtraValues((s) => ({ ...s, [f.key]: e.target.value === "" ? "" : Number(e.target.value) }))}
-                className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+                className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               />
             )}
           </Row>
@@ -1318,7 +1318,7 @@ function GenericExampleCard({ providerId, kind }) {
             <select
               value={imageOutputFormat}
               onChange={(e) => setImageOutputFormat(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               <option value="json">JSON (Base64)</option>
               <option value="binary">Binary File</option>
@@ -1329,11 +1329,11 @@ function GenericExampleCard({ providerId, kind }) {
         {/* Curl + Run */}
         <div className="mt-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Request</span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Request</span>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
               <button
                 onClick={() => copyCurl(curlSnippet)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedCurl ? "check" : "content_copy"}</span>
                 {copiedCurl ? "Copied" : "Copy"}
@@ -1341,7 +1341,7 @@ function GenericExampleCard({ providerId, kind }) {
             <button
               onClick={handleRun}
               disabled={running || !input.trim() || !modelFull}
-              className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-xs font-medium hover:bg-[var(--color-text-main)]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span className="material-symbols-outlined text-[14px]" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
                   play_arrow
@@ -1350,16 +1350,16 @@ function GenericExampleCard({ providerId, kind }) {
               </button>
             </div>
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
         </div>
 
         {/* Streaming progress */}
         {(running || progress) && useStreaming && (
-          <div className="flex flex-col gap-2 px-3 py-2 rounded-lg bg-sidebar border border-border sm:flex-row sm:items-center sm:gap-3">
-            <span className="material-symbols-outlined text-[16px] text-primary" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
+          <div className="flex flex-col gap-2 px-3 py-2 rounded-lg bg-sidebar border border-[var(--color-border)] sm:flex-row sm:items-center sm:gap-3">
+            <span className="material-symbols-outlined text-[16px] text-[var(--color-text-main)]" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
               {running ? "progress_activity" : "check_circle"}
             </span>
-            <span className="text-xs text-text-muted">
+            <span className="text-xs text-[var(--color-text-muted)]">
               {progress?.stage || "starting"}
               {!running && progress?.bytesReceived ? ` · ${(progress.bytesReceived / 1024).toFixed(1)} KB` : ""}
             </span>
@@ -1369,35 +1369,35 @@ function GenericExampleCard({ providerId, kind }) {
         {/* Partial image preview (codex stream) */}
         {partialImage?.b64_json && !result && (
           <div>
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Partial preview</span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Partial preview</span>
             <img
               src={`data:image/png;base64,${partialImage.b64_json}`}
               alt="Partial"
-              className="max-w-full rounded-lg border border-border mt-1.5 opacity-80"
+              className="max-w-full rounded-lg border border-[var(--color-border)] mt-1.5 opacity-80"
             />
           </div>
         )}
 
         {/* Error */}
-        {error && <p className="text-xs text-red-500 break-words">{error}</p>}
+        {error && <p className="text-xs text-[var(--color-danger)] break-words">{error}</p>}
 
         {/* Response */}
         <div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
               Response {result && <span className="font-normal normal-case">&#9889; {result.latencyMs}ms</span>}
             </span>
             {result && (
               <button
                 onClick={() => copyRes(resultJson)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedRes ? "check" : "content_copy"}</span>
                 {copiedRes ? "Copied" : "Copy"}
               </button>
             )}
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all opacity-70">
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all opacity-70">
             {result ? resultJson : exConfig.defaultResponse}
           </pre>
           {kind === "image" && (binaryImageUrl || result?.data?.data?.[0]) && (
@@ -1406,7 +1406,7 @@ function GenericExampleCard({ providerId, kind }) {
                 <a
                   href={binaryImageUrl || (result?.data?.data?.[0]?.b64_json ? `data:image/png;base64,${result.data.data[0].b64_json}` : result?.data?.data?.[0]?.url || "")}
                   download="image.png"
-                  className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                 >
                   <span className="material-symbols-outlined text-[14px]">download</span>
                   Download
@@ -1415,7 +1415,7 @@ function GenericExampleCard({ providerId, kind }) {
               <img
                 src={binaryImageUrl || (result?.data?.data?.[0]?.b64_json ? `data:image/png;base64,${result.data.data[0].b64_json}` : result?.data?.data?.[0]?.url)}
                 alt="Generated"
-                className="max-w-full rounded-lg border border-border"
+                className="max-w-full rounded-lg border border-[var(--color-border)]"
               />
             </div>
           )}
@@ -1533,7 +1533,7 @@ function SttExampleCard({ providerId }) {
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               {sttModels.map((m) => (
                 <option key={m.id} value={m.id}>{m.name || m.id}</option>
@@ -1546,7 +1546,7 @@ function SttExampleCard({ providerId }) {
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               placeholder="Enter model id"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
             />
           </Row>
         )}
@@ -1554,7 +1554,7 @@ function SttExampleCard({ providerId }) {
         {/* Endpoint */}
         <Row label="Endpoint">
           <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-            <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate">
+            <span className="w-full min-w-0 flex-1 px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate">
               {endpoint}/v1/audio/transcriptions
             </span>
             {tunnelEndpoint && (
@@ -1562,7 +1562,7 @@ function SttExampleCard({ providerId }) {
                 onClick={() => setUseTunnel((v) => !v)}
                 title={useTunnel ? "Using tunnel" : "Using local"}
                 className={`flex items-center gap-1 text-xs px-2 py-1.5 rounded-lg border shrink-0 transition-colors ${
-                  useTunnel ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-text-muted hover:text-primary"
+                  useTunnel ? "border-[var(--color-text-main)]/40 bg-[var(--color-text-main)]/10 text-[var(--color-text-main)]" : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
                 }`}
               >
                 <span className="material-symbols-outlined text-[14px]">wifi_tethering</span>
@@ -1574,8 +1574,8 @@ function SttExampleCard({ providerId }) {
 
         {/* API Key */}
         <Row label="API Key">
-          <span className="px-3 py-1.5 text-sm font-mono text-text-main bg-sidebar rounded-lg truncate block">
-            {apiKey ? `${apiKey.slice(0, 8)}${"\u2022".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-text-muted italic">No key configured</span>}
+          <span className="px-3 py-1.5 text-sm font-mono text-[var(--color-text-main)] bg-sidebar rounded-lg truncate block">
+            {apiKey ? `${apiKey.slice(0, 8)}${"\u2022".repeat(Math.min(20, apiKey.length - 8))}` : <span className="text-[var(--color-text-muted)] italic">No key configured</span>}
           </span>
         </Row>
 
@@ -1586,10 +1586,10 @@ function SttExampleCard({ providerId }) {
               type="file"
               accept="audio/*,video/mp4,.m4a,.mp3,.wav,.ogg,.flac,.webm,.opus"
               onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-              className="w-full text-xs text-text-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border file:border-border file:bg-background file:text-text-main hover:file:bg-sidebar file:cursor-pointer"
+              className="w-full text-xs text-[var(--color-text-muted)] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border file:border-[var(--color-border)] file:bg-background file:text-[var(--color-text-main)] hover:file:bg-sidebar file:cursor-pointer"
             />
             {audioFile && (
-              <span className="text-xs text-text-muted font-mono">
+              <span className="text-xs text-[var(--color-text-muted)] font-mono">
                 {audioFile.name} · {(audioFile.size / 1024).toFixed(1)} KB
               </span>
             )}
@@ -1603,7 +1603,7 @@ function SttExampleCard({ providerId }) {
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
               placeholder="e.g. en, vi, ja (auto-detect if empty)"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary font-mono"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)] font-mono"
             />
           </Row>
         )}
@@ -1615,7 +1615,7 @@ function SttExampleCard({ providerId }) {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="optional context to improve accuracy"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             />
           </Row>
         )}
@@ -1631,7 +1631,7 @@ function SttExampleCard({ providerId }) {
               value={temperature}
               onChange={(e) => setTemperature(e.target.value)}
               placeholder="0 - 1 (default 0)"
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             />
           </Row>
         )}
@@ -1642,7 +1642,7 @@ function SttExampleCard({ providerId }) {
             <select
               value={responseFormat}
               onChange={(e) => setResponseFormat(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="w-full px-3 py-1.5 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
             >
               <option value="json">json</option>
               <option value="text">text</option>
@@ -1656,11 +1656,11 @@ function SttExampleCard({ providerId }) {
         {/* Curl + Run */}
         <div className="mt-1">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Request</span>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Request</span>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
               <button
                 onClick={() => copyCurl(curlSnippet)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedCurl ? "check" : "content_copy"}</span>
                 {copiedCurl ? "Copied" : "Copy"}
@@ -1668,7 +1668,7 @@ function SttExampleCard({ providerId }) {
               <button
                 onClick={handleRun}
                 disabled={running || !audioFile || !modelFull}
-                className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full sm:w-auto items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-xs font-medium hover:bg-[var(--color-text-main)]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-[14px]" style={running ? { animation: "spin 1s linear infinite" } : undefined}>
                   play_arrow
@@ -1677,28 +1677,28 @@ function SttExampleCard({ providerId }) {
               </button>
             </div>
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all">{curlSnippet}</pre>
         </div>
 
-        {error && <p className="text-xs text-red-500 break-words">{error}</p>}
+        {error && <p className="text-xs text-[var(--color-danger)] break-words">{error}</p>}
 
         {/* Response */}
         <div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-1.5">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
               Response {result && latency && <span className="font-normal normal-case">&#9889; {latency}ms</span>}
             </span>
             {result && (
               <button
                 onClick={() => copyRes(resultStr)}
-                className="inline-flex items-center gap-1 text-xs text-text-muted hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
               >
                 <span className="material-symbols-outlined text-[14px]">{copiedRes ? "check" : "content_copy"}</span>
                 {copiedRes ? "Copied" : "Copy"}
               </button>
             )}
           </div>
-          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-text-main overflow-x-auto whitespace-pre-wrap break-all opacity-70">
+          <pre className="bg-sidebar rounded-lg px-3 py-2.5 text-xs font-mono text-[var(--color-text-main)] overflow-x-auto whitespace-pre-wrap break-all opacity-70">
             {resultStr}
           </pre>
         </div>
@@ -1755,7 +1755,7 @@ export default function MediaProviderDetailPage() {
   if (!isCustom && !builtInProvider) return notFound();
   if (isCustom && !customLoading && !customNode) return notFound();
   if (isCustom && customLoading) {
-    return <div className="text-text-muted text-sm py-12 text-center">Loading...</div>;
+    return <div className="text-[var(--color-text-muted)] text-sm py-12 text-center">Loading...</div>;
   }
 
   const kinds = isCustom ? ["embedding"] : (provider.serviceKinds ?? ["llm"]);
@@ -1767,7 +1767,7 @@ export default function MediaProviderDetailPage() {
       <div>
         <Link
           href={`/dashboard/media-providers/${kind}`}
-          className="inline-flex items-center gap-1 text-sm text-text-muted hover:text-primary transition-colors mb-4"
+          className="inline-flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors mb-4"
         >
           <span className="material-symbols-outlined text-lg">arrow_back</span>
           {kindConfig.label}
@@ -1793,7 +1793,7 @@ export default function MediaProviderDetailPage() {
                   href={provider.notice.apiKeyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                  className="text-xs text-[var(--color-text-main)] hover:underline inline-flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-sm">open_in_new</span>
                   Get API Key
@@ -1824,7 +1824,7 @@ export default function MediaProviderDetailPage() {
 
       {/* Kind-specific notice (e.g. codex/image requires Plus) */}
       {!isCustom && provider.kindNotice?.[kind] && (
-        <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400">
+        <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 text-[var(--color-accent)] dark:text-[var(--color-accent)]">
           <span className="material-symbols-outlined text-[20px] mt-0.5">warning</span>
           <p className="text-sm">{provider.kindNotice[kind]}</p>
         </div>
@@ -1832,15 +1832,15 @@ export default function MediaProviderDetailPage() {
 
       {/* Provider notice text (only when there's actual text content) */}
       {!isCustom && provider.notice?.text && !provider.deprecated && (
-        <div className="flex flex-col gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 sm:flex-row sm:items-center">
-          <span className="material-symbols-outlined text-[16px] text-blue-500 shrink-0">info</span>
-          <p className="min-w-0 flex-1 text-xs leading-relaxed text-blue-600 dark:text-blue-400">{provider.notice.text}</p>
+        <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-accent)]/30 bg-[var(--color-accent)]/10 px-3 py-2 sm:flex-row sm:items-center">
+          <span className="material-symbols-outlined text-[16px] text-[var(--color-accent)] shrink-0">info</span>
+          <p className="min-w-0 flex-1 text-xs leading-relaxed text-[var(--color-accent)] dark:text-[var(--color-accent)]">{provider.notice.text}</p>
           {provider.notice.apiKeyUrl && (
             <a
               href={provider.notice.apiKeyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex justify-center rounded bg-blue-500 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-600 sm:py-0.5"
+              className="inline-flex justify-center rounded bg-[var(--color-accent)] px-2 py-1 text-xs font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-accent)] sm:py-0.5"
             >
               Get API Key →
             </a>

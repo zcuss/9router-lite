@@ -96,15 +96,15 @@ export default function LoginPage() {
 
   const enabledOauth = config.oauth.filter((p) => p.enabled);
   const tabs = [
-    { id: "login", label: "Sign in" },
-    { id: "register", label: "Sign up" },
+    { id: "login", label: "Masuk" },
+    { id: "register", label: "Daftar" },
     ...(config.magicLink?.enabled ? [{ id: "magic", label: "Magic Link" }] : []),
   ];
 
   const heading = {
-    login: { title: "Welcome back", sub: "Sign in to manage your AI infrastructure." },
-    register: { title: "Create your account", sub: "Register to get started with the dashboard." },
-    magic: { title: "Sign in via email", sub: "We'll send a magic link to your inbox." },
+    login: { title: "Selamat datang kembali", sub: "Masuk untuk kelola infrastruktur AI Anda." },
+    register: { title: "Buat akun Anda", sub: "Daftar untuk mulai menggunakan dashboard." },
+    magic: { title: "Masuk via email", sub: "Kami kirim magic link ke inbox Anda." },
   }[tab];
 
   return (
@@ -125,18 +125,18 @@ export default function LoginPage() {
 
           <div className="hidden lg:block">
             <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text-main)]">
-              One endpoint for every AI provider you use.
+              Satu endpoint untuk semua provider AI Anda.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--color-text-muted)]">
-              Manage API keys, monitor usage, route model combos, and handle Midtrans top-ups
-              from a single lightweight dashboard.
+              Kelola kunci API, pantau pemakaian, route kombo model, dan handle top up Midtrans
+              dari satu dashboard ringan.
             </p>
             <ul className="mt-8 space-y-2.5">
               {[
                 "Multi-provider OAuth & magic link",
-                "Midtrans top-up & automatic wallet",
-                "Model combos with fallback routing",
-                "Real-time usage & request logs",
+                "Top up Midtrans & wallet otomatis",
+                "Kombo model dengan fallback routing",
+                "Pemakaian & log request real-time",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-text-muted)]">
                   <span className="mt-1.5 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
@@ -147,7 +147,7 @@ export default function LoginPage() {
           </div>
 
           <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-            <span>Relay SaaS for AI</span>
+            <span>Relay SaaS untuk AI</span>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export default function LoginPage() {
                       <span className="grid size-5 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[10px] font-bold text-[var(--color-text-muted)]">
                         {meta.mark}
                       </span>
-                      <span>Continue with {meta.label}</span>
+                      <span>Lanjut dengan {meta.label}</span>
                     </button>
                   );
                 })}
@@ -218,17 +218,17 @@ export default function LoginPage() {
                 {tab === "register" ? (
                   <>
                     <Field label="Username" type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus icon={AtSign} />
-                    <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
+                    <Field label="Email" type="email" placeholder="anda@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
                   </>
                 ) : (
-                  <Field label="Username or email" type="text" placeholder="username or email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
+                  <Field label="Username atau email" type="text" placeholder="username atau email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
                 )}
                 <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
                 <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                  <span>{tab === "register" ? "Create account" : "Sign in"}</span>
+                  <span>{tab === "register" ? "Buat Akun" : "Masuk"}</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>

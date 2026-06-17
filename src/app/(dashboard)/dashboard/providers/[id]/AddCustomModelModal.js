@@ -68,7 +68,7 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
               onChange={(e) => { setModelId(e.target.value); setTestStatus(null); setTestError(""); }}
               onKeyDown={handleKeyDown}
               placeholder="e.g. claude-opus-4-5"
-              className="flex-1 px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              className="flex-1 px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg bg-background focus:outline-none focus:border-[var(--color-text-main)]"
               autoFocus
             />
             <Button
@@ -81,20 +81,20 @@ export default function AddCustomModelModal({ isOpen, providerAlias, providerDis
               {testStatus === "testing" ? "Testing..." : "Test"}
             </Button>
           </div>
-          <p className="text-xs text-text-muted mt-1">
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
             Sent to provider as: <code className="font-mono bg-sidebar px-1 rounded">{stripAlias(modelId.trim()) || "model-id"}</code>
           </p>
         </div>
 
         {/* Test result */}
         {testStatus === "ok" && (
-          <div className="flex items-center gap-2 text-sm text-green-600">
+          <div className="flex items-center gap-2 text-sm text-[var(--color-success)]">
             <span className="material-symbols-outlined text-base">check_circle</span>
             Model is reachable
           </div>
         )}
         {testStatus === "error" && (
-          <div className="flex items-start gap-2 text-sm text-red-500">
+          <div className="flex items-start gap-2 text-sm text-[var(--color-danger)]">
             <span className="material-symbols-outlined text-base shrink-0">cancel</span>
             <span>{testError || "Model not reachable"}</span>
           </div>

@@ -27,7 +27,22 @@ import Link from "next/link";
 import { getErrorCode, getRelativeTime } from "@/shared/utils";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useHeaderSearchStore } from "@/store/headerSearchStore";
+import useRoleStore, { useEffectiveRole } from "@/store/roleStore";
+import { useRouter } from "next/navigation";
+import { ShieldOff } from "lucide-react";
 import ModelAvailabilityBadge from "./components/ModelAvailabilityBadge";
+
+function AccessDenied() {
+  return (
+    <div className="px-4 sm:px-6 py-12 max-w-2xl mx-auto">
+      <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-8 text-center space-y-3">
+        <ShieldOff className="size-8 mx-auto text-[var(--color-text-subtle)]" />
+        <h2 className="text-lg font-semibold">Akses Ditolak</h2>
+        <p className="text-[13px] text-[var(--color-text-muted)]">Hanya admin/dev yang dapat mengelola provider.</p>
+      </div>
+    </div>
+  );
+}
 
 function getStatusDisplay(connected, error, errorCode) {
   const parts = [];
@@ -49,7 +64,7 @@ function getStatusDisplay(connected, error, errorCode) {
     );
   }
   if (parts.length === 0) {
-    return <span className="text-text-muted">No connections</span>;
+    return <span className="text-[var(--color-text-muted)]">No connections</span>;
   }
   return parts;
 }
@@ -99,6 +114,33 @@ function getConnectionErrorTag(connection) {
 const APIKEY_INITIAL_VISIBLE = 20;
 
 export default function ProvidersPage() {
+  const realRole = useRoleStore((s) => s.realRole);
+  const viewAs = useRoleStore((s) => s.viewAs);
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/status", { cache: "no-store" });
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json();
+          const role = String(data?.role || "").toLowerCase();
+          if (role !== "admin" && role !== "dev") {
+            router.replace("/dashboard");
+            return;
+          }
+        }
+      } catch {}
+      if (!cancelled) setAuthChecked(true);
+    })();
+    return () => { cancelled = true; };
+  }, [router]);
+
+  const canAccess = authChecked && (realRole === "admin" || realRole === "dev") && !viewAs;
+
   const [connections, setConnections] = useState([]);
   const [providerNodes, setProviderNodes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -304,6 +346,10 @@ export default function ProvidersPage() {
       : apikeyEntries.slice(0, APIKEY_INITIAL_VISIBLE);
   const hiddenApikeyCount = apikeyEntries.length - APIKEY_INITIAL_VISIBLE;
 
+  if (!canAccess) {
+    return <AccessDenied />;
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col gap-8">
@@ -324,11 +370,11 @@ export default function ProvidersPage() {
   return (
     <div className="flex min-w-0 flex-col gap-6 px-1 sm:px-0">
       {!hasAnyResult && (
-        <div className="text-center py-8 border border-dashed border-border rounded-xl">
-          <span className="material-symbols-outlined text-[32px] text-text-muted mb-2">
+        <div className="text-center py-8 border border-dashed border-[var(--color-border)] rounded-xl">
+          <span className="material-symbols-outlined text-[32px] text-[var(--color-text-muted)] mb-2">
             search_off
           </span>
-          <p className="text-text-muted text-sm">No providers match your search</p>
+          <p className="text-[var(--color-text-muted)] text-sm">No providers match your search</p>
         </div>
       )}
 
@@ -352,7 +398,7 @@ export default function ProvidersPage() {
               variant="secondary"
               icon="add"
               onClick={() => setShowAddCompatibleModal(true)}
-              className="w-full !bg-white !text-black hover:!bg-gray-100 sm:w-auto"
+              className="w-full !bg-[var(--color-surface)] !text-[var(--color-text-main)] hover:!bg-[var(--color-text-muted)] sm:w-auto"
             >
               Add OpenAI Compatible
             </Button>
@@ -360,7 +406,7 @@ export default function ProvidersPage() {
         </div>
         {compatibleProviders.length === 0 &&
         anthropicCompatibleProviders.length === 0 ? (
-          <div className="flex items-center justify-center gap-2 py-2 border border-dashed border-border rounded-xl text-text-muted text-sm">
+          <div className="flex items-center justify-center gap-2 py-2 border border-dashed border-[var(--color-border)] rounded-xl text-[var(--color-text-muted)] text-sm">
             <span className="material-symbols-outlined text-[18px]">extension</span>
             <span>No custom providers — use buttons above to add OpenAI/Anthropic compatible endpoints</span>
           </div>
@@ -398,8 +444,8 @@ export default function ProvidersPage() {
               disabled={!!testingMode}
               className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
                 testingMode === "oauth"
-                  ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
-                  : "bg-bg border-border text-text-muted hover:text-text-main hover:border-primary/40"
+                  ? "bg-[var(--color-text-main)]/20 border-[var(--color-text-main)]/40 text-[var(--color-text-main)] animate-pulse"
+                  : "bg-bg border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/40"
               }`}
               title="Test all OAuth connections"
               aria-label="Test all OAuth connections"
@@ -440,8 +486,8 @@ export default function ProvidersPage() {
             disabled={!!testingMode}
             className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
               testingMode === "free"
-                ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
-                : "bg-bg border-border text-text-muted hover:text-text-main hover:border-primary/40"
+                ? "bg-[var(--color-text-main)]/20 border-[var(--color-text-main)]/40 text-[var(--color-text-main)] animate-pulse"
+                : "bg-bg border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/40"
             }`}
             title="Test all Free connections"
             aria-label="Test all Free provider connections"
@@ -491,8 +537,8 @@ export default function ProvidersPage() {
             disabled={!!testingMode}
             className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors sm:w-auto sm:py-1.5 ${
               testingMode === "apikey"
-                ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
-                : "bg-bg border-border text-text-muted hover:text-text-main hover:border-primary/40"
+                ? "bg-[var(--color-text-main)]/20 border-[var(--color-text-main)]/40 text-[var(--color-text-main)] animate-pulse"
+                : "bg-bg border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:border-[var(--color-text-main)]/40"
             }`}
             title="Test all API Key connections"
             aria-label="Test all API Key connections"
@@ -520,7 +566,7 @@ export default function ProvidersPage() {
         {!isApikeySearching && !showAllApikey && hiddenApikeyCount > 0 && (
           <button
             onClick={() => setShowAllApikey(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-primary/40 px-3 py-2.5 text-sm font-medium text-primary transition-colors hover:border-primary hover:bg-primary/5"
+            className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-[var(--color-text-main)]/40 px-3 py-2.5 text-sm font-medium text-[var(--color-text-main)] transition-colors hover:border-[var(--color-text-main)] hover:bg-[var(--color-text-main)]/5"
           >
             <span className="material-symbols-outlined text-[16px]">expand_more</span>
             Show all {apikeyEntries.length} providers
@@ -573,16 +619,16 @@ export default function ProvidersPage() {
           className="fixed inset-0 z-50 flex items-start justify-center px-3 pt-[6vh] sm:pt-[10vh]"
           onClick={() => setTestResults(null)}
         >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[var(--color-surface-2)]/60 backdrop-blur-sm" />
           <div
-            className="relative bg-surface border border-border rounded-xl w-full max-w-[600px] max-h-[86vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl"
+            className="relative bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl w-full max-w-[600px] max-h-[86vh] sm:max-h-[80vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-border bg-surface/95 backdrop-blur-sm rounded-t-xl">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 backdrop-blur-sm rounded-t-xl">
               <h3 className="font-semibold">Test Results</h3>
               <button
                 onClick={() => setTestResults(null)}
-                className="p-1 rounded-lg hover:bg-bg text-text-muted hover:text-text-main transition-colors"
+                className="p-1 rounded-lg hover:bg-bg text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] transition-colors"
                 aria-label="Close test results"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
@@ -603,10 +649,10 @@ function ProviderCard({ providerId, provider, stats, authType, onToggle }) {
   const isNoAuth = !!provider.noAuth;
 
   const dotColors = {
-    free: "bg-green-500",
-    oauth: "bg-blue-500",
-    apikey: "bg-amber-500",
-    compatible: "bg-orange-500",
+    free: "bg-[var(--color-success)]",
+    oauth: "bg-[var(--color-accent)]",
+    apikey: "bg-[var(--color-accent)]",
+    compatible: "bg-[var(--color-accent)]",
   };
   const dotLabels = {
     free: "Free",
@@ -619,7 +665,7 @@ function ProviderCard({ providerId, provider, stats, authType, onToggle }) {
     <Link href={`/dashboard/providers/${providerId}`} className="group min-w-0">
       <Card
         padding="xs"
-        className={`h-full hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors cursor-pointer ${allDisabled ? "opacity-50" : ""}`}
+        className={`h-full hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)]/[0.01] transition-colors cursor-pointer ${allDisabled ? "opacity-50" : ""}`}
       >
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -658,7 +704,7 @@ function ProviderCard({ providerId, provider, stats, authType, onToggle }) {
                   <>
                     {getStatusDisplay(connected, error, errorCode)}
                     {errorTime && (
-                      <span className="text-text-muted">{errorTime}</span>
+                      <span className="text-[var(--color-text-muted)]">{errorTime}</span>
                     )}
                   </>
                 )}
@@ -723,10 +769,10 @@ function ApiKeyProviderCard({
   );
 
   const dotColors = {
-    free: "bg-green-500",
-    oauth: "bg-blue-500",
-    apikey: "bg-amber-500",
-    compatible: "bg-orange-500",
+    free: "bg-[var(--color-success)]",
+    oauth: "bg-[var(--color-accent)]",
+    apikey: "bg-[var(--color-accent)]",
+    compatible: "bg-[var(--color-accent)]",
   };
   const dotLabels = {
     free: "Free",
@@ -748,7 +794,7 @@ function ApiKeyProviderCard({
     <Link href={`/dashboard/providers/${routeProviderId}`} className="group min-w-0">
       <Card
         padding="xs"
-        className={`h-full hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors cursor-pointer ${allDisabled ? "opacity-50" : ""}`}
+        className={`h-full hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)]/[0.01] transition-colors cursor-pointer ${allDisabled ? "opacity-50" : ""}`}
       >
         <div className="flex min-w-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -797,7 +843,7 @@ function ApiKeyProviderCard({
                       </Badge>
                     )}
                     {errorTime && (
-                      <span className="text-text-muted">{errorTime}</span>
+                      <span className="text-[var(--color-text-muted)]">{errorTime}</span>
                     )}
                   </>
                 )}
@@ -942,7 +988,7 @@ function AddOpenAICompatibleModal({ isOpen, onClose, onCreated }) {
         <>
           <Badge variant="success">Valid</Badge>
           {method === "chat" && (
-            <span className="text-sm text-text-muted">
+            <span className="text-sm text-[var(--color-text-muted)]">
               (via inference test)
             </span>
           )}
@@ -952,7 +998,7 @@ function AddOpenAICompatibleModal({ isOpen, onClose, onCreated }) {
     return (
       <div className="flex flex-col gap-1">
         <Badge variant="error">Invalid</Badge>
-        {error && <span className="text-sm text-red-500">{error}</span>}
+        {error && <span className="text-sm text-[var(--color-danger)]">{error}</span>}
       </div>
     );
   };
@@ -1132,7 +1178,7 @@ function AddAnthropicCompatibleModal({ isOpen, onClose, onCreated }) {
         <>
           <Badge variant="success">Valid</Badge>
           {method === "chat" && (
-            <span className="text-sm text-text-muted">
+            <span className="text-sm text-[var(--color-text-muted)]">
               (via inference test)
             </span>
           )}
@@ -1142,7 +1188,7 @@ function AddAnthropicCompatibleModal({ isOpen, onClose, onCreated }) {
     return (
       <div className="flex flex-col gap-1">
         <Badge variant="error">Invalid</Badge>
-        {error && <span className="text-sm text-red-500">{error}</span>}
+        {error && <span className="text-sm text-[var(--color-danger)]">{error}</span>}
       </div>
     );
   };
@@ -1229,10 +1275,10 @@ function ProviderTestResultsView({ results }) {
   if (results.error && !results.results) {
     return (
       <div className="text-center py-6">
-        <span className="material-symbols-outlined text-red-500 text-[32px] mb-2 block">
+        <span className="material-symbols-outlined text-[var(--color-danger)] text-[32px] mb-2 block">
           error
         </span>
-        <p className="text-sm text-red-400">{results.error}</p>
+        <p className="text-sm text-[var(--color-danger)]">{results.error}</p>
       </div>
     );
   }
@@ -1252,16 +1298,16 @@ function ProviderTestResultsView({ results }) {
     <div className="flex min-w-0 flex-col gap-3">
       {summary && (
         <div className="flex flex-wrap items-center gap-2 text-xs mb-1 sm:gap-3">
-          <span className="text-text-muted">{modeLabel} Test</span>
-          <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-medium">
+          <span className="text-[var(--color-text-muted)]">{modeLabel} Test</span>
+          <span className="px-2 py-0.5 rounded bg-[var(--color-success)]/15 text-[var(--color-success)] font-medium">
             {summary.passed} passed
           </span>
           {summary.failed > 0 && (
-            <span className="px-2 py-0.5 rounded bg-red-500/15 text-red-400 font-medium">
+            <span className="px-2 py-0.5 rounded bg-[var(--color-danger)]/15 text-[var(--color-danger)] font-medium">
               {summary.failed} failed
             </span>
           )}
-          <span className="text-text-muted sm:ml-auto">
+          <span className="text-[var(--color-text-muted)] sm:ml-auto">
             {summary.total} tested
           </span>
         </div>
@@ -1269,10 +1315,10 @@ function ProviderTestResultsView({ results }) {
       {items.map((r, i) => (
         <div
           key={r.connectionId || i}
-          className="flex min-w-0 flex-wrap items-center gap-2 rounded-lg bg-black/[0.03] px-3 py-2 text-xs dark:bg-white/[0.03] sm:flex-nowrap"
+          className="flex min-w-0 flex-wrap items-center gap-2 rounded-lg bg-[var(--color-surface-2)] px-3 py-2 text-xs dark:bg-[var(--color-surface)]/[0.03] sm:flex-nowrap"
         >
           <span
-            className={`material-symbols-outlined text-[16px] ${r.valid ? "text-emerald-500" : "text-red-500"}`}
+            className={`material-symbols-outlined text-[16px] ${r.valid ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}
           >
             {r.valid ? "check_circle" : "error"}
           </span>
@@ -1280,20 +1326,20 @@ function ProviderTestResultsView({ results }) {
             <span className="block truncate font-medium sm:inline">
               {r.connectionName}
             </span>
-            <span className="block truncate text-text-muted sm:ml-1.5 sm:inline">
+            <span className="block truncate text-[var(--color-text-muted)] sm:ml-1.5 sm:inline">
               ({r.provider})
             </span>
           </div>
           {r.latencyMs !== undefined && (
-            <span className="shrink-0 text-text-muted font-mono tabular-nums">
+            <span className="shrink-0 text-[var(--color-text-muted)] font-mono tabular-nums">
               {r.latencyMs}ms
             </span>
           )}
           <span
             className={`shrink-0 text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
               r.valid
-                ? "bg-emerald-500/15 text-emerald-400"
-                : "bg-red-500/15 text-red-400"
+                ? "bg-[var(--color-success)]/15 text-[var(--color-success)]"
+                : "bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
             }`}
           >
             {r.valid ? "OK" : r.diagnosis?.type || "ERROR"}
@@ -1301,7 +1347,7 @@ function ProviderTestResultsView({ results }) {
         </div>
       ))}
       {items.length === 0 && (
-        <div className="text-center py-4 text-text-muted text-sm">
+        <div className="text-center py-4 text-[var(--color-text-muted)] text-sm">
           No active connections found for this group.
         </div>
       )}

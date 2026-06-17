@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }) {
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-[var(--color-surface-2)]/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

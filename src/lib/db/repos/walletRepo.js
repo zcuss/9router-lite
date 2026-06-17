@@ -42,7 +42,7 @@ export async function creditBalance({ userId, amountCents, source, relatedId = n
   return await db.transactionAsync(async () => {
     const user = await db.get(`SELECT balance_cents, voucher_cents FROM users WHERE id = ?`, [userId]);
     if (!user) throw new Error("user not found");
-    const newBalance = (user.balance_cents ?? 0) + amountCents;
+    const newBalance = Number(user.balance_cents ?? 0) + Number(amountCents);
     await db.run(
       `UPDATE users SET balance_cents = ?, lifetime_topup_cents = lifetime_topup_cents + ?, updated_at = ? WHERE id = ?`,
       [newBalance, amountCents, nowIso(), userId]
@@ -64,7 +64,7 @@ export async function debitBalance({ userId, amountCents, source, relatedId = nu
   return await db.transactionAsync(async () => {
     const user = await db.get(`SELECT balance_cents, voucher_cents FROM users WHERE id = ?`, [userId]);
     if (!user) throw new Error("user not found");
-    const total = (user.balance_cents ?? 0) + (user.voucher_cents ?? 0);
+    const total = Number(user.balance_cents ?? 0) + Number(user.voucher_cents ?? 0);
     if (total < amountCents) {
       const err = new Error("insufficient balance");
       err.code = "INSUFFICIENT_BALANCE";
@@ -81,8 +81,8 @@ export async function debitBalance({ userId, amountCents, source, relatedId = nu
       voucherUse = voucherAvail;
       cashUse = amountCents - voucherAvail;
     }
-    const newBalance = (user.balance_cents ?? 0) - cashUse;
-    const newVoucher = (user.voucher_cents ?? 0) - voucherUse;
+    const newBalance = Number(user.balance_cents ?? 0) - Number(cashUse);
+    const newVoucher = Number(user.voucher_cents ?? 0) - Number(voucherUse);
     await db.run(
       `UPDATE users SET balance_cents = ?, voucher_cents = ?, lifetime_spent_cents = lifetime_spent_cents + ?, updated_at = ? WHERE id = ?`,
       [newBalance, newVoucher, amountCents, nowIso(), userId]
@@ -96,7 +96,7 @@ export async function debitBalance({ userId, amountCents, source, relatedId = nu
   });
 }
 
-export async function createVoucher({ amountCents, maxRedemptions = 1, expiresAt = null, createdBy, note = null, customCode = null }) {
+export async function createVoucher({ amountCents, maxRedemptions = 1, perUserLimit = 1, expiresAt = null, createdBy, note = null, customCode = null }) {
   if (!Number.isFinite(amountCents) || amountCents <= 0) throw new Error("amount must be > 0");
   const db = await getAdapter();
   let code = customCode;
@@ -113,9 +113,9 @@ export async function createVoucher({ amountCents, maxRedemptions = 1, expiresAt
   if (!code) throw new Error("failed to generate unique code");
   const id = newId();
   await db.run(
-    `INSERT INTO vouchers (id, code, amount_cents, max_redemptions, redeemed_count, expires_at, created_by, created_at, note)
-     VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?)`,
-    [id, code, amountCents, maxRedemptions, expiresAt, createdBy, nowIso(), note]
+    `INSERT INTO vouchers (id, code, amount_cents, max_redemptions, redeemed_count, per_user_limit, expires_at, created_by, created_at, note)
+     VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)`,
+    [id, code, amountCents, maxRedemptions, perUserLimit, expiresAt, createdBy, nowIso(), note]
   );
   return await getVoucherById(id);
 }
@@ -149,13 +149,13 @@ export async function deleteVoucher(id) {
   return true;
 }
 
-export async function updateVoucher({ id, amountCents, maxRedemptions, expiresAt, note }) {
+export async function updateVoucher({ id, amountCents, maxRedemptions, perUserLimit, expiresAt, note }) {
   const db = await getAdapter();
   await db.run(
     `UPDATE vouchers
-     SET amount_cents = ?, max_redemptions = ?, expires_at = ?, note = ?
+     SET amount_cents = ?, max_redemptions = ?, per_user_limit = ?, expires_at = ?, note = ?
      WHERE id = ?`,
-    [amountCents, maxRedemptions, expiresAt, note, id]
+    [amountCents, maxRedemptions, perUserLimit, expiresAt, note, id]
   );
   return await getVoucherById(id);
 }
@@ -169,10 +169,24 @@ export async function redeemVoucher({ userId, code }) {
     if (v.expires_at && new Date(v.expires_at) < new Date()) throw new Error("voucher expired");
     if (v.redeemed_count >= v.max_redemptions) throw new Error("voucher fully redeemed");
 
+    // Per-user limit check
+    const perUserLimit = Number(v.per_user_limit ?? 1);
+    if (perUserLimit > 0) {
+      const userRedemptions = await db.get(
+        `SELECT COUNT(*) AS cnt FROM voucher_redemptions WHERE voucher_id = ? AND user_id = ?`,
+        [v.id, userId]
+      );
+      if (Number(userRedemptions?.cnt ?? 0) >= perUserLimit) {
+        const err = new Error("you have already redeemed this voucher");
+        err.code = "ALREADY_REDEEMED";
+        throw err;
+      }
+    }
+
     const user = await db.get(`SELECT balance_cents, voucher_cents FROM users WHERE id = ?`, [userId]);
     if (!user) throw new Error("user not found");
 
-    const newBalance = (user.balance_cents ?? 0) + v.amount_cents;
+    const newBalance = Number(user.balance_cents ?? 0) + Number(v.amount_cents);
     const newVoucher = 0; // Vouchers merge into main balance upon redemption
     await db.run(
       `UPDATE users SET balance_cents = ?, voucher_cents = ?, updated_at = ? WHERE id = ?`,
@@ -183,12 +197,16 @@ export async function redeemVoucher({ userId, code }) {
       [v.id]
     );
     await db.run(
+      `INSERT INTO voucher_redemptions (id, voucher_id, user_id, amount_cents, redeemed_at) VALUES (?, ?, ?, ?, ?)`,
+      [newId(), v.id, userId, v.amount_cents, nowIso()]
+    );
+    await db.run(
       `INSERT INTO wallet_transactions (id, user_id, kind, source, amount_cents, balance_after_cents, voucher_after_cents, related_id, note, created_by, created_at)
        VALUES (?, ?, 'credit', 'voucher_redeem', ?, ?, ?, ?, ?, ?, ?)`,
       [newId(), userId, v.amount_cents, newBalance, newVoucher, v.id, `Redeem ${v.code} merged to balance`, userId, nowIso()]
     );
     return {
-      voucher: shapeVoucher({ ...v, redeemed_count: v.redeemed_count + 1 }),
+      voucher: shapeVoucher({ ...v, redeemed_count: Number(v.redeemed_count ?? 0) + 1 }),
       newVoucherCents: newVoucher,
     };
   });
@@ -327,13 +345,15 @@ export async function creditTopupPayment({ id, settledAmountCents, externalRef, 
     if (p.status === "settlement" || p.status === "completed" || p.status === "captured") {
       return await findTopupPaymentById(id);
     }
+    // Force numeric conversion (DB returns cents as string from pg driver)
+    const finalCents = Number(settledAmountCents);
     await db.run(
       `UPDATE topup_payments SET status = ?, final_cents = ?, external_ref = COALESCE(?, external_ref) WHERE id = ?`,
-      [status, settledAmountCents, externalRef, id]
+      [status, finalCents, externalRef, id]
     );
     await creditBalance({
       userId: p.user_id,
-      amountCents: settledAmountCents,
+      amountCents: finalCents,
       source: "topup_midtrans",
       relatedId: id,
       note: `Midtrans topup ${externalRef || ""}`.trim(),
@@ -384,6 +404,7 @@ function shapeVoucher(row) {
     amountCents: row.amount_cents,
     maxRedemptions: row.max_redemptions,
     redeemedCount: row.redeemed_count,
+    perUserLimit: row.per_user_limit != null ? Number(row.per_user_limit) : 1,
     expiresAt: row.expires_at,
     createdBy: row.created_by,
     createdAt: row.created_at,

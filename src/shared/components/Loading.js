@@ -14,7 +14,7 @@ export function Spinner({ size = "md", className }) {
   return (
     <span
       className={cn(
-        "material-symbols-outlined animate-spin text-brand-500",
+        "material-symbols-outlined animate-spin text-[var(--color-accent)]",
         sizes[size],
         className
       )}
@@ -29,7 +29,7 @@ export function PageLoading({ message = "Loading..." }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg">
       <Spinner size="xl" />
-      <p className="mt-4 text-text-muted">{message}</p>
+      <p className="mt-4 text-[var(--color-text-muted)]">{message}</p>
     </div>
   );
 }
@@ -39,7 +39,7 @@ export function Skeleton({ className, ...props }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-xl bg-surface-2/80",
+        "animate-pulse rounded-xl bg-[var(--color-surface-2)]/80",
         className
       )}
       {...props}
@@ -50,7 +50,7 @@ export function Skeleton({ className, ...props }) {
 // Card skeleton
 export function CardSkeleton() {
   return (
-    <div className="p-6 rounded-[14px] border border-border-subtle bg-surface shadow-[var(--shadow-soft)]">
+    <div className="p-6 rounded-[14px] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-[var(--shadow-soft)]">
       <div className="flex items-center justify-between mb-4">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="size-10 rounded-[10px]" />

@@ -39,19 +39,19 @@ export default function DonateModal({ isOpen, onClose }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-[var(--color-surface-2)]/30 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={modalRef}
-        className="relative w-full bg-surface border border-black/10 dark:border-white/10 rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-w-3xl flex flex-col max-h-[85vh]"
+        className="relative w-full bg-[var(--color-surface)] border border-[var(--color-border)]/10 dark:border-[var(--color-border-subtle)]/10 rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-w-3xl flex flex-col max-h-[85vh]"
       >
-        <div className="flex items-center justify-between p-3 border-b border-black/5 dark:border-white/5">
-          <h2 className="text-lg font-semibold text-text-main flex items-center gap-2">
-            <span className="material-symbols-outlined text-pink-500">volunteer_activism</span>
+        <div className="flex items-center justify-between p-3 border-b border-[var(--color-border)]/5 dark:border-[var(--color-border-subtle)]/5">
+          <h2 className="text-lg font-semibold text-[var(--color-text-main)] flex items-center gap-2">
+            <span className="material-symbols-outlined text-[var(--color-accent)]">volunteer_activism</span>
             {data?.title || "Support 9Router"}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] dark:hover:bg-[var(--color-surface)] transition-colors"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
@@ -60,18 +60,18 @@ export default function DonateModal({ isOpen, onClose }) {
 
         <div className="p-6 overflow-y-auto flex-1">
           {loading && (
-            <div className="flex items-center justify-center py-10 text-text-muted">
+            <div className="flex items-center justify-center py-10 text-[var(--color-text-muted)]">
               <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
               Loading...
             </div>
           )}
           {error && (
-            <div className="text-red-500 py-4">Failed to load donate info: {error}</div>
+            <div className="text-[var(--color-danger)] py-4">Failed to load donate info: {error}</div>
           )}
           {!loading && !error && data && (
             <>
               {data.message && (
-                <p className="text-text-muted text-sm mb-6 text-center">{data.message}</p>
+                <p className="text-[var(--color-text-muted)] text-sm mb-6 text-center">{data.message}</p>
               )}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {data.channels?.map((ch) => (
@@ -97,29 +97,29 @@ function DonateChannelCard({ channel }) {
       >
         <span className="material-symbols-outlined text-[26px]">{icon}</span>
       </div>
-      <div className="font-semibold text-text-main mb-1">{label}</div>
+      <div className="font-semibold text-[var(--color-text-main)] mb-1">{label}</div>
       {description && (
-        <div className="text-xs text-text-muted mb-3 text-center">{description}</div>
+        <div className="text-xs text-[var(--color-text-muted)] mb-3 text-center">{description}</div>
       )}
       {qr && (
         <img
           src={qr}
           alt={`${label} QR`}
-          className="w-full max-w-[180px] aspect-square object-contain rounded-lg bg-white p-1"
+          className="w-full max-w-[180px] aspect-square object-contain rounded-lg bg-[var(--color-surface)] p-1"
         />
       )}
     </>
   );
 
   return (
-    <div className="flex flex-col items-center p-4 rounded-xl border border-black/10 dark:border-white/10 bg-surface/50 hover:border-pink-500/40 transition-colors">
+    <div className="flex flex-col items-center p-4 rounded-xl border border-[var(--color-border)]/10 dark:border-[var(--color-border-subtle)]/10 bg-[var(--color-surface)]/50 hover:border-[var(--color-accent)]/40 transition-colors">
       {content}
       {url && (
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity"
+          className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-[var(--color-text-main)] hover:opacity-90 transition-opacity"
           style={{ backgroundColor: color }}
         >
           Open
