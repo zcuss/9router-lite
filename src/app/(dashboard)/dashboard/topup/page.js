@@ -63,6 +63,53 @@ export default function TopupPage() {
     return () => clearInterval(t);
   }, [isPrivileged]);
 
+  // Auto-refresh balance + history every 5s so the UI updates without manual
+  // refresh after a Snap payment settles. Pauses when the tab is hidden.
+  useEffect(() => {
+    let alive = true;
+    const tick = () => {
+      if (document.hidden) return;
+      fetch("/api/wallet/balance", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => alive && d?.balance && setBalance(d.balance))
+        .catch(() => {});
+      fetch("/api/wallet/history?limit=15", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => alive && d?.payments && setHistory(d.payments))
+        .catch(() => {});
+    };
+    const t = setInterval(tick, 5000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
+
+  // While a Snap order is open, poll the Midtrans status every 3s and stop
+  // as soon as the payment is settled / failed.
+  useEffect(() => {
+    if (!activeOrderId) return;
+    let alive = true;
+    let attempts = 0;
+    const tick = async () => {
+      if (!alive) return;
+      if (++attempts > 60) return; // safety: max ~3 min
+      try {
+        const r = await fetch("/api/wallet/topup-midtrans/check-status", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ orderId: activeOrderId }),
+        });
+        const d = await r.json().catch(() => ({}));
+        const st = d?.payment?.status;
+        if (st === "settlement" || st === "failed" || st === "expired" || st === "refunded") {
+          setActiveOrderId(null);
+          setSubmitting(false);
+          load();
+        }
+      } catch {}
+    };
+    const t = setInterval(tick, 3000);
+    return () => { alive = false; clearInterval(t); };
+  }, [activeOrderId]);
+
   const handleRedeem = async (e) => {
     e.preventDefault();
     if (!voucherCode.trim()) return;
