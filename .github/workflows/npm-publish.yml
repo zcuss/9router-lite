@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - zcus-router
   workflow_dispatch:
 
 jobs:
@@ -34,6 +35,13 @@ jobs:
 
       - name: Install CLI dependencies
         run: npm install
+
+      - name: Pre-flight: verify package name
+        run: |
+          echo "--- root package.json ---"
+          cat ../package.json | head -5
+          echo "--- cli/package.json (used by npm publish) ---"
+          cat package.json | head -5
 
       - name: Read package version
         id: pkg
