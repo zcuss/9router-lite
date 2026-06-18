@@ -20,6 +20,7 @@ import {
   CircleUserRound,
   LogOut,
   Hexagon,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import useSettingsStore from "@/store/settingsStore";
@@ -50,6 +51,7 @@ const navGroups = [
     title: "Akun",
     items: [
       { href: "/dashboard/profile", label: "Profil", icon: CircleUserRound },
+      { href: "/dashboard/chat", label: "Chat", icon: Bot },
     ],
   },
   {
