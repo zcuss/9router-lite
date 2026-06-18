@@ -9,7 +9,6 @@ import {
   Server,
   Layers,
   Code2,
-  KeyRound,
   Ticket,
   Brain,
   Shield,
@@ -37,7 +36,6 @@ const navGroups = [
     title: "Akses",
     items: [
       { href: "/dashboard/endpoint", label: "Endpoint & Kunci API", icon: Code2 },
-      { href: "/dashboard/quota", label: "Kunci API", icon: KeyRound },
     ],
   },
   {
@@ -45,7 +43,6 @@ const navGroups = [
     items: [
       { href: "/dashboard/topup", label: "Top Up", icon: Wallet },
       { href: "/dashboard/vouchers", label: "Tukar Voucher", icon: Ticket },
-      { href: "/dashboard/pricing", label: "Harga & Paket", icon: Layers, userHidden: true },
     ],
   },
   {
@@ -134,7 +131,6 @@ export default function Sidebar({ onClose }) {
         {navGroups.map((group) => {
           const visibleItems = group.items.filter((item) => {
             if (item.adminOnly) return isPrivileged;
-            if (item.userHidden) return isPrivileged;
             return true;
           });
           if (visibleItems.length === 0) return null;
@@ -149,7 +145,7 @@ export default function Sidebar({ onClose }) {
                   const Icon = item.icon;
                   return (
                     <Link
-                      key={`${group.title}-${item.href}`}
+                      key={item.href}
                       href={item.href}
                       onClick={onClose}
                       className={cn(

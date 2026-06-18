@@ -10,7 +10,7 @@ const OAUTH_META = {
   discord: { label: "Discord", mark: "D" },
 };
 
-const OAUTH_BTN_CLS = "h-10 w-full items-center justify-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-surface-2)]";
+const OAUTH_BTN_CLS = "h-10 w-full items-center justify-start gap-2.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm font-medium text-[var(--color-text-main)] transition-colors hover:bg-[var(--color-surface-2)]";
 
 export default function LoginPage() {
   const [tab, setTab] = useState("login");
@@ -123,7 +123,7 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <div className="hidden lg:block">
+          <div className="hidden flex-1 lg:flex lg:flex-col lg:justify-center">
             <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text-main)]">
               Satu endpoint untuk semua provider AI Anda.
             </h2>
@@ -161,13 +161,13 @@ export default function LoginPage() {
             </div>
 
             {tabs.length > 1 && (
-              <div className="mb-5 flex gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5">
+              <div className="mb-5 flex w-full gap-0.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5">
                 {tabs.map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => { setTab(t.id); setError(""); setInfo(""); }}
-                    className={`flex-1 rounded-[6px] px-3 py-1.5 text-xs font-medium transition-colors ${
+                    className={`flex-1 min-w-0 rounded-[6px] px-3 py-1.5 text-xs font-medium transition-colors text-center ${
                       tab === t.id
                         ? "bg-[var(--color-text-main)] text-[var(--color-bg)]"
                         : "text-[var(--color-text-muted)] hover:text-[var(--color-text-main)]"
@@ -185,17 +185,17 @@ export default function LoginPage() {
                   const meta = OAUTH_META[p.id] || { label: p.label, mark: p.id[0]?.toUpperCase() };
                   return (
                     <button key={p.id} type="button" onClick={() => handleOAuth(p.id)} className={OAUTH_BTN_CLS}>
-                      <span className="grid size-5 place-items-center rounded-sm bg-[var(--color-surface-2)] text-[10px] font-bold text-[var(--color-text-muted)]">
+                      <span className="grid size-7 shrink-0 place-items-center rounded-md bg-[var(--color-surface-2)] text-[11px] font-bold text-[var(--color-text-muted)]">
                         {meta.mark}
                       </span>
-                      <span>Lanjut dengan {meta.label}</span>
+                      <span className="flex-1 text-left">Lanjut dengan {meta.label}</span>
                     </button>
                   );
                 })}
                 <div className="my-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-                    or
+                    atau
                   </span>
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                 </div>
@@ -204,12 +204,12 @@ export default function LoginPage() {
 
             {tab === "magic" ? (
               <form onSubmit={handleMagicLink} className="space-y-4">
-                <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
+                <Field label="Email" type="email" placeholder="anda@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
-                <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
+                <button type="submit" disabled={loading} className="btn-base btn-primary w-full gap-2">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" strokeWidth={2} />}
-                  <span>Send magic link</span>
+                  <span>Kirim Magic Link</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>
@@ -226,7 +226,7 @@ export default function LoginPage() {
                 <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
-                <button type="submit" disabled={loading} className="btn-base btn-primary w-full">
+                <button type="submit" disabled={loading} className="btn-base btn-primary w-full gap-2">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : null}
                   <span>{tab === "register" ? "Buat Akun" : "Masuk"}</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
