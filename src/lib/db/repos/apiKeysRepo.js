@@ -9,7 +9,10 @@ function rowToKey(row) {
     name: row.name,
     machineId: row.machineId,
     userId: row.user_id || row.userId || null,
-    isActive: row.isActive === 1 || row.isActive === true,
+    // pg/cockroach driver returns booleans/integers as strings ("1"/"0"/"true"/"false")
+    // — use loose equality + truthy check so all string/number/bool variants map
+    // correctly to a JS boolean.
+    isActive: row.isActive == 1 || row.isActive == true || row.isActive === "1" || row.isActive === "true" || !!row.isActive,
     createdAt: row.createdAt,
   };
 }
