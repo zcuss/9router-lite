@@ -100,8 +100,8 @@ if (loadedEnvPath && process.env.DEBUG === "1") {
 try { ensureTrayRuntime({ silent: true }); } catch {}
 
 // Configuration constants
-const APP_NAME = "9router-lite"; // Use custom package name since this is the lite version
-const INSTALL_CMD_LATEST = `npm i -g 9router-lite@latest --prefer-online`;
+const APP_NAME = "zcusrouter";
+const INSTALL_CMD_LATEST = `npm i -g zcusrouter@latest --prefer-online`;
 
 const DEFAULT_PORT = 20129;
 const DEFAULT_HOST = "0.0.0.0";

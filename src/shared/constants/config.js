@@ -15,9 +15,9 @@ export const GITHUB_CONFIG = {
 
 // Updater configuration
 export const UPDATER_CONFIG = {
-  npmPackageName: "9router-lite",
-  installCmd: "npm i -g 9router-lite",
-  installCmdLatest: "npm i -g 9router-lite@latest --prefer-online",
+  npmPackageName: "zcusrouter",
+  installCmd: "npm i -g zcusrouter",
+  installCmdLatest: "npm i -g zcusrouter@latest --prefer-online",
   shutdownCountdownSec: 3,
   exitDelayMs: 500,
   statusPort: 20129,

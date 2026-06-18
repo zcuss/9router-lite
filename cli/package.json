@@ -1,10 +1,10 @@
 {
-  "name": "9router-lite",
+  "name": "zcusrouter",
   "version": "0.4.75",
   "bin": {
-    "9router-lite": "./cli.js"
+    "zcusrouter": "./cli.js"
   },
-  "description": "9Router CLI - Start and manage 9Router server",
+  "description": "Zcus Router CLI - Start and manage Zcus Router server",
   "files": [
     "cli.js",
     "src",

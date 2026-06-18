@@ -37,10 +37,10 @@ const DEFAULT_SETTINGS = {
   cavemanEnabled: false,
   cavemanLevel: "full",
   aiTuningEnabled: false,
-  aiPersonaName: "9Router Lite Assistant",
+  aiPersonaName: "Zcus Router Assistant",
   aiPersonaTone: "balanced",
   aiPersonaBehavior: "Helpful, concise, technical, and honest.",
-  aiSystemPrompt: "You are a helpful AI assistant routed through 9Router Lite. Follow the user's instructions, keep answers clear, and adapt to the configured persona.",
+  aiSystemPrompt: "You are a helpful AI assistant routed through Zcus Router. Follow the user's instructions, keep answers clear, and adapt to the configured persona.",
   uiMode: "expert", // "lite" or "expert"
 };
 

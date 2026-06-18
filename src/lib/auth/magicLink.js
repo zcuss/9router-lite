@@ -49,9 +49,9 @@ function getTransport() {
 export async function sendMagicLinkEmail(email, link) {
   const t = getTransport();
   const s = loadSettingsAuth();
-  const subject = "Your 9Router sign-in link";
-  const text = `Sign in to 9Router:\n\n${link}\n\nThis link expires in 15 minutes and can be used once. If you did not request it, ignore this email.`;
-  const html = `<!doctype html><html><body style="font-family:system-ui,sans-serif;background:#0b1220;color:#e2e8f0;padding:24px"><div style="max-width:480px;margin:0 auto;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:32px"><h1 style="margin:0 0 8px;font-size:20px">Sign in to 9Router</h1><p style="color:#94a3b8;margin:0 0 24px">Click the button below to sign in. The link expires in 15 minutes.</p><a href="${link}" style="display:inline-block;background:#06b6d4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600">Sign in to 9Router</a><p style="color:#64748b;font-size:12px;margin-top:24px">If you did not request this email, you can safely ignore it.</p><p style="color:#475569;font-size:11px;margin-top:12px">Or paste this link: ${link}</p></div></body></html>`;
+  const subject = "Your Zcus Router sign-in link";
+  const text = `Sign in to Zcus Router:\n\n${link}\n\nThis link expires in 15 minutes and can be used once. If you did not request it, ignore this email.`;
+  const html = `<!doctype html><html><body style="font-family:system-ui,sans-serif;background:#0b1220;color:#e2e8f0;padding:24px"><div style="max-width:480px;margin:0 auto;background:#111827;border:1px solid #1f2937;border-radius:12px;padding:32px"><h1 style="margin:0 0 8px;font-size:20px">Sign in to Zcus Router</h1><p style="color:#94a3b8;margin:0 0 24px">Click the button below to sign in. The link expires in 15 minutes.</p><a href="${link}" style="display:inline-block;background:#06b6d4;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600">Sign in to Zcus Router</a><p style="color:#64748b;font-size:12px;margin-top:24px">If you did not request this email, you can safely ignore it.</p><p style="color:#475569;font-size:11px;margin-top:12px">Or paste this link: ${link}</p></div></body></html>`;
 
   if (!t) {
     console.log(`[magic-link] SMTP not configured. Email=${email} Link=${link}`);
