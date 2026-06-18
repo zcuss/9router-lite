@@ -36,7 +36,7 @@ jobs:
       - name: Install CLI dependencies
         run: npm install
 
-      - name: Pre-flight: verify package name
+      - name: Pre-flight verify package metadata
         run: |
           echo "--- root package.json ---"
           cat ../package.json | head -5
