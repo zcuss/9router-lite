@@ -2,9 +2,8 @@
 
 export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
-import { Wallet, Plus, Tag, ArrowRight, Loader2, Clock, Check, X, Receipt, AlertCircle, Banknote } from "lucide-react";
+import { Wallet, Tag, ArrowRight, Loader2, Check, X, AlertCircle } from "lucide-react";
 import Script from "next/script";
-import useRoleStore, { useEffectiveRole } from "@/store/roleStore";
 
 const PRESETS = [500, 1000, 2500, 5000, 10000, 25000]; // in cents
 
@@ -12,18 +11,7 @@ const fmtUSD = (cents) => {
   return ((Number(cents) || 0) / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 };
 
-const PAYMENT_METHODS = [
-  { id: "bank_transfer", label: "Transfer Bank" },
-  { id: "e_wallet", label: "E-Wallet (OVO/GoPay/Dana)" },
-  { id: "qris", label: "QRIS" },
-  { id: "cash", label: "Tunai" },
-  { id: "other", label: "Lainnya" },
-];
-
 export default function TopupPage() {
-  const effectiveRole = useEffectiveRole();
-  const isPrivileged = effectiveRole === "admin" || effectiveRole === "dev";
-
   const [balance, setBalance] = useState(null);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,15 +21,6 @@ export default function TopupPage() {
   const [msg, setMsg] = useState(null);
   const [activeOrderId, setActiveOrderId] = useState(null);
 
-  // Manual top-up request
-  const [manualAmount, setManualAmount] = useState("");
-  const [manualMethod, setManualMethod] = useState("bank_transfer");
-  const [manualReference, setManualReference] = useState("");
-  const [manualNote, setManualNote] = useState("");
-  const [manualSubmitting, setManualSubmitting] = useState(false);
-  const [manualMsg, setManualMsg] = useState(null);
-  const [manualRequests, setManualRequests] = useState([]);
-
   const [voucherCode, setVoucherCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
   const [voucherMsg, setVoucherMsg] = useState(null);
@@ -49,16 +28,14 @@ export default function TopupPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const [bRes, hRes, cRes, mRes] = await Promise.all([
+      const [bRes, hRes, cRes] = await Promise.all([
         fetch("/api/wallet/balance").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/wallet/history?limit=15").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/auth/config").then((r) => (r.ok ? r.json() : null)),
-        fetch("/api/wallet/topup-request?mine=1&limit=20").then((r) => (r.ok ? r.json() : null)),
       ]);
       if (bRes?.balance) setBalance(bRes.balance);
       if (hRes?.payments) setHistory(hRes.payments);
       if (cRes?.midtrans) setMidtrans(cRes.midtrans);
-      if (mRes?.requests) setManualRequests(mRes.requests);
     } finally {
       setLoading(false);
     }
@@ -161,7 +138,7 @@ export default function TopupPage() {
       if (payment?.status === "settlement") {
         setMsg({ type: "success", text: "Pembayaran berhasil. Saldo diperbarui." });
       } else if (payment?.status === "pending") {
-        setMsg({ type: "success", text: "Pembayaran tertunda. Saldo akan ditambah setelah settle." });
+        setMsg({ type: "success", text: "Pembayaran tertunda. Saldo akan ditambah setelah settle. Admin bisa approve manual dari dashboard kalau perlu." });
       } else if (payment?.status === "failed" || payment?.status === "expired" || payment?.status === "refunded") {
         setMsg({ type: "error", text: `Pembayaran ${payment.status}. Coba lagi.` });
       } else {
@@ -204,47 +181,6 @@ export default function TopupPage() {
     });
   };
 
-  const handleManualSubmit = async (e) => {
-    e.preventDefault();
-    const amt = parseFloat(manualAmount);
-    if (isNaN(amt) || amt <= 0) {
-      setManualMsg({ type: "error", text: "Nominal harus lebih dari 0" });
-      return;
-    }
-    if (!manualReference.trim()) {
-      setManualMsg({ type: "error", text: "Isi referensi / bukti transfer" });
-      return;
-    }
-    setManualSubmitting(true);
-    setManualMsg(null);
-    try {
-      const r = await fetch("/api/wallet/topup-request", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          amountCents: Math.round(amt * 100),
-          method: manualMethod,
-          reference: manualReference.trim(),
-          note: manualNote.trim() || null,
-        }),
-      });
-      const data = await r.json();
-      if (!r.ok) {
-        setManualMsg({ type: "error", text: data.error || "Gagal mengirim permintaan" });
-        return;
-      }
-      setManualMsg({ type: "success", text: "Permintaan terkirim. Menunggu approval admin." });
-      setManualAmount("");
-      setManualReference("");
-      setManualNote("");
-      load();
-    } catch (err) {
-      setManualMsg({ type: "error", text: err.message });
-    } finally {
-      setManualSubmitting(false);
-    }
-  };
-
   const total = balance ? (Number(balance.balanceCents || 0) + Number(balance.voucherCents || 0)) / 100 : 0;
 
   return (
@@ -256,10 +192,9 @@ export default function TopupPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <section className="md:col-span-2 space-y-6">
-          {/* Midtrans quick top-up */}
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold">Top Up Otomatis (Midtrans)</h2>
+              <h2 className="text-[14px] font-semibold">Top Up via Midtrans</h2>
               <span className={`text-[10px] font-mono uppercase tracking-wider ${midtrans?.enabled ? "text-[var(--color-text-subtle)]" : "text-[var(--color-text-subtle)]"}`}>
                 {midtrans?.enabled ? "aktif" : "nonaktif"}
               </span>
@@ -338,117 +273,24 @@ export default function TopupPage() {
               </>
             )}
 
-            <div className="p-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)] text-[11px] text-[var(--color-text-subtle)] leading-relaxed">
-              <strong>Midtrans:</strong> {midtrans?.enabled ? "aktif" : "tidak dikonfigurasi"}. Pembayaran diproses otomatis lewat Midtrans. Admin tidak perlu approve manual. Kalau pembayaran pending/gagal, admin bisa force-settle dari dashboard.
-            </div>
-          </div>
-
-          {/* Manual top-up request (user can submit; admin approves) */}
-          <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <Receipt size={14} className="text-[var(--color-text-subtle)]" />
-              <h2 className="text-[14px] font-semibold">Top Up Manual (Butuh Approval)</h2>
-            </div>
-
-            {manualMsg && (
-              <div className={`p-3 rounded text-[12px] flex items-center justify-between ${
-                manualMsg.type === "success" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
-              }`}>
-                <span>{manualMsg.text}</span>
-                <button onClick={() => setManualMsg(null)}><X size={14} /></button>
-              </div>
-            )}
-
-            <form onSubmit={handleManualSubmit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-                    Nominal (USD)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] text-[12px] font-mono">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={manualAmount}
-                      onChange={(e) => setManualAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full h-10 pl-7 pr-3 rounded-md border border-[var(--color-border-subtle)] bg-transparent text-[13px] outline-none focus:border-[var(--color-text-main)]"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-                    Metode
-                  </label>
-                  <select
-                    value={manualMethod}
-                    onChange={(e) => setManualMethod(e.target.value)}
-                    className="w-full h-10 px-3 rounded-md border border-[var(--color-border-subtle)] bg-transparent text-[13px] outline-none focus:border-[var(--color-text-main)]"
-                  >
-                    {PAYMENT_METHODS.map((m) => (
-                      <option key={m.id} value={m.id}>{m.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-                  Referensi / Bukti Transfer
-                </label>
-                <input
-                  type="text"
-                  value={manualReference}
-                  onChange={(e) => setManualReference(e.target.value)}
-                  placeholder="cth: BCA 1234567890 a.n. Zcus, 12 Jun 2026"
-                  className="w-full h-10 px-3 rounded-md border border-[var(--color-border-subtle)] bg-transparent text-[13px] outline-none focus:border-[var(--color-text-main)]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-                  Catatan (opsional)
-                </label>
-                <input
-                  type="text"
-                  value={manualNote}
-                  onChange={(e) => setManualNote(e.target.value)}
-                  placeholder="cth: top up untuk testing"
-                  className="w-full h-10 px-3 rounded-md border border-[var(--color-border-subtle)] bg-transparent text-[13px] outline-none focus:border-[var(--color-text-main)]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={manualSubmitting || !manualAmount || !manualReference.trim()}
-                className="w-full h-10 rounded-md border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-fg)] text-[12px] font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition-colors"
-              >
-                {manualSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Banknote size={14} />}
-                Kirim Permintaan Top Up
-              </button>
-            </form>
-
             <div className="p-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)] text-[11px] text-[var(--color-text-subtle)] leading-relaxed flex items-start gap-2">
               <AlertCircle size={12} className="shrink-0 mt-0.5" />
               <span>
-                Isi referensi / bukti transfer dengan jelas. Admin akan approve setelah memverifikasi pembayaran. Saldo baru akan masuk setelah approve.
+                <strong>Midtrans:</strong> {midtrans?.enabled ? "aktif" : "tidak dikonfigurasi"}. Pembayaran diproses otomatis lewat Midtrans. Kalau pembayaran pending/failed, admin bisa force-settle dari menu Voucher & Top Up → tab Pembayaran.
               </span>
             </div>
           </div>
 
-          {/* Combined history: midtrans payments + manual requests */}
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] overflow-hidden">
             <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold">Riwayat Permintaan</h2>
-              <span className="text-[11px] text-[var(--color-text-subtle)]">{history.length + manualRequests.length} total</span>
+              <h2 className="text-[14px] font-semibold">Riwayat Pembayaran</h2>
+              <span className="text-[11px] text-[var(--color-text-subtle)]">{history.length} records</span>
             </div>
 
             {loading ? (
               <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Memuat…</div>
-            ) : history.length === 0 && manualRequests.length === 0 ? (
-              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Belum ada permintaan.</div>
+            ) : history.length === 0 ? (
+              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Belum ada pembayaran.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-[12px]">
@@ -456,38 +298,17 @@ export default function TopupPage() {
                     <tr className="bg-[var(--color-surface-2)] text-[var(--color-text-subtle)] border-b border-[var(--color-border-subtle)] text-[10px] uppercase tracking-wider">
                       <th className="px-5 py-3 font-semibold">Tanggal</th>
                       <th className="px-5 py-3 font-semibold">Nominal</th>
-                      <th className="px-5 py-3 font-semibold">Tipe</th>
-                      <th className="px-5 py-3 font-semibold">Referensi</th>
+                      <th className="px-5 py-3 font-semibold">Ref / Promo</th>
                       <th className="px-5 py-3 font-semibold">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[var(--color-border-subtle)]">
-                    {manualRequests.map((r) => (
-                      <tr key={`manual-${r.id}`}>
-                        <td className="px-5 py-3 text-[var(--color-text-muted)]">
-                          {new Date(r.requestedAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-5 py-3 font-mono font-medium">{fmtUSD(r.amountCents)}</td>
-                        <td className="px-5 py-3 text-[var(--color-text-muted)] text-[10px] uppercase font-mono">manual · {r.method || "—"}</td>
-                        <td className="px-5 py-3 font-mono text-[var(--color-text-subtle)] text-[10px]">{r.reference || "—"}</td>
-                        <td className="px-5 py-3">
-                          <span className={`chip ${
-                            r.status === "approved" ? "bg-success/10 text-success"
-                              : r.status === "rejected" ? "bg-danger/10 text-danger"
-                              : "bg-warning/10 text-warning"
-                          }`}>
-                            {r.status === "approved" ? "disetujui" : r.status === "rejected" ? "ditolak" : "menunggu"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
                     {history.map((h) => (
-                      <tr key={`midtrans-${h.id}`}>
+                      <tr key={h.id}>
                         <td className="px-5 py-3 text-[var(--color-text-muted)]">
                           {new Date(h.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-5 py-3 font-mono font-medium">{fmtUSD(h.amountCents)}</td>
-                        <td className="px-5 py-3 text-[var(--color-text-muted)] text-[10px] uppercase font-mono">midtrans</td>
                         <td className="px-5 py-3 font-mono text-[var(--color-text-subtle)] text-[10px]">{h.promoCode || h.externalRef || "—"}</td>
                         <td className="px-5 py-3">
                           <span className={`chip ${
@@ -571,3 +392,4 @@ export default function TopupPage() {
     </div>
   );
 }
+

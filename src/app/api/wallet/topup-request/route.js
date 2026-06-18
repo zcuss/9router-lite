@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentDashboardUser } from "@/lib/auth/currentUser";
+import { getCurrentDashboardUser, canManageUsers } from "@/lib/auth/currentUser";
 import { createTopupRequest, listTopupRequests } from "@/lib/db/repos/walletRepo";
 
 export async function GET(request) {
@@ -22,9 +22,16 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  // Manual top-up requests are no longer exposed in the user UI.
+  // Admin/dev can still create them programmatically (e.g. for offline transfers
+  // they want to record before approving). All requests go through the same
+  // admin approval flow in /api/admin/wallet.
+  const user = await getCurrentDashboardUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canManageUsers(user)) {
+    return NextResponse.json({ error: "Manual top-up requests are created by admin/dev only" }, { status: 403 });
+  }
   try {
-    const user = await getCurrentDashboardUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await request.json();
     const amountCents = Math.round(Number(body?.amountCents || body?.amount || 0) * (body?.amountCents ? 1 : 100));
     const method = body?.method || null;
@@ -33,7 +40,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "amount must be > 0" }, { status: 400 });
     }
     const req = await createTopupRequest({
-      userId: user.userId || user.id,
+      userId: body?.userId || user.userId || user.id,
       amountCents,
       method,
       reference,

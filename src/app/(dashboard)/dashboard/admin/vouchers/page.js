@@ -287,21 +287,12 @@ export default function AdminVouchersPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setTab("requests")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  tab === "requests" ? "bg-[var(--color-accent)] text-[var(--color-accent-fg)]" : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
-                }`}
-              >
-                Permintaan Top Up ({requests.length})
-              </button>
-              <button
-                type="button"
                 onClick={() => setTab("payments")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   tab === "payments" ? "bg-[var(--color-accent)] text-[var(--color-accent-fg)]" : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
                 }`}
               >
-                Pembayaran ({payments.length})
+                Pembayaran Midtrans ({payments.length})
               </button>
               <button
                 type="button"

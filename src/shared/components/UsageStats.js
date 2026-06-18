@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FREE_PROVIDERS, AI_PROVIDERS } from "@/shared/constants/providers";
+import { useEffectiveRole } from "@/store/roleStore";
 
 // Keep providers without serviceKinds (default LLM) or with "llm" in serviceKinds
 function isLLMProvider(id) {
@@ -14,8 +16,14 @@ import Badge from "./Badge";
 import Card from "./Card";
 import OverviewCards from "@/app/(dashboard)/dashboard/usage/components/OverviewCards";
 import UsageTable, { fmt, fmtTime } from "@/app/(dashboard)/dashboard/usage/components/UsageTable";
-import ProviderTopology from "@/app/(dashboard)/dashboard/usage/components/ProviderTopology";
+// ProviderTopology uses @xyflow/react — heavy. Only load for admin/dev.
+// User view: just show the "Network" card label without the React Flow graph.
 import UsageChart from "@/app/(dashboard)/dashboard/usage/components/UsageChart";
+
+const ProviderTopology = dynamic(
+  () => import("@/app/(dashboard)/dashboard/usage/components/ProviderTopology"),
+  { ssr: false, loading: () => null }
+);
 
 function timeAgo(timestamp) {
   const diff = Math.floor((Date.now() - new Date(timestamp)) / 1000);
@@ -199,6 +207,8 @@ const PERIODS = [
 export default function UsageStats({ period: periodProp, setPeriod: setPeriodProp, hidePeriodSelector = false } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const effectiveRole = useEffectiveRole();
+  const isPrivileged = effectiveRole === "admin" || effectiveRole === "dev";
 
   const sortBy = searchParams.get("sortBy") || "rawModel";
   const sortOrder = searchParams.get("sortOrder") || "asc";
@@ -457,8 +467,8 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
       {/* Overview cards */}
       {loading ? spinner : <OverviewCards stats={stats} />}
 
-      {/* Provider topology + Recent Requests */}
-      {loading ? spinner : (
+      {/* Provider topology + Recent Requests (admin/dev only — heavy React Flow graph) */}
+      {loading ? spinner : (isPrivileged ? (
         <div className="grid min-w-0 grid-cols-1 items-stretch gap-2 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
           <ProviderTopology
             providers={providers}
@@ -468,7 +478,12 @@ export default function UsageStats({ period: periodProp, setPeriod: setPeriodPro
           />
           <RecentRequests requests={stats.recentRequests || []} />
         </div>
-      )}
+      ) : (
+        <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5">
+          <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-2">Jaringan</div>
+          <div className="text-[13px] text-[var(--color-text-muted)]">Topologi jaringan cuma tersedia untuk admin/dev. Lihat tab <span className="font-mono">Details</span> atau <span className="font-mono">Logs</span> untuk request Anda sendiri.</div>
+        </div>
+      ))}
 
       {/* Token / Cost chart - sync period */}
       {loading ? spinner : <UsageChart period={period} />}
