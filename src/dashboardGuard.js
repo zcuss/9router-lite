@@ -35,6 +35,9 @@ const PUBLIC_API_PATHS = [
   "/api/auth/oauth",
   "/api/version",
   "/api/settings/require-login",
+  // Midtrans payment webhook — Midtrans cannot send a JWT cookie.
+  // Signature is verified inside the handler (verifyMidtransSignature).
+  "/api/payment/midtrans/callback",
 ];
 
 // Public top-level prefixes (LLM API endpoints with their own API key auth).
