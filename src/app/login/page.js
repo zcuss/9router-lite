@@ -96,15 +96,15 @@ export default function LoginPage() {
 
   const enabledOauth = config.oauth.filter((p) => p.enabled);
   const tabs = [
-    { id: "login", label: "Masuk" },
-    { id: "register", label: "Daftar" },
+    { id: "login", label: "Sign in" },
+    { id: "register", label: "Sign up" },
     ...(config.magicLink?.enabled ? [{ id: "magic", label: "Magic Link" }] : []),
   ];
 
   const heading = {
-    login: { title: "Selamat datang kembali", sub: "Masuk untuk kelola infrastruktur AI Anda." },
-    register: { title: "Buat akun Anda", sub: "Daftar untuk mulai menggunakan dashboard." },
-    magic: { title: "Masuk via email", sub: "Kami kirim magic link ke inbox Anda." },
+    login: { title: "Welcome back", sub: "Sign in to manage your AI infrastructure." },
+    register: { title: "Create your account", sub: "Register to get started with the dashboard." },
+    magic: { title: "Sign in via email", sub: "We'll send a magic link to your inbox." },
   }[tab];
 
   return (
@@ -125,18 +125,18 @@ export default function LoginPage() {
 
           <div className="hidden flex-1 lg:flex lg:flex-col lg:justify-center">
             <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight text-[var(--color-text-main)]">
-              Satu endpoint untuk semua provider AI Anda.
+              One endpoint for every AI provider you use.
             </h2>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--color-text-muted)]">
-              Kelola kunci API, pantau pemakaian, route kombo model, dan handle top up Midtrans
-              dari satu dashboard ringan.
+              Manage API keys, monitor usage, route model combos, and handle Midtrans top-ups
+              from a single lightweight dashboard.
             </p>
             <ul className="mt-8 space-y-2.5">
               {[
                 "Multi-provider OAuth & magic link",
-                "Top up Midtrans & wallet otomatis",
-                "Kombo model dengan fallback routing",
-                "Pemakaian & log request real-time",
+                "Midtrans top-up & automatic wallet",
+                "Model combos with fallback routing",
+                "Real-time usage & request logs",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-[var(--color-text-muted)]">
                   <span className="mt-1.5 inline-block size-1.5 shrink-0 rounded-full bg-[var(--color-accent)]" />
@@ -147,7 +147,7 @@ export default function LoginPage() {
           </div>
 
           <div className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-            <span>Relay SaaS untuk AI</span>
+            <span>Relay SaaS for AI</span>
           </div>
         </div>
 
@@ -188,14 +188,14 @@ export default function LoginPage() {
                       <span className="grid size-7 shrink-0 place-items-center rounded-md bg-[var(--color-surface-2)] text-[11px] font-bold text-[var(--color-text-muted)]">
                         {meta.mark}
                       </span>
-                      <span className="flex-1 text-left">Lanjut dengan {meta.label}</span>
+                      <span className="flex-1 text-left">Continue with {meta.label}</span>
                     </button>
                   );
                 })}
                 <div className="my-4 flex items-center gap-3">
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">
-                    atau
+                    or
                   </span>
                   <div className="h-px flex-1 bg-[var(--color-border)]" />
                 </div>
@@ -204,12 +204,12 @@ export default function LoginPage() {
 
             {tab === "magic" ? (
               <form onSubmit={handleMagicLink} className="space-y-4">
-                <Field label="Email" type="email" placeholder="anda@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
+                <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus icon={Mail} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
                 <button type="submit" disabled={loading} className="btn-base btn-primary w-full gap-2">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" strokeWidth={2} />}
-                  <span>Kirim Magic Link</span>
+                  <span>Send magic link</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>
@@ -218,17 +218,17 @@ export default function LoginPage() {
                 {tab === "register" ? (
                   <>
                     <Field label="Username" type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} required autoFocus icon={AtSign} />
-                    <Field label="Email" type="email" placeholder="anda@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
+                    <Field label="Email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required icon={Mail} />
                   </>
                 ) : (
-                  <Field label="Username atau email" type="text" placeholder="username atau email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
+                  <Field label="Username or email" type="text" placeholder="username or email" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoFocus icon={UserIcon} />
                 )}
                 <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required icon={Lock} />
                 <Alert type="error" message={error} />
                 <Alert type="info" message={info} />
                 <button type="submit" disabled={loading} className="btn-base btn-primary w-full gap-2">
                   {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                  <span>{tab === "register" ? "Buat Akun" : "Masuk"}</span>
+                  <span>{tab === "register" ? "Create account" : "Sign in"}</span>
                   {!loading && <ArrowRight className="size-4" strokeWidth={2} />}
                 </button>
               </form>

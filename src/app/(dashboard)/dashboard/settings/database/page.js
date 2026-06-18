@@ -21,8 +21,8 @@ function AccessDenied() {
     <div className="px-4 sm:px-6 py-12 max-w-2xl mx-auto">
       <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-8 text-center space-y-3">
         <ShieldOff className="size-8 mx-auto text-[var(--color-text-subtle)]" />
-        <h2 className="text-lg font-semibold">Akses Ditolak</h2>
-        <p className="text-[13px] text-[var(--color-text-muted)]">Hanya admin/dev yang dapat mengubah konfigurasi database.</p>
+        <h2 className="text-lg font-semibold">Access Denied</h2>
+        <p className="text-[13px] text-[var(--color-text-muted)]">Only admin/dev can change database configuration.</p>
       </div>
     </div>
   );

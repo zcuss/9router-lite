@@ -97,40 +97,40 @@ export default function DashboardHome() {
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">
-            Halo, {username || "Tuan"}.
+            Hi, {username || "there"}.
           </h1>
         </div>
         <Link
           href="/dashboard/endpoint"
           className="h-9 px-4 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-[12px] font-medium flex items-center gap-2 hover:bg-[var(--color-accent-hover)] transition-colors"
         >
-          Kelola Kunci <ArrowUpRight size={13} strokeWidth={2} />
+          Manage keys <ArrowUpRight size={13} strokeWidth={2} />
         </Link>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-lg border border-[var(--color-border-subtle)] p-5 bg-[var(--color-surface)]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">Saldo</span>
+            <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">Balance</span>
             <Wallet size={14} strokeWidth={1.6} className="text-[var(--color-text-subtle)]" />
           </div>
           <div className="text-3xl font-bold tabular-nums tracking-tight">
             {loading ? "—" : fmtUSD(Math.round(total * 100))}
           </div>
           <div className="mt-2 text-[11px] text-[var(--color-text-subtle)]">
-            Top up {fmtUSD(Math.round(topped * 100))} · Terpakai {fmtUSD(Math.round(spent * 100))}
+            Top-ups {fmtUSD(Math.round(topped * 100))} · Spent {fmtUSD(Math.round(spent * 100))}
           </div>
         </div>
 
         <div className="rounded-lg border border-[var(--color-border-subtle)] p-5 bg-[var(--color-surface)]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">Kunci API</span>
+            <span className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">API keys</span>
             <KeyRound size={14} strokeWidth={1.6} className="text-[var(--color-text-subtle)]" />
           </div>
           <div className="text-3xl font-bold tabular-nums tracking-tight">
             {loading ? "—" : keys.filter((k) => k.isActive).length}
           </div>
-          <div className="mt-2 text-[11px] text-[var(--color-text-subtle)]">Aktif dan siap digunakan</div>
+          <div className="mt-2 text-[11px] text-[var(--color-text-subtle)]">Active, ready to use</div>
         </div>
 
         <div className="rounded-lg border border-[var(--color-border-subtle)] p-5 bg-[var(--color-surface)]">
@@ -139,10 +139,10 @@ export default function DashboardHome() {
             <Zap size={14} strokeWidth={1.6} className="text-[var(--color-text-subtle)]" />
           </div>
           <div className="text-[13px] font-mono truncate text-[var(--color-text-main)]">
-            {endpoint?.url || (loading ? "Memuat…" : "Belum dikonfigurasi")}
+            {endpoint?.url || (loading ? "Loading…" : "Not configured")}
           </div>
           <Link href="/dashboard/endpoint" className="mt-2 text-[11px] text-[var(--color-text-main)] inline-flex items-center gap-1 hover:underline">
-            Lihat setup <ChevronRight size={11} />
+            View setup <ChevronRight size={11} />
           </Link>
         </div>
       </div>
@@ -150,24 +150,24 @@ export default function DashboardHome() {
       {isAdmin && (
         <div className="rounded-lg border border-[var(--color-border-subtle)] p-5 bg-[var(--color-surface)]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[14px] font-semibold">Jaringan</h2>
+            <h2 className="text-[14px] font-semibold">Network</h2>
             <span className="chip">{effectiveRole}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">User</div>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Users</div>
               <div className="text-xl font-bold tabular-nums mt-1">{stats?.userCount ?? "—"}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Kunci</div>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Keys</div>
               <div className="text-xl font-bold tabular-nums mt-1">{stats?.keyCount ?? "—"}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Request · 24 jam</div>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Requests · 24h</div>
               <div className="text-xl font-bold tabular-nums mt-1">{stats?.req24h ?? "—"}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Pengeluaran · 24 jam</div>
+              <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)]">Spend · 24h</div>
               <div className="text-xl font-bold tabular-nums mt-1">
                 {stats?.spend24h ? fmtUSD(stats.spend24h) : "—"}
               </div>
@@ -178,12 +178,12 @@ export default function DashboardHome() {
 
       <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] overflow-hidden">
         <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-          <h2 className="text-[14px] font-semibold">Kunci API Anda</h2>
+          <h2 className="text-[14px] font-semibold">Your API keys</h2>
           <button
             onClick={() => setShowCreate(true)}
             className="h-8 px-3 rounded-md border border-[var(--color-border-subtle)] text-[11px] font-medium hover:border-[var(--color-text-main)] flex items-center gap-1.5"
           >
-            <Plus size={12} strokeWidth={2} /> Kunci Baru
+            <Plus size={12} strokeWidth={2} /> New key
           </button>
         </div>
 
@@ -194,7 +194,7 @@ export default function DashboardHome() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && createKey()}
-              placeholder="Nama kunci (mis. aplikasi-saya)"
+              placeholder="Key name (e.g. my-app)"
               className="flex-1 h-9 px-3 rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[12px] outline-none focus:border-[var(--color-text-main)]"
             />
             <button
@@ -202,7 +202,7 @@ export default function DashboardHome() {
               disabled={creating || !newName.trim()}
               className="h-9 px-4 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-[12px] font-medium disabled:opacity-40"
             >
-              {creating ? "Membuat…" : "Buat"}
+              {creating ? "Creating…" : "Create"}
             </button>
             <button
               onClick={() => { setShowCreate(false); setNewName(""); }}
@@ -214,15 +214,15 @@ export default function DashboardHome() {
         )}
 
         {loading ? (
-          <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Memuat…</div>
+          <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Loading…</div>
         ) : keys.length === 0 ? (
           <div className="px-5 py-12 text-center">
-            <div className="text-[12px] text-[var(--color-text-subtle)]">Belum ada kunci.</div>
+            <div className="text-[12px] text-[var(--color-text-subtle)]">No keys yet.</div>
             <button
               onClick={() => setShowCreate(true)}
               className="mt-3 h-8 px-3 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] text-[11px] font-medium inline-flex items-center gap-1.5"
             >
-              <Plus size={12} strokeWidth={2} /> Buat kunci pertama Anda
+              <Plus size={12} strokeWidth={2} /> Create your first key
             </button>
           </div>
         ) : (
@@ -233,7 +233,7 @@ export default function DashboardHome() {
                   <KeyRound size={14} strokeWidth={1.6} className="text-[var(--color-text-muted)]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-medium truncate">{k.name || "Tanpa nama"}</div>
+                  <div className="text-[12px] font-medium truncate">{k.name || "Unnamed"}</div>
                   <div className="text-[10px] text-[var(--color-text-subtle)] font-mono truncate">
                     {revealId === k.id ? (k.key || k.apiKey) : "••••••••••" + (k.lastFour || "")}
                   </div>
@@ -242,21 +242,21 @@ export default function DashboardHome() {
                   <button
                     onClick={() => setRevealId(revealId === k.id ? null : k.id)}
                     className="h-7 w-7 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-surface-2)] flex items-center justify-center"
-                    title={revealId === k.id ? "Sembunyikan" : "Tampilkan"}
+                    title={revealId === k.id ? "Hide" : "Reveal"}
                   >
                     {revealId === k.id ? <EyeOff size={12} /> : <Eye size={12} />}
                   </button>
                   <button
                     onClick={() => copyText(k.key || k.apiKey, k.id)}
                     className="h-7 w-7 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-main)] hover:bg-[var(--color-surface-2)] flex items-center justify-center"
-                    title="Salin"
+                    title="Copy"
                   >
                     {copied === k.id ? <Check size={12} className="text-success" /> : <Copy size={12} />}
                   </button>
                   <button
                     onClick={() => deleteKey(k.id)}
                     className="h-7 w-7 rounded text-[var(--color-text-muted)] hover:text-danger hover:bg-[var(--color-surface-2)] flex items-center justify-center"
-                    title="Hapus"
+                    title="Delete"
                   >
                     <Trash2 size={12} />
                   </button>

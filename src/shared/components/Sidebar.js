@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   BarChart3,
@@ -63,7 +64,7 @@ const navGroups = [
   {
     title: "Rilis & Admin",
     items: [
-      { href: "/dashboard/admin/vouchers", label: "Voucher & Top Up", icon: Ticket, adminOnly: true },
+      { href: "/dashboard/admin/vouchers", label: "Voucher & Top Up", icon: Ticket, adminOnly: true, badgeKey: "pendingPayments" },
       { href: "/dashboard/admin/models", label: "Rilis Model", icon: Layers, adminOnly: true },
     ],
   },
@@ -92,6 +93,25 @@ export default function Sidebar({ onClose }) {
   const effectiveRole = useEffectiveRole();
   const userRole = String(effectiveRole || settings?.userRole || "user").toLowerCase();
   const isPrivileged = userRole === "admin" || userRole === "dev";
+
+  // Pending counts for admin badges (poll every 30s)
+  const [pendingCounts, setPendingCounts] = useState({ pendingPayments: 0, pendingTopupRequests: 0 });
+  useEffect(() => {
+    if (!isPrivileged) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const r = await fetch("/api/admin/pending-counts", { cache: "no-store" });
+        if (r.ok && !cancelled) {
+          const data = await r.json();
+          setPendingCounts(data);
+        }
+      } catch {}
+    };
+    load();
+    const t = setInterval(load, 30000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [isPrivileged]);
 
   const isActive = (href) => {
     try {
@@ -143,6 +163,7 @@ export default function Sidebar({ onClose }) {
                 {visibleItems.map((item) => {
                   const active = isActive(item.href);
                   const Icon = item.icon;
+                  const badgeCount = item.badgeKey ? Number(pendingCounts[item.badgeKey] || 0) : 0;
                   return (
                     <Link
                       key={item.href}
@@ -164,8 +185,13 @@ export default function Sidebar({ onClose }) {
                         )}
                         strokeWidth={2}
                       />
-                      <span className="min-w-0 truncate">{item.label}</span>
-                      {active && (
+                      <span className="min-w-0 truncate flex-1">{item.label}</span>
+                      {badgeCount > 0 && (
+                        <span className="ml-auto grid h-4 min-w-4 place-items-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-bold text-[var(--color-accent-fg)]">
+                          {badgeCount > 99 ? "99+" : badgeCount}
+                        </span>
+                      )}
+                      {!badgeCount && active && (
                         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
                       )}
                     </Link>

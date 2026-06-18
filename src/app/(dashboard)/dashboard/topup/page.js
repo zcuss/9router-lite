@@ -2,8 +2,10 @@
 
 export const dynamic = "force-dynamic";
 import { useEffect, useState } from "react";
-import { Wallet, Tag, ArrowRight, Loader2, Check, X, AlertCircle } from "lucide-react";
+import { Wallet, Tag, ArrowRight, Loader2, Check, X, AlertCircle, Shield } from "lucide-react";
+import Link from "next/link";
 import Script from "next/script";
+import useRoleStore, { useEffectiveRole } from "@/store/roleStore";
 
 const PRESETS = [500, 1000, 2500, 5000, 10000, 25000]; // in cents
 
@@ -12,6 +14,11 @@ const fmtUSD = (cents) => {
 };
 
 export default function TopupPage() {
+  const effectiveRole = useEffectiveRole();
+  const realRole = useRoleStore((s) => s.realRole);
+  const viewAs = useRoleStore((s) => s.viewAs);
+  const isPrivileged = (realRole === "admin" || realRole === "dev") && !viewAs;
+
   const [balance, setBalance] = useState(null);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(true);
@@ -20,6 +27,7 @@ export default function TopupPage() {
   const [midtrans, setMidtrans] = useState(null);
   const [msg, setMsg] = useState(null);
   const [activeOrderId, setActiveOrderId] = useState(null);
+  const [pendingCount, setPendingCount] = useState(0);
 
   const [voucherCode, setVoucherCode] = useState("");
   const [redeeming, setRedeeming] = useState(false);
@@ -28,14 +36,16 @@ export default function TopupPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const [bRes, hRes, cRes] = await Promise.all([
+      const [bRes, hRes, cRes, pRes] = await Promise.all([
         fetch("/api/wallet/balance").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/wallet/history?limit=15").then((r) => (r.ok ? r.json() : null)),
         fetch("/api/auth/config").then((r) => (r.ok ? r.json() : null)),
+        isPrivileged ? fetch("/api/admin/pending-counts", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)) : Promise.resolve(null),
       ]);
       if (bRes?.balance) setBalance(bRes.balance);
       if (hRes?.payments) setHistory(hRes.payments);
       if (cRes?.midtrans) setMidtrans(cRes.midtrans);
+      if (pRes?.pendingPayments != null) setPendingCount(pRes.pendingPayments);
     } finally {
       setLoading(false);
     }
@@ -43,7 +53,15 @@ export default function TopupPage() {
 
   useEffect(() => {
     load();
-  }, []);
+    if (!isPrivileged) return;
+    const t = setInterval(() => {
+      fetch("/api/admin/pending-counts", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => d && setPendingCount(d.pendingPayments || 0))
+        .catch(() => {});
+    }, 30000);
+    return () => clearInterval(t);
+  }, [isPrivileged]);
 
   const handleRedeem = async (e) => {
     e.preventDefault();
@@ -58,10 +76,10 @@ export default function TopupPage() {
       });
       const data = await r.json();
       if (!r.ok) {
-        setVoucherMsg({ type: "error", text: data.error || "Gagal menukar voucher" });
+        setVoucherMsg({ type: "error", text: data.error || "Failed to redeem voucher" });
         return;
       }
-      setVoucherMsg({ type: "success", text: "Voucher berhasil ditukar! Saldo diperbarui." });
+      setVoucherMsg({ type: "success", text: `Voucher redeemed! +${fmtUSD(data.amountCents || 0)} added to your balance.` });
       setVoucherCode("");
       load();
     } catch (err) {
@@ -74,7 +92,7 @@ export default function TopupPage() {
   const handleMidtrans = async () => {
     const rawVal = parseFloat(amount);
     if (isNaN(rawVal) || rawVal <= 0) {
-      setMsg({ type: "error", text: "Masukkan nominal yang valid" });
+      setMsg({ type: "error", text: "Enter a valid amount" });
       return;
     }
     setSubmitting(true);
@@ -87,10 +105,10 @@ export default function TopupPage() {
       });
       const data = await r.json();
       if (!r.ok) {
-        setMsg({ type: "error", text: data.error || "Gagal memulai pembayaran Midtrans" });
+        setMsg({ type: "error", text: data.error || "Failed to start Midtrans payment" });
         return;
       }
-      setMsg({ type: "success", text: "Membuka Midtrans Snap..." });
+      setMsg({ type: "success", text: "Opening Midtrans Snap..." });
       setActiveOrderId(data.orderId);
       setTimeout(async () => {
         try {
@@ -132,17 +150,17 @@ export default function TopupPage() {
       }
     }
     if (!window.snap) {
-      throw new Error("Midtrans Snap belum dimuat. Tunggu sebentar lalu coba lagi.");
+      throw new Error("Midtrans Snap is not loaded yet. Please wait a moment and try again.");
     }
     const afterCheck = (payment) => {
       if (payment?.status === "settlement") {
-        setMsg({ type: "success", text: "Pembayaran berhasil. Saldo diperbarui." });
+        setMsg({ type: "success", text: "Payment success. Balance updated." });
       } else if (payment?.status === "pending") {
-        setMsg({ type: "success", text: "Pembayaran tertunda. Saldo akan ditambah setelah settle. Admin bisa approve manual dari dashboard kalau perlu." });
+        setMsg({ type: "success", text: `Payment is pending. ${isPrivileged ? "You can force-settle it from the admin panel." : "An admin will credit it once settled."}` });
       } else if (payment?.status === "failed" || payment?.status === "expired" || payment?.status === "refunded") {
-        setMsg({ type: "error", text: `Pembayaran ${payment.status}. Coba lagi.` });
+        setMsg({ type: "error", text: `Payment ${payment.status}. Please try again.` });
       } else {
-        setMsg({ type: "success", text: "Pembayaran dikirim. Saldo akan diperbarui sebentar lagi." });
+        setMsg({ type: "success", text: "Payment submitted. Balance will update shortly." });
       }
       setActiveOrderId(null);
       load();
@@ -150,12 +168,12 @@ export default function TopupPage() {
     window.snap.embed(snapToken, {
       embedId: "snap-container",
       onSuccess: async () => {
-        setMsg({ type: "success", text: "Memverifikasi pembayaran..." });
+        setMsg({ type: "success", text: "Verifying payment..." });
         const p = orderId ? await checkMidtransStatus(orderId) : null;
         afterCheck(p);
       },
       onPending: async () => {
-        setMsg({ type: "success", text: "Memverifikasi pembayaran..." });
+        setMsg({ type: "success", text: "Verifying payment..." });
         const p = orderId ? await checkMidtransStatus(orderId) : null;
         afterCheck(p);
       },
@@ -164,17 +182,17 @@ export default function TopupPage() {
           const p = await checkMidtransStatus(orderId);
           afterCheck(p);
         } else {
-          setMsg({ type: "error", text: res?.status_message || "Kesalahan pembayaran" });
+          setMsg({ type: "error", text: res?.status_message || "Payment error" });
           setActiveOrderId(null);
         }
       },
       onClose: async () => {
         if (orderId) {
-          setMsg({ type: "success", text: "Memeriksa status pembayaran..." });
+          setMsg({ type: "success", text: "Checking payment status..." });
           const p = await checkMidtransStatus(orderId);
           afterCheck(p);
         } else {
-          setMsg({ type: "error", text: "Pembayaran ditutup." });
+          setMsg({ type: "error", text: "Payment closed." });
           setActiveOrderId(null);
         }
       },
@@ -186,17 +204,35 @@ export default function TopupPage() {
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8 pb-24 lg:pb-8 max-w-5xl mx-auto space-y-6">
       <header>
-        <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-subtle)]">Saldo</div>
+        <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-subtle)]">Balance</div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">Top Up</h1>
       </header>
+
+      {isPrivileged && pendingCount > 0 && (
+        <Link
+          href="/dashboard/admin/vouchers"
+          className="flex items-center gap-3 rounded-lg border border-[var(--color-accent)]/40 bg-[var(--color-accent)]/10 px-4 py-3 hover:bg-[var(--color-accent)]/15 transition-colors"
+        >
+          <Shield className="size-4 text-[var(--color-accent)] shrink-0" />
+          <div className="min-w-0 flex-1">
+            <div className="text-[12px] font-semibold text-[var(--color-text-main)]">
+              {pendingCount} pending {pendingCount === 1 ? "payment" : "payments"} awaiting admin approval
+            </div>
+            <div className="text-[11px] text-[var(--color-text-muted)]">
+              Click to open the admin voucher panel and approve them manually.
+            </div>
+          </div>
+          <ArrowRight className="size-4 text-[var(--color-accent)] shrink-0" />
+        </Link>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <section className="md:col-span-2 space-y-6">
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold">Top Up via Midtrans</h2>
-              <span className={`text-[10px] font-mono uppercase tracking-wider ${midtrans?.enabled ? "text-[var(--color-text-subtle)]" : "text-[var(--color-text-subtle)]"}`}>
-                {midtrans?.enabled ? "aktif" : "nonaktif"}
+              <h2 className="text-[14px] font-semibold">Pay via Midtrans</h2>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--color-text-subtle)]">
+                {midtrans?.enabled ? "enabled" : "disabled"}
               </span>
             </div>
 
@@ -220,7 +256,7 @@ export default function TopupPage() {
                     }}
                     className="text-[11px] text-danger hover:underline"
                   >
-                    Batalkan
+                    Cancel
                   </button>
                 </div>
                 <div
@@ -245,7 +281,7 @@ export default function TopupPage() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-                      Nominal (USD)
+                      Amount (USD)
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-subtle)] text-[12px] font-mono">$</span>
@@ -266,7 +302,7 @@ export default function TopupPage() {
                       className="w-full h-10 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] hover:bg-[var(--color-accent-hover)] text-[12px] font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition-colors"
                     >
                       {submitting ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
-                      Bayar via Midtrans
+                      Pay with Midtrans
                     </button>
                   </div>
                 </div>
@@ -276,28 +312,28 @@ export default function TopupPage() {
             <div className="p-3 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface-2)] text-[11px] text-[var(--color-text-subtle)] leading-relaxed flex items-start gap-2">
               <AlertCircle size={12} className="shrink-0 mt-0.5" />
               <span>
-                <strong>Midtrans:</strong> {midtrans?.enabled ? "aktif" : "tidak dikonfigurasi"}. Pembayaran diproses otomatis lewat Midtrans. Kalau pembayaran pending/failed, admin bisa force-settle dari menu Voucher & Top Up → tab Pembayaran.
+                <strong>Midtrans:</strong> {midtrans?.enabled ? "enabled" : "not configured"}. Payment is auto-processed. {isPrivileged ? "If pending, force-settle from the admin panel." : "If payment stays pending, an admin can force-settle it."}
               </span>
             </div>
           </div>
 
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] overflow-hidden">
             <div className="px-5 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-              <h2 className="text-[14px] font-semibold">Riwayat Pembayaran</h2>
+              <h2 className="text-[14px] font-semibold">Payment History</h2>
               <span className="text-[11px] text-[var(--color-text-subtle)]">{history.length} records</span>
             </div>
 
             {loading ? (
-              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Memuat…</div>
+              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Loading...</div>
             ) : history.length === 0 ? (
-              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">Belum ada pembayaran.</div>
+              <div className="px-5 py-12 text-center text-[12px] text-[var(--color-text-subtle)]">No payments yet.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-[12px]">
                   <thead>
                     <tr className="bg-[var(--color-surface-2)] text-[var(--color-text-subtle)] border-b border-[var(--color-border-subtle)] text-[10px] uppercase tracking-wider">
-                      <th className="px-5 py-3 font-semibold">Tanggal</th>
-                      <th className="px-5 py-3 font-semibold">Nominal</th>
+                      <th className="px-5 py-3 font-semibold">Date</th>
+                      <th className="px-5 py-3 font-semibold">Amount</th>
                       <th className="px-5 py-3 font-semibold">Ref / Promo</th>
                       <th className="px-5 py-3 font-semibold">Status</th>
                     </tr>
@@ -334,24 +370,24 @@ export default function TopupPage() {
 
         <section className="space-y-4">
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5">
-            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Total Saldo</div>
+            <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Total Balance</div>
             <div className="text-3xl font-bold tabular-nums tracking-tight mb-2">
               {loading ? "—" : fmtUSD(Math.round(total * 100))}
             </div>
             <div className="divide-y divide-[var(--color-border-subtle)] text-[11px] text-[var(--color-text-subtle)] mt-4">
               <div className="py-2 flex justify-between">
-                <span>Saldo utama</span>
+                <span>Core balance</span>
                 <span className="font-mono">{balance ? fmtUSD(balance.balanceCents) : "—"}</span>
               </div>
               <div className="py-2 flex justify-between">
-                <span>Voucher</span>
+                <span>Vouchers</span>
                 <span className="font-mono">{balance ? fmtUSD(balance.voucherCents) : "—"}</span>
               </div>
             </div>
           </div>
 
           <div className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5 space-y-4">
-            <h3 className="text-[12px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">Tukar Voucher</h3>
+            <h3 className="text-[12px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium">Redeem Voucher</h3>
 
             {voucherMsg && (
               <div className={`p-3 rounded text-[11px] flex items-center justify-between ${
@@ -376,7 +412,7 @@ export default function TopupPage() {
                 className="w-full h-9 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] hover:bg-[var(--color-accent-hover)] text-[12px] font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition-colors"
               >
                 {redeeming ? <Loader2 size={12} className="animate-spin" /> : <Tag size={12} />}
-                Tukar
+                Redeem
               </button>
             </form>
           </div>
@@ -392,4 +428,3 @@ export default function TopupPage() {
     </div>
   );
 }
-

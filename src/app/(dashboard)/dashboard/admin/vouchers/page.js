@@ -199,9 +199,9 @@ export default function AdminVouchersPage() {
       <div>
         <h1 className="text-2xl font-semibold text-[var(--color-text-main)] flex items-center gap-2">
           <Ticket size={22} className="text-[var(--color-accent)]" />
-          Voucher & Top Up
+          Vouchers & Top Up
         </h1>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">Buat kode voucher, approve top up, kelola saldo user.</p>
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">Create voucher codes, approve pending payments, and manage user balance.</p>
       </div>
 
       {error && <div className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-2 text-sm text-[var(--color-danger)] dark:text-[var(--color-danger)]">{error}</div>}
@@ -209,10 +209,10 @@ export default function AdminVouchersPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card padding="md" className="lg:col-span-1">
-          <h2 className="text-base font-semibold text-[var(--color-text-main)] mb-3">Buat Voucher</h2>
+          <h2 className="text-base font-semibold text-[var(--color-text-main)] mb-3">Create Voucher</h2>
           <form onSubmit={createVoucher} className="space-y-3">
             <div>
-              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Nominal (USD)</label>
+              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Amount (USD)</label>
               <input
                 type="number"
                 step="0.01"
@@ -223,7 +223,7 @@ export default function AdminVouchersPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Maks Tukar (total)</label>
+              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Max redemptions (total)</label>
               <input
                 type="number"
                 min="1"
@@ -233,7 +233,7 @@ export default function AdminVouchersPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Batas per User (1 akun = 1x)</label>
+              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Per-user limit (1 account = 1x)</label>
               <input
                 type="number"
                 min="0"
@@ -241,10 +241,10 @@ export default function AdminVouchersPage() {
                 onChange={(e) => setForm({ ...form, perUserLimit: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-main)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40"
               />
-              <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">0 = unlimited per user. 1 = setiap akun hanya bisa 1x.</p>
+              <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">0 = unlimited per user. 1 = each account can only redeem once.</p>
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Kadaluarsa (opsional)</label>
+              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Expires at (optional)</label>
               <input
                 type="datetime-local"
                 value={form.expiresAt}
@@ -253,12 +253,12 @@ export default function AdminVouchersPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Catatan (opsional)</label>
+              <label className="block text-xs text-[var(--color-text-muted)] mb-1">Note (optional)</label>
               <input
                 type="text"
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
-                placeholder="cth: promo, refund"
+                placeholder="e.g. promo, refund"
                 className="w-full px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] bg-bg text-[var(--color-text-main)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/40"
               />
             </div>
@@ -267,14 +267,14 @@ export default function AdminVouchersPage() {
               disabled={creating}
               className="w-full px-4 py-2 rounded-lg bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-50 text-[var(--color-accent-fg)] text-sm font-medium transition-colors"
             >
-              {creating ? "Membuat..." : "Buat Voucher"}
+              {creating ? "Creating..." : "Create voucher"}
             </button>
           </form>
         </Card>
 
         <Card padding="md" className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <h2 className="text-base font-semibold text-[var(--color-text-main)]">Item Terbaru</h2>
+            <h2 className="text-base font-semibold text-[var(--color-text-main)]">Recent Items</h2>
             <div className="flex items-center gap-1 flex-wrap">
               <button
                 type="button"
@@ -283,7 +283,7 @@ export default function AdminVouchersPage() {
                   tab === "vouchers" ? "bg-[var(--color-accent)] text-[var(--color-accent-fg)]" : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
                 }`}
               >
-                Voucher ({vouchers.length})
+                Vouchers ({vouchers.length})
               </button>
               <button
                 type="button"
@@ -292,7 +292,7 @@ export default function AdminVouchersPage() {
                   tab === "payments" ? "bg-[var(--color-accent)] text-[var(--color-accent-fg)]" : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
                 }`}
               >
-                Pembayaran Midtrans ({payments.length})
+                Midtrans Payments ({payments.length})
               </button>
               <button
                 type="button"
@@ -301,27 +301,27 @@ export default function AdminVouchersPage() {
                   tab === "history" ? "bg-[var(--color-accent)] text-[var(--color-accent-fg)]" : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)]"
                 }`}
               >
-                Riwayat ({history.length})
+                History ({history.length})
               </button>
             </div>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Memuat...</div>
+            <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Loading...</div>
           ) : tab === "vouchers" ? (
             vouchers.length === 0 ? (
-              <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Belum ada voucher. Buat di panel kiri.</div>
+              <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">No vouchers yet. Create one on the left.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[var(--color-text-muted)] border-b border-[var(--color-border-subtle)]">
-                      <th className="py-2 pr-4">Kode</th>
-                      <th className="py-2 pr-4">Nominal</th>
-                      <th className="py-2 pr-4">Penukaran</th>
-                      <th className="py-2 pr-4">Kadaluarsa</th>
-                      <th className="py-2 pr-4">Dibuat</th>
-                      <th className="py-2 pr-4 text-right">Aksi</th>
+                      <th className="py-2 pr-4">Code</th>
+                      <th className="py-2 pr-4">Amount</th>
+                      <th className="py-2 pr-4">Redemptions</th>
+                      <th className="py-2 pr-4">Expires</th>
+                      <th className="py-2 pr-4">Created</th>
+                      <th className="py-2 pr-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -346,7 +346,7 @@ export default function AdminVouchersPage() {
                               onClick={() => deleteVoucher(v.id)}
                               className="px-2 py-0.5 rounded text-xs border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-fg)] transition-colors"
                             >
-                              Hapus
+                              Delete
                             </button>
                           </div>
                         </td>
@@ -397,20 +397,20 @@ export default function AdminVouchersPage() {
             )
           ) : tab === "payments" ? (
             payments.length === 0 ? (
-              <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Belum ada catatan pembayaran.</div>
+              <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">No payment records yet.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[var(--color-text-muted)] border-b border-[var(--color-border-subtle)]">
                       <th className="py-2 pr-4">User</th>
-                      <th className="py-2 pr-4">Nominal</th>
+                      <th className="py-2 pr-4">Amount</th>
                       <th className="py-2 pr-4">Final</th>
-                      <th className="py-2 pr-4">Metode</th>
+                      <th className="py-2 pr-4">Method</th>
                       <th className="py-2 pr-4">Status</th>
-                      <th className="py-2 pr-4">Ref</th>
-                      <th className="py-2 pr-4">Dibuat</th>
-                      <th className="py-2 pr-4 text-right">Aksi</th>
+                      <th className="py-2 pr-4">External Ref</th>
+                      <th className="py-2 pr-4">Created</th>
+                      <th className="py-2 pr-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -421,7 +421,7 @@ export default function AdminVouchersPage() {
                         <tr key={p.id} className="border-b border-[var(--color-border-subtle)] last:border-b-0">
                           <td className="py-2 pr-4 text-[var(--color-text-main)] text-xs">
                             <div className="font-mono text-[11px] text-[var(--color-text-muted)]">{p.userId.slice(0, 8)}</div>
-                            <div className="font-medium">{p.username || p.email || "(tanpa nama)"}</div>
+                            <div className="font-medium">{p.username || p.email || "(no name)"}</div>
                           </td>
                           <td className="py-2 pr-4 text-[var(--color-text-main)]">{fmtMoney(p.amountCents)}</td>
                           <td className="py-2 pr-4 text-[var(--color-text-main)]">{fmtMoney(p.finalCents)}</td>
@@ -447,7 +447,7 @@ export default function AdminVouchersPage() {
                                 onClick={() => resolvePayment(p.id, "approve-payment")}
                                 className="px-2 py-1 rounded text-xs bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--color-accent-fg)]"
                               >
-                                {resolvingPaymentId === p.id ? "..." : settled ? "Kredit" : "Setujui"}
+                                {resolvingPaymentId === p.id ? "..." : settled ? "Credited" : "Approve"}
                               </button>
                               <button
                                 type="button"
@@ -455,7 +455,7 @@ export default function AdminVouchersPage() {
                                 onClick={() => resolvePayment(p.id, "reject-payment")}
                                 className="px-2 py-1 rounded text-xs border border-[var(--color-danger)]/40 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 disabled:opacity-40 disabled:cursor-not-allowed"
                               >
-                                Tolak
+                                Reject
                               </button>
                             </div>
                           </td>
@@ -469,32 +469,32 @@ export default function AdminVouchersPage() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="text-xs text-[var(--color-text-muted)]">Riwayat semua permintaan top up user.</div>
+                <div className="text-xs text-[var(--color-text-muted)]">History of all top-up requests.</div>
                 <select
                   value={historyStatus}
                   onChange={(e) => setHistoryStatus(e.target.value)}
                   className="px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] bg-bg text-xs text-[var(--color-text-main)]"
                 >
-                  <option value="">Semua status</option>
-                  <option value="pending">Tertunda</option>
-                  <option value="approved">Disetujui</option>
-                  <option value="rejected">Ditolak</option>
+                  <option value="">All statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </div>
               {history.length === 0 ? (
-                <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Belum ada riwayat top up.</div>
+                <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">No top-up history.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-[var(--color-text-muted)] border-b border-[var(--color-border-subtle)]">
                         <th className="py-2 pr-4">User</th>
-                        <th className="py-2 pr-4">Nominal</th>
-                        <th className="py-2 pr-4">Metode</th>
+                        <th className="py-2 pr-4">Amount</th>
+                        <th className="py-2 pr-4">Method</th>
                         <th className="py-2 pr-4">Status</th>
-                        <th className="py-2 pr-4">Diminta</th>
-                        <th className="py-2 pr-4">Selesai</th>
-                        <th className="py-2 pr-4">Catatan</th>
+                        <th className="py-2 pr-4">Requested</th>
+                        <th className="py-2 pr-4">Resolved</th>
+                        <th className="py-2 pr-4">Note</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -502,13 +502,11 @@ export default function AdminVouchersPage() {
                         <tr key={r.id} className="border-b border-[var(--color-border-subtle)] last:border-b-0">
                           <td className="py-2 pr-4 text-[var(--color-text-main)] text-xs">
                             <div className="font-mono text-[11px] text-[var(--color-text-muted)]">{r.userId.slice(0, 8)}</div>
-                            <div className="font-medium">{r.username || r.email || "(tanpa nama)"}</div>
+                            <div className="font-medium">{r.username || r.email || "(no name)"}</div>
                           </td>
                           <td className="py-2 pr-4 text-[var(--color-text-main)]">{fmtMoney(r.amountCents)}</td>
                           <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs">{r.method || "—"}</td>
-                          <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs uppercase">
-                            {r.status === "pending" ? "tertunda" : r.status === "approved" ? "disetujui" : r.status === "rejected" ? "ditolak" : (r.status || "—")}
-                          </td>
+                          <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs uppercase">{r.status || "—"}</td>
                           <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs">{fmtDate(r.requestedAt)}</td>
                           <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs">{fmtDate(r.resolvedAt)}</td>
                           <td className="py-2 pr-4 text-[var(--color-text-muted)] text-xs">{r.resolutionNote || "—"}</td>

@@ -15,6 +15,7 @@ export async function GET() {
     const oidcEmail = String(session?.oidcEmail || "").trim();
     const displayName = oidcName || oidcEmail || (session?.oidc ? "OIDC user" : "Password user");
     const loginMethod = session?.oidc ? "OIDC" : "Password";
+    const role = String(session?.role || "").toLowerCase() || "user";
 
     return NextResponse.json({
       requireLogin,
@@ -27,6 +28,8 @@ export async function GET() {
       oidcName: oidcName || null,
       oidcEmail: oidcEmail || null,
       oidcLogin: !!session?.oidc,
+      role,
+      canManageUsers: ["admin", "dev"].includes(role),
     });
   } catch {
     return NextResponse.json({
@@ -40,6 +43,9 @@ export async function GET() {
       oidcName: null,
       oidcEmail: null,
       oidcLogin: false,
+      role: "user",
+      canManageUsers: false,
     });
   }
 }
+

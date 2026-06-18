@@ -112,10 +112,10 @@ export default function UserVoucherRedeemPage() {
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8 pb-24 lg:pb-8 max-w-2xl mx-auto space-y-6">
       <header>
-        <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-subtle)]">Saldo</div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">Tukar Voucher</h1>
+        <div className="text-[11px] uppercase tracking-wider text-[var(--color-text-subtle)]">Balance</div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">Redeem Voucher</h1>
         <p className="text-[13px] text-[var(--color-text-muted)] mt-1">
-          Masukkan kode voucher dari admin untuk menambahkan saldo ke akun Anda.
+          Enter a voucher code from admin to add balance to your account.
         </p>
       </header>
 
@@ -135,7 +135,7 @@ export default function UserVoucherRedeemPage() {
 
           <div>
             <label className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium block mb-1.5">
-              Kode Voucher
+              Voucher code
             </label>
             <div className="relative">
               <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[var(--color-text-subtle)]" strokeWidth={1.6} />
@@ -155,20 +155,20 @@ export default function UserVoucherRedeemPage() {
             className="w-full h-10 rounded-md bg-[var(--color-accent)] text-[var(--color-accent-fg)] hover:bg-[var(--color-accent-hover)] text-[12px] font-semibold flex items-center justify-center gap-2 disabled:opacity-40 transition-colors"
           >
             {redeeming ? <Loader2 size={14} className="animate-spin" /> : <Tag size={14} />}
-            Tukar Voucher
+            Redeem
           </button>
         </form>
       </Card>
 
       <Card padding="md">
-        <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Saldo Anda</div>
+        <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Your balance</div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <div className="text-[10px] text-[var(--color-text-subtle)]">Saldo Utama</div>
+            <div className="text-[10px] text-[var(--color-text-subtle)]">Core</div>
             <div className="text-lg font-bold tabular-nums">{balance ? fmtUSD(balance.balanceCents) : "—"}</div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--color-text-subtle)]">Voucher</div>
+            <div className="text-[10px] text-[var(--color-text-subtle)]">Vouchers</div>
             <div className="text-lg font-bold tabular-nums">{balance ? fmtUSD(balance.voucherCents) : "—"}</div>
           </div>
         </div>
@@ -176,7 +176,7 @@ export default function UserVoucherRedeemPage() {
 
       {history.length > 0 && (
         <Card padding="md">
-          <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Riwayat Pembayaran Terakhir</div>
+          <div className="text-[10px] uppercase tracking-wider text-[var(--color-text-subtle)] font-medium mb-3">Recent payments</div>
           <div className="divide-y divide-[var(--color-border-subtle)]">
             {history.slice(0, 5).map((h) => (
               <div key={h.id} className="py-2 flex items-center justify-between text-[12px]">
