@@ -1,6 +1,6 @@
 {
   "name": "zcusrouter",
-  "version": "0.4.75",
+  "version": "0.4.76",
   "description": "Zcus Router - AI provider router web dashboard",
   "scripts": {
     "predev": "node scripts/create-default-env.js",
