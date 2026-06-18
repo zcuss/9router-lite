@@ -25,12 +25,16 @@ export async function getUserBalance(userId) {
     [userId]
   );
   if (!row) return null;
+  // pg/cockroach driver returns numeric columns as strings — coerce to Number
+  // so callers don't accidentally do "0" + "0" → "00" string concat.
+  const balanceCents = Number(row.balance_cents ?? 0);
+  const voucherCents = Number(row.voucher_cents ?? 0);
   return {
-    balanceCents: row.balance_cents ?? 0,
-    voucherCents: row.voucher_cents ?? 0,
-    lifetimeSpentCents: row.lifetime_spent_cents ?? 0,
-    lifetimeTopupCents: row.lifetime_topup_cents ?? 0,
-    totalCents: (row.balance_cents ?? 0) + (row.voucher_cents ?? 0),
+    balanceCents,
+    voucherCents,
+    lifetimeSpentCents: Number(row.lifetime_spent_cents ?? 0),
+    lifetimeTopupCents: Number(row.lifetime_topup_cents ?? 0),
+    totalCents: balanceCents + voucherCents,
   };
 }
 
