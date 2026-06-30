@@ -1,7 +1,7 @@
 import { getMachineId } from "@/shared/utils/machine";
-import EndpointRoleRouter from "./EndpointRoleRouter";
+import EndpointPageClient from "./EndpointPageClient";
 
 export default async function EndpointPage() {
   const machineId = await getMachineId();
-  return <EndpointRoleRouter machineId={machineId} />;
+  return <EndpointPageClient machineId={machineId} />;
 }
