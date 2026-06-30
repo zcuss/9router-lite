@@ -2,6 +2,7 @@
   "name": "zcusrouter",
   "version": "0.4.76",
   "bin": {
+    "zcus-9router": "./cli.js",
     "zcusrouter": "./cli.js"
   },
   "description": "Zcus Router CLI - Start and manage Zcus Router server",
